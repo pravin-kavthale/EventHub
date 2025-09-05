@@ -1,0 +1,1 @@
+from django.users import get_user_model
