@@ -1,1 +1,6 @@
-from django.users import get_user_model
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('',views.home,name='Event-home'),
+]
