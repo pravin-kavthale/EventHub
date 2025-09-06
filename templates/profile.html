@@ -5,10 +5,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>AdminLTE 3 | Profile</title>
-  <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% include 'base/header.html' %}
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
 <body class="hold-transition sidebar-mini">
@@ -18,12 +16,13 @@
   {% include 'base/navbar.html' %}
   <!-- /.navbar -->
 
-  <!-- Main Sidebar Container -->
+  <!-- Sidebar -->
   {% include 'base/sidebar.html' %}
 
-  <!-- Content Wrapper. Contains page content -->
+  <!-- Content Wrapper -->
   <div class="content-wrapper">
-    <!-- Content Header -->
+
+    <!-- Page Header -->
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
@@ -39,31 +38,30 @@
       <div class="container-fluid">
 
         <div class="row">
+          <!-- Left column -->
           <div class="col-md-4">
 
             <!-- Profile Image -->
             <div class="card card-primary card-outline">
               <div class="card-body box-profile">
-               <div class="text-center">
-                <img class="profile-user-img img-fluid img-circle"
-                    src="{{ user.profile.image.url }}"
-                    alt="User profile picture">
+                <div class="text-center">
+                  <img class="profile-user-img img-fluid img-circle"
+                       src="{{ user.profile.image.url }}"
+                       alt="User profile picture">
                 </div>
 
                 <h3 class="profile-username text-center">{{ user.username }}</h3>
                 <p class="text-muted text-center">{{ user.email }}</p>
 
                 <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
-                    {% csrf_token %}
-                    <button type="submit" class="dropdown-item dropdown-footer">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item dropdown-footer">
                     <i class="fas fa-sign-out-alt m-2"></i>
                     Logout
-                    </button>
+                  </button>
                 </form>
               </div>
             </div>
-            <!-- /.card -->
-
           </div>
 
           <!-- Right column -->
@@ -74,10 +72,10 @@
                   <li class="nav-item"><a class="nav-link active" href="#about" data-toggle="tab">About</a></li>
                   <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
                 </ul>
-              </div><!-- /.card-header -->
+              </div>
               <div class="card-body">
                 <div class="tab-content">
-                  
+
                   <!-- About Tab -->
                   <div class="active tab-pane" id="about">
                     <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
@@ -94,20 +92,41 @@
 
                   <!-- Settings Tab -->
                   <div class="tab-pane" id="settings">
-                    <form class="form-horizontal" method="post">
+                    <form class="form-horizontal" method="post" enctype="multipart/form-data">
                       {% csrf_token %}
+
+                      <!-- User update form -->
                       <div class="form-group row">
-                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                        <label class="col-sm-2 col-form-label">Username</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputName" value="{{ user.get_full_name }}">
+                          {{ u_form.username }}
+                          {% if u_form.username.errors %}
+                            <p class="text-danger small">{{ u_form.username.errors|striptags }}</p>
+                          {% endif %}
                         </div>
                       </div>
+
                       <div class="form-group row">
-                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                        <label class="col-sm-2 col-form-label">Email</label>
                         <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputEmail" value="{{ user.email }}">
+                          {{ u_form.email }}
+                          {% if u_form.email.errors %}
+                            <p class="text-danger small">{{ u_form.email.errors|striptags }}</p>
+                          {% endif %}
                         </div>
                       </div>
+
+                      <!-- Profile update form -->
+                      <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">Profile Image</label>
+                        <div class="col-sm-10">
+                          {{ p_form.image }}
+                          {% if p_form.image.errors %}
+                            <p class="text-danger small">{{ p_form.image.errors|striptags }}</p>
+                          {% endif %}
+                        </div>
+                      </div>
+
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
                           <button type="submit" class="btn btn-success">Save Changes</button>
@@ -118,22 +137,17 @@
                   <!-- /.tab-pane -->
 
                 </div>
-              </div><!-- /.card-body -->
+              </div>
             </div>
           </div>
-          <!-- /.col -->
         </div>
-        <!-- /.row -->
 
       </div>
     </section>
   </div>
-  <!-- /.content-wrapper -->
 
   {% include 'base/footer.html' %}
-
 </div>
-<!-- ./wrapper -->
 
 {% include 'base/js.html' %}
 </body>
