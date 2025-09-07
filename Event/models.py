@@ -1,5 +1,5 @@
 from django.db import models
-from djnago.contrib.authm.models import user
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -17,7 +17,7 @@ class Event(models.Model):
     title=models.CharField(max_length=100)
     description=models.TextField()
     category=models.CharField(max_length=100,choices=CATEGORY_CHOICES, default='other')
-    date=models.Date()
+    date=models.DateTimeField()
     Location=models.CharField(max_length=300)
     start_time=models.TimeField()
     end_time=models.TimeField()
