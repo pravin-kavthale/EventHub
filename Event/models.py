@@ -61,3 +61,15 @@ class Like(models.Model):
 
     def __str__(self):
         return f'{self.usr.username} likes {self.event_id.title}'
+
+class ChatRoom(models.Model):
+    event=models.OneToOneField(Event,on_delete=models.CASCADE)
+    users=models.ManyToManyField(User,related_name='chatrooms')
+    name=models.CharField(max_length=100)
+
+    def save(self,*args,**kwargs):
+        if not self.name:
+            self.name=f'chartroom_{self.event.id}'
+            super().save(*args,**kwargs)
+
+            self.users.add(self.event.participants.all())
