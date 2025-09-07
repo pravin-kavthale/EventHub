@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Create your models here.
-
 class Event(models.Model):
 
     CATEGORY_CHOICES = [
@@ -37,3 +36,19 @@ class Event(models.Model):
     class Meta:
         ordering = ['-start_time'] 
 
+class Category(models.Model):
+    name=models.CharField(max_length=100,unique=True)
+    description=models.TextField(blank=True)
+    slug = models.SlugField(unique=True, blank=True)
+
+    def save(self,*args,**kwargs):
+        if not self.slug:
+            self.slug=self.slugify(self.name)
+            super().save(*args,**kwargs)
+
+    @property
+    def popularity(self):
+        return self.event_set.count()
+
+    def __str__(self):
+        return self.name
