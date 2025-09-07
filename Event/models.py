@@ -52,3 +52,12 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Like(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    event_id=models.ForeignKey(Event,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.usr.username} likes {self.event_id.title}'
