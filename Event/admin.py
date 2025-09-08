@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Event,Category,EventAttendence
+from .models import Event,Category,EventAttendance
 # Register your models here.
 
 @admin.register(Event)
@@ -15,7 +15,7 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields=('name',)
 
 
-@admin.register(EventAttendence)
+@admin.register(EventAttendance)
 class EventAttendanceAdmin(admin.ModelAdmin):
     list_display = ("user", "event", "status", "attended", "check_in_time")
     list_filter = ("status", "attended")

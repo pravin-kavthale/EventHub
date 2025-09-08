@@ -1,95 +1,89 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 import uuid
 
-# Create your models here.
-class Event(models.Model):
-
-    CATEGORY_CHOICES = [
-        ('music', 'Music'),
-        ('art', 'Art'),
-        ('sports', 'Sports'),
-        ('tech', 'Tech'),
-        ('travel', 'Travel'),
-        ('other', 'Other'),
-    ]
-
-    title=models.CharField(max_length=100)
-    description=models.TextField()
-    category=models.CharField(max_length=100,choices=CATEGORY_CHOICES, default='other')
-    date=models.DateTimeField()
-    Location=models.CharField(max_length=300)
-    start_time=models.TimeField()
-    end_time=models.TimeField()
-    created_at=models.DateTimeField(auto_now_add=True)
-    updated_at=models.DateTimeField(auto_now_add=True)
-
-    #relationship
-    organizer=models.ForeignKey(User,on_delete=models.CASCADE,related_name='events_creater')
-    participants=models.ManyToManyField(User,related_name='events_participated',blank=True)
-
-     # optional image
-    image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
-
-    def __str__(self):
-        return self.title
-    
-    class Meta:
-        ordering = ['-start_time'] 
 
 class Category(models.Model):
-    name=models.CharField(max_length=100,unique=True)
-    description=models.TextField(blank=True)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
 
-    def save(self,*args,**kwargs):
+    def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug=self.slugify(self.name)
-            super().save(*args,**kwargs)
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     @property
     def popularity(self):
-        return self.event_set.count()
+        return self.events.count()
 
     def __str__(self):
         return self.name
 
 
+class Event(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="events")
+    date = models.DateTimeField()
+    location = models.CharField(max_length=300)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
+    participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
+
+    image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-start_time']
+
+
 class Like(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    event_id=models.ForeignKey(Event,on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.usr.username} likes {self.event_id.title}'
+        return f'{self.user.username} likes {self.event.title}'
+
 
 class ChatRoom(models.Model):
-    event=models.OneToOneField(Event,on_delete=models.CASCADE)
-    users=models.ManyToManyField(User,related_name='chatrooms')
-    name=models.CharField(max_length=100)
+    event = models.OneToOneField(Event, on_delete=models.CASCADE)
+    users = models.ManyToManyField(User, related_name='chatrooms')
+    name = models.CharField(max_length=100, blank=True)
 
-    def save(self,*args,**kwargs):
+    def save(self, *args, **kwargs):
         if not self.name:
-            self.name=f'chartroom_{self.event.id}'
-            super().save(*args,**kwargs)
+            self.name = f'chatroom_{self.event.id}'
+        super().save(*args, **kwargs)
+        self.users.add(*self.event.participants.all())
 
-            self.users.add(self.event.participants.all())
+    def __str__(self):
+        return self.name
 
-class EventAttendence(models.Model):
-    status_choices=[
-        ('going','Going'),
-        ('intersted','Intersted'),
-        ('maybe','Maybe'),
-        ('not_going','Not Going'),
+
+class EventAttendance(models.Model):
+    STATUS_CHOICES = [
+        ('going', 'Going'),
+        ('interested', 'Interested'),
+        ('maybe', 'Maybe'),
+        ('not_going', 'Not Going'),
     ]
 
-    user=models.ForeignKey(User,on_delete=models.CASCADE, related_name="participations")
-    event=models.ForeignKey(Event,on_delete=models.CASCADE,related_name="EventParticipants")
-    status=models.CharField(max_length=10,choices=status_choices,default='pending')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="participations")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="attendances")
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='maybe')
 
-    qr_token=models.UUIDField(default=uuid.uuid4,unique=True,editable=False)
-    attended=models.BooleanField(default=False)
-    check_in_time=models.DateTimeField(null=True,blank=True)
+    qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    attended = models.BooleanField(default=False)
+    check_in_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title} ({self.status})"
