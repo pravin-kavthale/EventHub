@@ -52,4 +52,31 @@ class UserBatch(models.Model):
     
     def __str__(self):
         return f"{self.user.username} earned {self.batch.name}"
+class UserConnection(models.Model):
+    follower = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="followers"
+    )
+    following = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="followings"
+    )
 
+    def __str__(self):
+        return f"{self.follower} following {self.following}"
+
+    class Meta:
+        constraints = [
+            # 🚫 Prevent self-follow
+            models.CheckConstraint(
+                check=~models.Q(follower=models.F("following")),
+                name="prevent_self_follow"
+            ),
+            # 🚫 Prevent duplicate follow
+            models.UniqueConstraint(
+                fields=["follower", "following"],
+                name="unique_follow"
+            )
+        ]
