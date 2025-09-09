@@ -25,7 +25,6 @@ class Notification(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_notifications")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, blank=True, null=True)
-
     message = models.CharField(max_length=255)
     action_url = models.CharField(max_length=255, blank=True, null=True)
     is_read = models.BooleanField(default=False)
@@ -34,3 +33,23 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification to {self.receiver.username} - {self.message[:20]}"
+
+class Batch(models.Model):
+    name=models.CharField(max_length=100)
+    description=models.TextField(blank=True)
+    required_events=models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.name} needs (≥{self.event_threshold} events)"
+
+class UserBatch(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    batch=models.ForeignKey(Batch,on_delete=models.CASCADE)
+    earned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together=('user','batch')
+    
+    def __str__(self):
+        return f"{self.user.username} earned {self.batch.name}"
+

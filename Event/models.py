@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 import uuid
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -21,7 +20,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-
 class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -35,7 +33,6 @@ class Event(models.Model):
 
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
     participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
-
     image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
 
     def __str__(self):
@@ -44,7 +41,6 @@ class Event(models.Model):
     class Meta:
         ordering = ['-start_time']
 
-
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
@@ -52,7 +48,6 @@ class Like(models.Model):
 
     def __str__(self):
         return f'{self.user.username} likes {self.event.title}'
-
 
 class ChatRoom(models.Model):
     event = models.OneToOneField(Event, on_delete=models.CASCADE)
@@ -67,7 +62,6 @@ class ChatRoom(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class EventAttendance(models.Model):
     STATUS_CHOICES = [
@@ -87,9 +81,11 @@ class EventAttendance(models.Model):
         return f"{self.user.username} - {self.event.title} ({self.status})"
 
 class Message(models.Model):
-    chatroom=models.ForeignKey(chatroom,on_delete=models.CASCADE,related_name="messages")
+    chatroom=models.ForeignKey(ChatRoom,on_delete=models.CASCADE,related_name="messages")
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     content=models.TextField()
     timestamp=models.DateTimeField(auto_now=True)
     def __str__(self):
         return f'{self.user.username}: {self.content}'
+
+
