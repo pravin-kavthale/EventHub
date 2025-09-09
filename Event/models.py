@@ -76,7 +76,6 @@ class EventAttendance(models.Model):
         ('maybe', 'Maybe'),
         ('not_going', 'Not Going'),
     ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="participations")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="attendances")
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='maybe')
@@ -84,7 +83,6 @@ class EventAttendance(models.Model):
     qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     attended = models.BooleanField(default=False)
     check_in_time = models.DateTimeField(null=True, blank=True)
-
     def __str__(self):
         return f"{self.user.username} - {self.event.title} ({self.status})"
 
@@ -93,6 +91,5 @@ class Message(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     content=models.TextField()
     timestamp=models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return f'{self.user.username}: {self.content}'
