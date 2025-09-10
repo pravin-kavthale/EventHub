@@ -22,6 +22,9 @@ urlpatterns = [
     
     #like URL
     path('like/<int:pk>/',views.LikeView.as_view(),name='like_event'),
-
+    # Event Attendance URLs
+    path('attend/<int:pk>/', views.AttendEventView.as_view(), name='attend_event'),
     
+
+
 ]
