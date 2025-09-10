@@ -30,8 +30,8 @@ class EventList(ListView):
     paginate_by=10
 
 class EventDetails(DetailView):
-    mmodel=Event
-    templatee_name='Event/event_detail.html'
+    model=Event
+    template_name='Event/event_detail.html'
     context_object_name='event'
 
 class EventUpdate(LoginRequiredMixin, UpdateView):
@@ -95,8 +95,24 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
 class LikeView(LoginRequiredMixin,View):
     def post(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
-        if request.user in event.likes.all():
-            event.likes.remove(request.user)
-        else:
-            event.likes.add(request.user)
+        like,created=Like.objects.get_or_create(user=request.user,event=event)
+        if not created:
+            like.delete()
         return redirect('event_detail',pk=pk)
+
+class EventAttendanceView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        status = request.POST.get('status', 'going')  # default to 'going'
+
+        attendance, created = EventAttendance.objects.get_or_create(
+            user=request.user,
+            event=event,
+            defaults={'status': status}  # only used if created
+        )
+
+        if not created:
+            # If already exists, delete it (toggle off)
+            attendance.delete()
+
+        return redirect('event_detail', pk=pk)

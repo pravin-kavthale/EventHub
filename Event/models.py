@@ -30,7 +30,7 @@ class Event(models.Model):
     end_time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(User, related_name="liked_events", blank=True)
+
 
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
     participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
@@ -46,6 +46,10 @@ class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    
+    class Meta:
+        unique_together = ('user', 'event')   # prevent duplicate likes
 
     def __str__(self):
         return f'{self.user.username} likes {self.event.title}'
@@ -78,6 +82,10 @@ class EventAttendance(models.Model):
     qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     attended = models.BooleanField(default=False)
     check_in_time = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('user', 'event')   # prevent duplicate likes
+
     def __str__(self):
         return f"{self.user.username} - {self.event.title} ({self.status})"
 
