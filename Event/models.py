@@ -30,6 +30,7 @@ class Event(models.Model):
     end_time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, related_name="liked_events", blank=True)
 
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
     participants = models.ManyToManyField(User, related_name='events_participated', blank=True)

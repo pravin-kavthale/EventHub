@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Event,Category
 from django.urls import reverse_lazy 
 from django.db.models import Count
+from django.shortcuts import get_object_or_404,redirect
+from django.views import View
 
 def home(request):
     return render(request,'base/base.html')
@@ -88,3 +90,13 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         return self.request.user.is_superuser
 
 
+# Like view
+
+class LikeView(LoginRequiredMixin,View):
+    def post(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        if request.user in event.likes.all():
+            event.likes.remove(request.user)
+        else:
+            event.likes.add(request.user)
+        return redirect('event_detail',pk=pk)

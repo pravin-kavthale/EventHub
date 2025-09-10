@@ -19,4 +19,9 @@ urlpatterns = [
     path('categories/', views.CategoryList.as_view(), name='category_list'),
     path('category-update/<int:pk>/', views.CategoryUpdate.as_view(), name='category_update'),
     path('category-delete/<int:pk>/', views.CategoryDelete.as_view(), name='category_delete'),
+    
+    #like URL
+    path('like/<int:pk>/',views.LikeView.as_view(),name='like_event'),
+
+    
 ]
