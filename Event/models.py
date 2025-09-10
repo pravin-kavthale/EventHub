@@ -100,3 +100,18 @@ class Comment(models.Model):
 
     class Meta:
         ordering=["-created_at"]
+    
+
+class Report(models.Model):
+    REPORT_REASON_CHOICES=[
+        ('spam','spam or misleading'),
+        ('inappropriate','inappropriate content'),
+        ('harassment','harassment or hate speech'),
+        ('other','other'),
+    ]
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    event=models.ForeignKey(Event,on_delete=models.CASCADE,related_name="reports")
+    reason=models.CharField(max_length=20,choices=REPORT_REASON_CHOICES)
+
+    def __str__(self):
+        returnn f"{self.user.username} reported {self.event.title} for {self.reason}"
