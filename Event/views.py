@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Event
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+from .models import Event,Category
 from django.urls import reverse_lazy 
+from django.db.models import Count
 
 def home(request):
     return render(request,'base/base.html')
 
-
+# Event Views
 class CreateEvent(CreateView):
     model=Event
     fields=['title','description','category','location','date','start_time','end_time','image']
@@ -30,10 +31,11 @@ class EventDetails(DetailView):
     mmodel=Event
     templatee_name='Event/event_detail.html'
     context_object_name='event'
+
 class EventUpdate(LoginRequiredMixin, UpdateView):
     model = Event
     fields = ['title','description','category','date','location','start_time','end_time','image']
-    template_name = 'Event/event_update.html'
+    template_name='Event/event_form.html'
     success_url = reverse_lazy('event_list')
 
     def get_queryset(self):
@@ -47,3 +49,42 @@ class EventDelete(LoginRequiredMixin,DeleteView):
 
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user)
+
+# Category Views
+class CreateCategory(LoginRequiredMixin,UserPassesTestMixin,CreateView):
+    model=Category
+    fields=['name','description']
+    template_name='Event/category_form.html'
+    success_url=reverse_lazy('event_list')
+    
+    def test_func(self):
+        return self.request.user.is_superuser
+
+class CategoryList(ListView):
+    model=Category
+    template_name='Event/category_list.html'
+    context_object_name='categories'
+    paginate_by=10
+    
+    def get_queryset(self):
+        return Category.objects.annotate(
+            popularity=Count('events')
+        ).order_by('-popularity')
+
+class CategoryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    model=Category
+    fields=['name','description']
+    template_name = 'Event/category_form.html'
+    success_url=reverse_lazy('category_list')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
+    model=Category
+    template_name='Event/category_delete.html'
+    success_url=reverse_lazy('category_list') 
+    def test_func(self):
+        return self.request.user.is_superuser
+
+
