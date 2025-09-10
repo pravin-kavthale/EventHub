@@ -117,3 +117,6 @@ class Report(models.Model):
     def __str__(self):
         return f"{self.user.username} reported {self.event.title} for {self.reason}"
 
+    class Meta:
+        ordering=["-created_at"]
+        
