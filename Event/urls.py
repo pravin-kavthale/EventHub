@@ -24,7 +24,5 @@ urlpatterns = [
     path('like/<int:pk>/',views.LikeView.as_view(),name='like_event'),
     # Event Attendance URLs
     path('attend/<int:pk>/', views.AttendEventView.as_view(), name='attend_event'),
-    
-
-
+    path('chatroom/<int:pk>/',views.ChatRoomView.as_view(),name='chat_room'),
 ]

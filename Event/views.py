@@ -110,9 +110,25 @@ class EventAttendanceView(LoginRequiredMixin, View):
             event=event,
             defaults={'status': status}  # only used if created
         )
-
         if not created:
             # If already exists, delete it (toggle off)
             attendance.delete()
 
         return redirect('event_detail', pk=pk)
+
+
+class ChatRoomView(LoginRequiredMixin,View):
+    def get(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        chatroom,create=ChatRoom.objects.get_or_create(event=event)
+        messages=chatroom.messages.all()
+        return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
+    def post(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        chatroom,create=ChatRoom.objects.get_or_create(event=event)
+        content=request.POST.get('content')
+        if content:
+            messages=chatroom.messages.create(user=request.user,content=content)
+            return redirect('chatroom',pk=pk)
+        messages=chatroom.messages.all()
+        return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
