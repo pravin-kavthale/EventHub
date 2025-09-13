@@ -182,6 +182,7 @@ class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == comment.user or self.request.user.is_staff
 
 class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+
     model = Comment
     fields = ['content']
     template_name = "Event/comment_update.html"  # use a dedicated template
@@ -192,4 +193,11 @@ class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user == self.get_object().user
 
-    
+class ReportView(LoginRequiredMixin,View):
+    def post(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        reason=request.POST.get('reason')
+        if reason:
+            event.reports.create(user=request.user,reason=reason)
+            return redirect('event_detail',pk=pk)
+        return HttpResponse("Report reason is required.", status=400)

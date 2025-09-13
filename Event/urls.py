@@ -27,4 +27,6 @@ urlpatterns = [
     # Event Attendance URLs
     path('attend/<int:pk>/', views.EventAttendanceView.as_view(), name='attend_event'),
     path('chatroom/<int:pk>/',views.ChatRoomView.as_view(),name='chat_room'),
+
+    path('report-event/<int:pk>/',views.ReportView.as_view(),name='report_event'),
 ]
