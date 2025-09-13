@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
-from .models import Event,Category
+from .models import Event,Category,Like,ChatRoom,EventAttendance
 from django.urls import reverse_lazy 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404,redirect
@@ -132,3 +132,39 @@ class ChatRoomView(LoginRequiredMixin,View):
             return redirect('chatroom',pk=pk)
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
+
+class CommentView(LoginRequiredMixin,View):
+    def get(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        comments=event.comments.all().order_by('-created_at')
+        return render(request,'Event/event_comments.html',{'event':event,'comments':comments})
+                
+    def post(self,request,pk):
+        event=get_object_or_404(Event,pk=pk)
+        if not event.comments_enabled:
+            return HttpResponse("Comments are disabled for this event.",status=403)
+        content=request.POST.get('content')
+        if content:
+            event.comments.objects.create(User=request.user,content=content)
+            return redirect('event_detail',pk=pk)
+        return render(request,'Event/event_comments.html',{'event':event,'comments':event.comments.all().order_by('-created_at')})
+
+class ReplyCommentView(LoginRequiredMixin,View):
+    def get(self,request,pk):
+        parent=get_object_or_404(Comment,pk=pk)
+        comments_replies=parent.replies.all()
+        return render(request,'Event/event_comments.html',{'parent':parent,'replies':comments_replies})
+
+    def post(self,request,pk):
+        parent=get_object_or_404(Comment,pk=pk)
+        content=request.POST.get('content')
+        if content:
+            Comment.objects.create(
+                user=request.user,
+                event=parent.event,
+                parent=parent,
+                content=content
+            )
+            return redirect('event_detail',pk=parent.event.pk)
+        comments_replies=parent.replies.all()
+        return render(request,'Event/event_comments.html',{'parent':parent,'replies':comments_replies})

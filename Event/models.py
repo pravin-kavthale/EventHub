@@ -35,6 +35,8 @@ class Event(models.Model):
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
     participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
     image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
+    
+    comments_enabled=models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -99,7 +101,7 @@ class Message(models.Model):
 
 class Comment(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    event=models.ForeignKey("Event",on_delete=models.CASCADE)
+    event=models.ForeignKey("Event",on_delete=models.CASCADE,related_name="comments")
     parent=models.ForeignKey("self",null=True,blank=True,on_delete=models.CASCADE,related_name="replies")
     content=models.TextField()
     created_at = models.DateTimeField(auto_now_add=True) 
@@ -125,6 +127,5 @@ class Report(models.Model):
 
     def __str__(self):
         return f"{self.user.username} reported {self.event.title} for {self.reason}"
-
     class Meta:
         ordering=["-created_at"]
