@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
-from .models import Event,Category,Like,ChatRoom,EventAttendance
+from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment
 from django.urls import reverse_lazy 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404,redirect
@@ -91,7 +91,6 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
 
 
 # Like view
-
 class LikeView(LoginRequiredMixin,View):
     def post(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
@@ -133,6 +132,7 @@ class ChatRoomView(LoginRequiredMixin,View):
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
 
+
 class CommentView(LoginRequiredMixin,View):
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
@@ -168,3 +168,28 @@ class ReplyCommentView(LoginRequiredMixin,View):
             return redirect('event_detail',pk=parent.event.pk)
         comments_replies=parent.replies.all()
         return render(request,'Event/event_comments.html',{'parent':parent,'replies':comments_replies})
+
+class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'Event/comment_confirm_delete.html'
+    context_object_name = "comment"
+
+    def get_success_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.user or self.request.user.is_staff
+
+class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    fields = ['content']
+    template_name = "Event/comment_update.html"  # use a dedicated template
+
+    def get_success_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+
+    def test_func(self):
+        return self.request.user == self.get_object().user
+
+    
