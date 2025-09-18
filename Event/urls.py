@@ -27,6 +27,11 @@ urlpatterns = [
     # Event Attendance URLs
     path('attend/<int:pk>/', views.EventAttendanceView.as_view(), name='attend_event'),
     path('chatroom/<int:pk>/',views.ChatRoomView.as_view(),name='chat_room'),
-
     path('report-event/<int:pk>/',views.ReportView.as_view(),name='report_event'),
+
+    # Notification URLs
+    path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
+    path('create-notification/<int:event_id>/', user_views.CreateNotification.as_view(), name='create_notification'),
+    path('detail-notification/<int:pk>/', user_views.DetailNotification.as_view(), name='detail_notification'),
+    
 ]

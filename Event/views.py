@@ -89,7 +89,6 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     def test_func(self):
         return self.request.user.is_superuser
 
-
 # Like view
 class LikeView(LoginRequiredMixin,View):
     def post(self,request,pk):
@@ -115,7 +114,6 @@ class EventAttendanceView(LoginRequiredMixin, View):
 
         return redirect('event_detail', pk=pk)
 
-
 class ChatRoomView(LoginRequiredMixin,View):
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
@@ -131,7 +129,6 @@ class ChatRoomView(LoginRequiredMixin,View):
             return redirect('chatroom',pk=pk)
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
-
 
 class CommentView(LoginRequiredMixin,View):
     def get(self,request,pk):
