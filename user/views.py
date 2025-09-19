@@ -2,16 +2,14 @@ from django.shortcuts import render,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm
-
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserRegisterForm,UserUpdateForm,ProfileUpdateForm
-
 from django.views.generic import CreateView,UpdateView,DetailView,ListView,DeleteView,View
-
 from django.contrib.auth.decorators import login_required
-from django.authn.mixins import LoginRequiredMixin,UserPassesTestMixin
-from .models import Notification
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+from .models import Notification,Profile,Batch,UserBatch,UserConnection
+from django.urls import reverse_lazy
 
 def register(request):
     if request.method == 'POST':
@@ -25,7 +23,6 @@ def register(request):
         form = UserRegisterForm()
 
     return render(request, 'register.html', {'form': form})
-
 @login_required
 def profile(request):
     u_form=UserUpdateForm()
@@ -49,8 +46,7 @@ def profile(request):
         'p_form':p_form
     }
     return render(request,'profile.html',context)
-
-class CreateNotification(LoginRequiredMixin,UserPassestestMixin,CreateView):
+class CreateNotification(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     def post(self,request,*args,**kwargs):
         event=Event.object.get_object_or_404(id=self.kwargs.get('event_id'))
         Like,creates=Like.object.get_object_or_404(user=request.user,event=event)
@@ -79,7 +75,6 @@ class CreateNotification(LoginRequiredMixin,UserPassestestMixin,CreateView):
     def test_func(self):
         event = get_object_or_404(Event, id=self.kwargs.get('event_id'))
         return request.user is not event.organizer
-
 class ListNotification(LoginRequiredMixin,ListView):
     model=Notification
     template_name='user/List_notification.html'
@@ -99,3 +94,51 @@ class DetailNotification(LoginRequiredMixin,DetailView):
             notification.is_read = True
             notification.save()
         return notification
+
+class CreateBatch(LoginRequiredMixin,UserPassesTestMixin,CreateView):
+    model=Batch
+    fields=['name','description','required_events']
+    template_name='user/batch_form.html'
+    success_url=reverse_lazy('batch_list')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+class ListBatch(LoginRequiredMixin,ListView):
+    model=Batch
+    template_name='user/batch_list.html'
+    context_object_name='batches'
+    paginate_by=10
+
+    def get_queryset(self):
+        return Batch.objects.all().order_by('required_events')
+
+class DetailBatch(LoginRequiredMixin,DetailView):
+    model=Batch
+    template_name='user/batch_detail.html'
+    context_object_name='batch'
+
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        batch=self.get_object()
+
+        if batch.required_events <= self.request.user.events.count():
+            context['show_description'] = True
+        else:
+            context['show_description'] = False
+            messages.info(
+                self.request,
+                f"You need {batch.required_events} events to earn this batch "
+                f"(Currently: {self.request.user.events.count()})."
+            )
+
+        return context
+        
+class DeleteBatch(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
+    model=Batch
+    template_name='user/batch_confirm_delete.html'
+    success_url=reverse_lazy('batch_list')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+

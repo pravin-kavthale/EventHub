@@ -130,6 +130,7 @@ class ChatRoomView(LoginRequiredMixin,View):
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
 
+# Comment Views 
 class CommentView(LoginRequiredMixin,View):
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
@@ -190,6 +191,7 @@ class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user == self.get_object().user
 
+#Report View 
 class ReportView(LoginRequiredMixin,View):
     def post(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
