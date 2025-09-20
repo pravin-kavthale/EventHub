@@ -40,6 +40,14 @@ urlpatterns = [
     path('list-followers',user_views.ListFollowers.as_view(),name='list_followers'),
     path('list-following',user_views.ListFollowing.as_view(),name='list_followings'),
 
-    path('list-user-batch',user_views.ListUserBatch.as_view(),name='list_user_batch'),
-    
+
+    #Batches URLs
+   # Batches URLs
+    path('create-batch/', user_views.CreateBatch.as_view(), name='create_batch'),
+    path('list-batch/', user_views.ListBatch.as_view(), name='list_batch'),
+    path('detail-batch/<int:pk>/', user_views.DetailBatch.as_view(), name='detail_batch'),
+    path('delete-batch/<int:pk>/', user_views.DeleteBatch.as_view(), name='delete_batch'),
+    path('list-user-batch/', user_views.ListUserBatch.as_view(), name='list_user_batch'),
+
+        
 ]
