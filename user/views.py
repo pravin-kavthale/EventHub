@@ -142,3 +142,12 @@ class DeleteBatch(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     def test_func(self):
         return self.request.user.is_superuser
 
+class ListUserBatch(LoginRequiredMixin,ListView):
+    model=UserBatch
+    template_name='user/userbatch_list.html'
+    context_object_name='user_batches'
+    paginate_by=3
+
+    def get_queryset(self):
+        return UserBatch.objects.filter(user=self.request.user).order_by('-earned_at')
+
