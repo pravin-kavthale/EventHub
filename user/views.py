@@ -151,3 +151,31 @@ class ListUserBatch(LoginRequiredMixin,ListView):
     def get_queryset(self):
         return UserBatch.objects.filter(user=self.request.user).order_by('-earned_at')
 
+class CreateUserConnection(LoginRequiredMixin,View):
+    success_url=reverse_lazy('profile')
+    def post(self,request,*args,**kwargs):
+        following=get_object_or_404(User,id=self.kwargs.get('user_id'))
+        connection = UserConnection.objects.filter(
+            follower=request.user,
+            following=following
+        )
+        if connection.exists():
+            connection.delete()
+        else:
+            UserConnection.objects.create(following=following,follower=request.user)
+        return redirect(self.success_url)
+
+class ListFollowers(LoginRequiredMixin,ListView):
+    model=UserConnection
+    template_name='user/followers.html'
+    context_object_name= 'followers'
+
+    def get_queryset(self):
+        return UserConnection.objects.filter(following=self.request.user)
+class ListFollowing(LoginRequiredMixin,ListView):
+    model=UserConnection
+    template_name='user/followers.html'
+    context_object_name= 'followings'
+
+    def get_queryset(self):
+        return UserConnection.objects.filter(follower=self.request.user)

@@ -33,5 +33,13 @@ urlpatterns = [
     path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
     path('create-notification/<int:event_id>/', user_views.CreateNotification.as_view(), name='create_notification'),
     path('detail-notification/<int:pk>/', user_views.DetailNotification.as_view(), name='detail_notification'),
+
+
+    #UserConnection URLs
+    path('user-connection',user_views.CreateUserConnection.as_view(),name='user_connection'),
+    path('list-followers',user_views.ListFollowers.as_view(),name='list_followers'),
+    path('list-following',user_views.ListFollowing.as_view(),name='list_followings'),
+
+    path('list-user-batch',user_views.ListUserBatch.as_view(),name='list_user_batch'),
     
 ]
