@@ -7,6 +7,9 @@ from django.urls import reverse_lazy
 from django.db.models import Count
 from django.shortcuts import get_object_or_404,redirect
 from django.views import View
+from django.shortcuts import redirect
+from django.contrib import messages
+from .forms import CategoryForm 
 
 def home(request):
     return render(request,'base/base.html')
@@ -52,15 +55,15 @@ class EventDelete(LoginRequiredMixin,DeleteView):
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user)
 
-# Category Views
-class CreateCategory(LoginRequiredMixin,UserPassesTestMixin,CreateView):
-    model=Category
-    fields=['name','description']
-    template_name='Event/category_form.html'
-    success_url=reverse_lazy('event_list')
-    
-    def test_func(self):
-        return self.request.user.is_superuser
+class CreateCategory(CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'Event/category_form.html'
+    success_url = reverse_lazy('category_list')  # change to your category list URL
+
+    def form_valid(self, form):
+        # If you want to do anything before saving, you can do it here
+        return super().form_valid(form)
 
 class CategoryList(ListView):
     model=Category
@@ -70,8 +73,8 @@ class CategoryList(ListView):
     
     def get_queryset(self):
         return Category.objects.annotate(
-            popularity=Count('events')
-        ).order_by('-popularity')
+            event_count=Count('events')  # renamed from popularity
+        ).order_by('-event_count')
 
 class CategoryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model=Category

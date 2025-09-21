@@ -7,6 +7,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
+    favicon = models.ImageField(upload_to='category_favicons/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
