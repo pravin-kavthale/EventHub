@@ -69,7 +69,7 @@ class CategoryList(ListView):
     model=Category
     template_name='Event/category_list.html'
     context_object_name='categories'
-    paginate_by=10
+    
     
     def get_queryset(self):
         return Category.objects.annotate(
