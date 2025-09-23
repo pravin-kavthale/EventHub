@@ -78,7 +78,7 @@ class CategoryList(ListView):
 
 class CategoryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model=Category
-    fields=['name','description']
+    fields=['name','description','favicon']
     template_name = 'Event/category_form.html'
     success_url=reverse_lazy('category_list')
 
