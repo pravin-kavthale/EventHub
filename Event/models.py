@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 import uuid
+from django.utils import timezone
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -31,6 +32,7 @@ class Event(models.Model):
     end_time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
 
 
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
@@ -41,6 +43,19 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+     
+    @property
+    def get_status(self):
+        now = timezone.now()
+        
+        event_start_datetime = self.date
+        
+        if now > event_start_datetime:
+            return "Completed"
+        if now < event_start_datetime:
+            return "Upcoming"
+       
+        return "Ongoing"
 
     class Meta:
         ordering = ['-start_time']
