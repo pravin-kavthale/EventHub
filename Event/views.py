@@ -32,6 +32,8 @@ class EventList(ListView):
     ordering=['-start_time']
     paginate_by=10
 
+    def get_queryset(self):
+        return Event.objects.all()
 class EventDetails(DetailView):
     model=Event
     template_name='Event/event_detail.html'
