@@ -33,13 +33,12 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-
-
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
     participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
     image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
     
     comments_enabled=models.BooleanField(default=True)
+    
 
     def __str__(self):
         return self.title

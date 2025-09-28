@@ -8,21 +8,16 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-sm border-0 rounded-3">
-                
-                <!-- Event Image -->
+               
                 {% if event.image %}
                     <img src="{{ event.image.url }}" class="card-img-top rounded-top"
-                         alt="{{ event.title }}" style="max-height: 350px; object-fit: cover;">
+                          alt="{{ event.title }}" style="max-height: 350px; object-fit: cover;">
                 {% endif %}
                 
                 <div class="card-body">
-                    <!-- Title -->
                     <h2 class="card-title text-center mb-3">{{ event.title }}</h2>
-
-                    <!-- Description -->
                     <p class="card-text fs-5">{{ event.description }}</p>
 
-                    <!-- Date & Time -->
                     <p class="mb-1">
                         <i class="bi bi-calendar-event"></i>
                         <strong>Date:</strong> {{ event.date|date:"F d, Y" }}
@@ -31,32 +26,45 @@
                         <i class="bi bi-clock"></i>
                         <strong>Time:</strong> {{ event.time|time:"h:i A" }}
                     </p>
-
-                    <!-- Location -->
                     <p class="mb-1">
                         <i class="bi bi-geo-alt"></i>
                         <strong>Location:</strong> {{ event.location }}
                     </p>
-
-                    <!-- Organizer -->
                     <p class="mb-1">
                         <i class="bi bi-person"></i>
                         <strong>Organizer:</strong> {{ event.organizer.username }}
                     </p>
                 </div>
 
-                <div class="card-footer d-flex justify-content-between">
-
+                <div class="card-footer d-flex justify-content-between align-items-center">
                     <a href="{% url 'event_list' %}" class="btn btn-secondary">Back to Events</a>
-                    <div>
-                    {% if request.user == event.organizer %}
-                        
-                            <a href="{% url 'event_update' event.pk %}" class="btn btn-primary me-2">Edit</a>
+
+                    <div class="d-flex align-items-center gap-2">
+                        {% if request.user == event.organizer %}
+                            <a href="{% url 'event_update' event.pk %}" class="btn btn-primary">Edit</a>
                             <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
-                        
-                    {%else%}
-                         <a href="#" class="btn btn-secondary">Join</a>
-                    {% endif %}
+                        {% else %}
+                            <a href="#" class="btn btn-primary me-2">Join</a>
+
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary p-0" type="button" 
+                                    id="dropdown3{{ event.pk }}" data-bs-toggle="dropdown" aria-expanded="false"
+                                    style="width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu **dropdown-menu-end**" aria-labelledby="dropdown3{{ event.pk }}">
+                                    <li>
+                                        <a class="dropdown-item" href="#">View Participants</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ event.id }}">
+                                            Report
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        {% endif %}
                     </div>
                 </div>
 
@@ -64,4 +72,48 @@
         </div>
     </div>
 </div>
+
+{% if request.user != event.organizer %}
+<div class="modal fade" id="reportModal{{ event.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'event_report' event.id %}">
+                {% csrf_token %}
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-flag"></i> Report Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-2">Why are you reporting <b>{{ event.title }}</b>?</p>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="reason" id="spam{{ event.id }}" value="spam" required>
+                        <label class="form-check-label" for="spam{{ event.id }}">Spam or Misleading</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="reason" id="inappropriate{{ event.id }}" value="inappropriate">
+                        <label class="form-check-label" for="inappropriate{{ event.id }}">Inappropriate Content</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="reason" id="harassment{{ event.id }}" value="harassment">
+                        <label class="form-check-label" for="harassment{{ event.id }}">Harassment or Hate Speech</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="reason" id="other{{ event.id }}" value="other">
+                        <label class="form-check-label" for="other{{ event.id }}">Other</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-paper-plane"></i> Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock content %}

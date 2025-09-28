@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
-from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment
+from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment,Report
 from django.urls import reverse_lazy 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404,redirect
@@ -197,11 +197,14 @@ class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user == self.get_object().user
 
 #Report View 
-class ReportView(LoginRequiredMixin,View):
-    def post(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
-        reason=request.POST.get('reason')
+class ReportView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        reason = request.POST.get("reason")
+
         if reason:
-            event.reports.create(user=request.user,reason=reason)
-            return redirect('event_detail',pk=pk)
+            Report.objects.create(user=request.user, event=event, reason=reason)
+            return redirect("event_detail", pk=pk)
+
         return HttpResponse("Report reason is required.", status=400)
+

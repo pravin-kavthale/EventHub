@@ -25,6 +25,7 @@ urlpatterns = [
     path('comment-replies/<int:pk>/',views.ReplyCommentView.as_view(),name='comment_replies'),
     path('comment-delete/<int:pk>/',views.DeleteComment.as_view(),name='comment_delete'),
     path('comment-update/<int:pk>',views.UpdateComment.as_view(),name='comment_update'),
+    path('events/<int:pk>/report/', views.ReportView.as_view(), name='event_report'),
 
     # Event Attendance URLs
     path('attend/<int:pk>/', views.EventAttendanceView.as_view(), name='attend_event'),
