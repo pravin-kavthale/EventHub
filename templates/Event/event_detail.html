@@ -4,6 +4,15 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* Custom hover effect for dropdown items */
+.custom-dropdown .dropdown-item:hover {
+    background-color: #e0e0e0;  /* Light grey */
+    color: #000;               /* Black text */
+    transition: background-color 0.2s ease-in-out;
+}
+</style>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -44,15 +53,25 @@
                             <a href="{% url 'event_update' event.pk %}" class="btn btn-primary">Edit</a>
                             <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
                         {% else %}
-                            <a href="#" class="btn btn-primary me-2">Join</a>
+                           <form action="{% url 'join_event' event.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    {% if request.user in event.participants.all %}
+                                        Leave
+                                    {% else %}
+                                        Join
+                                    {% endif %}
+                                </button>
+                            </form>
 
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary p-0" type="button" 
+                            <!-- Dropup Menu -->
+                            <div class="dropdown dropup">
+                                <button class="btn p-0" type="button" 
                                     id="dropdown3{{ event.pk }}" data-bs-toggle="dropdown" aria-expanded="false"
-                                    style="width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    style="width: 40px; height: 40px; border: none; background: transparent; display: flex; align-items: center; justify-content: center;">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <ul class="dropdown-menu **dropdown-menu-end**" aria-labelledby="dropdown3{{ event.pk }}">
+                                <ul class="dropdown-menu dropdown-menu-end custom-dropdown" aria-labelledby="dropdown3{{ event.pk }}">
                                     <li>
                                         <a class="dropdown-item" href="#">View Participants</a>
                                     </li>
@@ -63,6 +82,7 @@
                                     </li>
                                 </ul>
                             </div>
+                            <!-- End Dropup -->
 
                         {% endif %}
                     </div>

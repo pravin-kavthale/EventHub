@@ -25,6 +25,27 @@ class CreateEvent(CreateView):
         form.instance.organizer=self.request.user
         return super().form_valid(form)
 
+
+class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+
+        if request.user in event.participants.all():
+            event.participants.remove(request.user)
+            messages.success(request, "You have left the event.")
+            EventAttendance.objects.filter(user=request.user, event=event).delete()
+        else:
+            event.participants.add(request.user)
+            messages.success(request, "You have joined the event.")
+            EventAttendance.objects.get_or_create(user=request.user, event=event, defaults={'status': 'going'})
+
+        return redirect('event_detail', pk=pk)
+
+    def test_func(self):
+        event = get_object_or_404(Event, pk=self.kwargs['pk'])
+        return self.request.user != event.organizer
+
+
 class EventList(ListView):
     model=Event
     template_name='Event/event_list.html'
