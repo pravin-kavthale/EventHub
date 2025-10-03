@@ -114,7 +114,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#participantsModal{{ event.pk }}">
                                         <i class="fas fa-users me-2"></i>View Participants
                                     </a>    
                                 </li>
@@ -126,13 +126,44 @@
                 </div>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center">
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-1"></i> No events found.
+
+        <!-- Participants Modal -->
+        <div class="modal fade" id="participantsModal{{ event.pk }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Participants for {{ event.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if event.participants.all %}
+                            <ul class="list-group">
+                                {% for user in event.participants.all %}
+                                    <li class="list-group-item">{{ user.username }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No participants yet.</p>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
+
         {% endfor %}
+
+        {% for event in events %}
+   <!-- your event card code here -->
+{% empty %}
+<div class="col-12 text-center">
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-1"></i> No events found.
+    </div>
+</div>
+{% endfor %}
     </div>
 
     <!-- Pagination -->
@@ -156,7 +187,3 @@
 
 </div>
 {% endblock content %}
-
-{% block extrascript %}
-
-{% endblock extrascript %}

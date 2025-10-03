@@ -140,6 +140,18 @@ class EventAttendanceView(LoginRequiredMixin, View):
 
         return redirect('event_detail', pk=pk)
 
+class getEventAttendance(LoginRequiredMixin,UserPassesTestMixin,ListView):
+    model=EventAttendance
+    template_name='Event/event_attendance.html'
+    context_object_name='attendances'
+
+    def get_queryset(self):
+        self.event = get_object_or_404(Event, pk=self.kwargs['pk'])
+        return EventAttendance.objects.filter(event=self.event)
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user == self.event.organizer
+
+
 class ChatRoomView(LoginRequiredMixin,View):
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)

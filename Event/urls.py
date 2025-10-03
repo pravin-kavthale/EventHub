@@ -28,13 +28,11 @@ urlpatterns = [
     path('events/<int:pk>/report/', views.ReportView.as_view(), name='event_report'),
     path('event_attendance/<int:pk>/', views.JoinEvent.as_view(), name='join_event'),
 
-
-
     # Event Attendance URLs
     path('attend/<int:pk>/', views.EventAttendanceView.as_view(), name='attend_event'),
     path('chatroom/<int:pk>/',views.ChatRoomView.as_view(),name='chat_room'),
     path('report-event/<int:pk>/',views.ReportView.as_view(),name='report_event'),
-
+    path('attendance-list/<int:pk>/', views.getEventAttendance.as_view(), name='attendance_list'),
     # Notification URLs
     path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
     path('create-notification/<int:event_id>/', user_views.CreateNotification.as_view(), name='create_notification'),
@@ -47,8 +45,8 @@ urlpatterns = [
     path('list-following',user_views.ListFollowing.as_view(),name='list_followings'),
 
 
+    
     #Batches URLs
-   # Batches URLs
     path('create-batch/', user_views.CreateBatch.as_view(), name='create_batch'),
     path('list-batch/', user_views.ListBatch.as_view(), name='list_batch'),
     path('detail-batch/<int:pk>/', user_views.DetailBatch.as_view(), name='detail_batch'),
