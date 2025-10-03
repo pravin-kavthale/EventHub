@@ -10,6 +10,8 @@ from django.views import View
 from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import CategoryForm 
+from django.utils import timezone
+from django.db.models import Case, When, Value, CharField
 
 def home(request):
     return render(request,'base/base.html')
@@ -55,6 +57,48 @@ class EventList(ListView):
 
     def get_queryset(self):
         return Event.objects.all()
+
+class MyEvents(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = 'Event/MyEvents.html'
+    context_object_name = 'events'
+
+    def get_queryset(self):
+        status_filter = self.request.GET.get('status', 'all').lower()
+        now = timezone.now()
+
+        # Base queryset
+        qs = Event.objects.filter(organizer=self.request.user)
+
+        # Annotate each event with status like get_status
+        qs = qs.annotate(
+            status=Case(
+                When(date__lt=now, then=Value('completed')),
+                When(date__gt=now, then=Value('upcoming')),
+                default=Value('ongoing'),
+                output_field=CharField()
+            )
+        )
+
+        # Filter based on requested status
+        if status_filter in ['completed', 'ongoing', 'upcoming']:
+            qs = qs.filter(status=status_filter)
+
+        return qs.order_by('-start_time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        user_events = Event.objects.filter(organizer=self.request.user)
+
+        context['current_status'] = self.request.GET.get('status', 'all')
+        context['total_events'] = user_events.count()
+        context['completed_events_count'] = user_events.filter(date__lt=now).count()
+        context['ongoing_events_count'] = user_events.filter(date=now.date()).count()
+        context['upcoming_events_count'] = user_events.filter(date__gt=now).count()
+        
+        return context
+
 class EventDetails(DetailView):
     model=Event
     template_name='Event/event_detail.html'
@@ -67,7 +111,6 @@ class EventUpdate(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('event_list')
 
     def get_queryset(self):
-        # Only allow the organizer to update their own events
         return Event.objects.filter(organizer=self.request.user)
 
 class EventDelete(LoginRequiredMixin,DeleteView):

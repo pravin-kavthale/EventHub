@@ -14,6 +14,7 @@ urlpatterns = [
     path('events/<int:pk>/', views.EventDetails.as_view(), name='event_detail'),
     path('event-update/<int:pk>/', views.EventUpdate.as_view(), name='event_update'),
     path('event-delete/<int:pk>/', views.EventDelete.as_view(), name='event_delete'),
+    path('my-events/', views.MyEvents.as_view(), name='my_events'),
     # Category URLs
     path('create-category/', views.CreateCategory.as_view(), name='create_category'),
     path('categories/', views.CategoryList.as_view(), name='category_list'),
