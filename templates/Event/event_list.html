@@ -79,7 +79,7 @@
                     <div class="d-flex justify-content-between align-items-center mt-3">
 
                         <!-- Like Button -->
-                        <form action="{% url 'like_event' event.pk %}" method="post" class="d-inline">
+                        <form action="{% url 'like_event' event.pk %}" method="post" class="d-inline me-2">
                             {% csrf_token %}
                             <button type="submit" style="background:none; border:none;" class="p-0 m-0">
                                 {% if event.is_liked %}
@@ -90,6 +90,12 @@
                             </button>
                             <span class="ms-1 small text-muted">{{ event.like_set.count }}</span>
                         </form>
+
+                        <!-- Comment Button -->
+                        <a href="{% url 'comment_event' event.pk %}" class="btn p-0 m-0 d-flex align-items-center text-decoration-none">
+                            <i class="far fa-comment" style="color:gray; font-size:1.3rem;"></i>
+                            <span class="ms-1 small text-muted">{{ event.comments.count }}</span>
+                        </a>
 
                         <!-- View Button -->
                         <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-primary">

@@ -246,6 +246,7 @@ class ChatRoomView(LoginRequiredMixin,View):
 
 # Comment Views 
 class CommentView(LoginRequiredMixin,View):
+    template_name = 'Event/event_comments.html'
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
         comments=event.comments.all().order_by('-created_at')
@@ -257,7 +258,7 @@ class CommentView(LoginRequiredMixin,View):
             return HttpResponse("Comments are disabled for this event.",status=403)
         content=request.POST.get('content')
         if content:
-            event.comments.objects.create(User=request.user,content=content)
+            event.comments.create(user=request.user, content=content)
             return redirect('event_detail',pk=pk)
         return render(request,'Event/event_comments.html',{'event':event,'comments':event.comments.all().order_by('-created_at')})
 
