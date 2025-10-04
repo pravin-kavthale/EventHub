@@ -51,10 +51,12 @@ class EventList(ListView):
     model=Event
     template_name='Event/event_list.html'
     context_object_name='events'
-    
-
     def get_queryset(self):
-        return Event.objects.all().order_by('-start_time')
+        qs=Event.objects.all().order_by('-start_time')
+        user=self.request.user
+        for event in qs:
+            event.is_liked=event.is_likeby(user) 
+        return qs
 
 class MyEvents(LoginRequiredMixin, ListView):
     model = Event

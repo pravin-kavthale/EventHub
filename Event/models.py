@@ -38,11 +38,14 @@ class Event(models.Model):
     image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
     
     comments_enabled=models.BooleanField(default=True)
+    likes=models.ManyToManyField(User,related_name='liked_events',blank=True)
     
-
     def __str__(self):
         return self.title
-     
+    def total_likes(self):
+        return self.likes.count()
+    def is_likeby(self,user):
+        return self.like_set.filter(user=user).exists()
     @property
     def get_status(self):
         now = timezone.now()
