@@ -47,7 +47,6 @@ class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
         event = get_object_or_404(Event, pk=self.kwargs['pk'])
         return self.request.user != event.organizer
 
-
 class EventList(ListView):
     model=Event
     template_name='Event/event_list.html'
@@ -66,11 +65,7 @@ class MyEvents(LoginRequiredMixin, ListView):
     def get_queryset(self):
         status_filter = self.request.GET.get('status', 'all').lower()
         now = timezone.now()
-
-        # Base queryset
         qs = Event.objects.filter(organizer=self.request.user)
-
-        # Annotate each event with status like get_status
         qs = qs.annotate(
             status=Case(
                 When(date__lt=now, then=Value('completed')),
@@ -79,11 +74,8 @@ class MyEvents(LoginRequiredMixin, ListView):
                 output_field=CharField()
             )
         )
-
-        # Filter based on requested status
         if status_filter in ['completed', 'ongoing', 'upcoming']:
             qs = qs.filter(status=status_filter)
-
         return qs.order_by('-start_time')
 
     def get_context_data(self, **kwargs):
@@ -97,6 +89,38 @@ class MyEvents(LoginRequiredMixin, ListView):
         context['ongoing_events_count'] = user_events.filter(date=now.date()).count()
         context['upcoming_events_count'] = user_events.filter(date__gt=now).count()
         
+        return context
+
+class joinedEvents(LoginRequiredMixin,ListView):
+    model=Event
+    template_name='Event/joined_events.html'
+    context_object_name='events'
+
+    def get_queryset(self):
+        status_filter=self.request.GET.get('status','all').lower()
+        qs=Event.objects.filter(participants=self.request.user)
+
+        qs=qs.annotate(status=Case(
+            When(date__lt=timezone.now(),then=Value('completed')),
+            When(date__gt=timezone.now(),then=Value('upcoming')),
+            default=Value('ongoing'),
+            output_field=CharField()            
+        ))
+
+        if status_filter in ['completed','ongoing','upcoming']:
+            qs=qs.filter(status=status_filter)
+        return qs.order_by('-start_time')
+    
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        now=timezone.now()
+        Joined_events=Event.objects.filter(participants=self.request.user)
+        context['current_status']=self.request.GET.get('status','all')
+        context['total_events']=Joined_events.count()
+        context['completed_events_count']=Joined_events.filter(date__lt=now).count()
+        context['ongoing_events_count']=Joined_events.filter(date=now.date()).count()
+        context['upcoming_events_count']=Joined_events.filter(date__gt=now).count()
+
         return context
 
 class EventDetails(DetailView):
@@ -283,4 +307,3 @@ class ReportView(LoginRequiredMixin, View):
             return redirect("event_detail", pk=pk)
 
         return HttpResponse("Report reason is required.", status=400)
-

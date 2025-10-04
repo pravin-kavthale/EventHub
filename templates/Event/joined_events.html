@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+{% block title %}Joined Events{% endblock title %}
+{% block breadcrumb %}Joined Events{% endblock breadcrumb %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <div class="row g-3 mb-4">
+        <!-- ALL EVENTS CARD -->
+        <div class="col-md-3">
+            <div class="card text-white bg-info 
+                {% if current_status == 'all' or not current_status %}
+                    shadow-lg border border-5 border-light
+                {% endif %}">
+                <div class="card-body">
+                    <h3>{{ total_events }}</h3>
+                    <p>All Joined Events</p>
+                </div>
+                <div class="card-footer p-2">
+                    <a href="{% url 'joined_events' %}" 
+                       class="small-box-footer text-white d-block text-center"
+                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ONGOING EVENTS CARD -->
+        <div class="col-md-3">
+            <div class="card text-white bg-success 
+                {% if current_status == 'ongoing' %}
+                    shadow-lg border border-5 border-light
+                {% endif %}">
+                <div class="card-body">
+                    <h3>{{ ongoing_events_count }}</h3>
+                    <p>Ongoing Events</p>
+                </div>
+                <div class="card-footer p-2">
+                    <a href="{% url 'joined_events' %}?status=ongoing" 
+                       class="small-box-footer text-white d-block text-center"
+                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- UPCOMING EVENTS CARD -->
+        <div class="col-md-3">
+            <div class="card text-white bg-warning 
+                {% if current_status == 'upcoming' %}
+                    shadow-lg border border-5 border-light
+                {% endif %}">
+                <div class="card-body">
+                    <h3>{{ upcoming_events_count }}</h3>
+                    <p>Upcoming Events</p>
+                </div>
+                <div class="card-footer p-2">
+                    <a href="{% url 'joined_events' %}?status=upcoming" 
+                       class="small-box-footer text-white d-block text-center"
+                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMPLETED EVENTS CARD -->
+        <div class="col-md-3">
+            <div class="card text-white bg-danger 
+                {% if current_status == 'completed' %}
+                    shadow-lg border border-5 border-light
+                {% endif %}">
+                <div class="card-body">
+                    <h3>{{ completed_events_count }}</h3>
+                    <p>Completed Events</p>
+                </div>
+                <div class="card-footer p-2">
+                    <a href="{% url 'joined_events' %}?status=completed" 
+                       class="small-box-footer text-white d-block text-center"
+                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Joined Events -->
+    <div class="card">
+        <div class="card-header">
+            <h4>
+                {% if current_status == 'ongoing' %}
+                    <span class="text-success">Ongoing Joined Events</span>
+                {% elif current_status == 'upcoming' %}
+                    <span class="text-warning">Upcoming Joined Events</span>
+                {% elif current_status == 'completed' %}
+                    <span class="text-danger">Completed Joined Events</span>
+                {% else %}
+                    <span class="text-info">All Joined Events</span>
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Venue</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.category.name }}</td>
+                        <td>{{ event.start_time|date:"M d, Y" }}</td>
+                        <td>{{ event.end_time|date:"M d, Y" }}</td>
+                        <td>{{ event.location }}</td>
+                        <td>
+                            {% if event.status == "completed" %}
+                                <span class="badge bg-danger">Completed</span>
+                            {% elif event.status == "ongoing" %}
+                                <span class="badge bg-success">Ongoing</span>
+                            {% elif event.status == "upcoming" %}
+                                <span class="badge bg-warning text-dark">Upcoming</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'event_detail' event.id %}" class="btn btn-info btn-sm" title="View"><i class="fas fa-eye"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No joined events found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
