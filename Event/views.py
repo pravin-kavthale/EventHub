@@ -27,7 +27,6 @@ class CreateEvent(CreateView):
         form.instance.organizer=self.request.user
         return super().form_valid(form)
 
-
 class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
@@ -199,7 +198,7 @@ class LikeView(LoginRequiredMixin,View):
         like,created=Like.objects.get_or_create(user=request.user,event=event)
         if not created:
             like.delete()
-        return redirect('event_detail',pk=pk)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
 class EventAttendanceView(LoginRequiredMixin, View):
     def post(self, request, pk):
