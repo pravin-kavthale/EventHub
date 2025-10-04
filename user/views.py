@@ -44,6 +44,7 @@ def profile(request):
         'p_form':p_form
     }
     return render(request,'profile.html',context)
+
 class CreateNotification(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     def post(self,request,*args,**kwargs):
         event=Event.object.get_object_or_404(id=self.kwargs.get('event_id'))
@@ -73,6 +74,7 @@ class CreateNotification(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     def test_func(self):
         event = get_object_or_404(Event, id=self.kwargs.get('event_id'))
         return request.user is not event.organizer
+
 class ListNotification(LoginRequiredMixin,ListView):
     model=Notification
     template_name='user/List_notification.html'
@@ -171,6 +173,7 @@ class ListFollowers(LoginRequiredMixin,ListView):
 
     def get_queryset(self):
         return UserConnection.objects.filter(following=self.request.user)
+
 class ListFollowing(LoginRequiredMixin,ListView):
     model=UserConnection
     template_name='user/followers.html'

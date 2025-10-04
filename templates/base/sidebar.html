@@ -133,7 +133,7 @@
               </li>
             </ul>
           </li>
-          {% if request.user.is_superuser %}
+          
           <li class="nav-item has-treeview menu-open">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-folder"></i>
@@ -143,21 +143,29 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
+              {% if request.user.is_superuser %}
               <li class="nav-item">
                 <a href="{%url 'create_batch'%}" class="nav-link">
                   <i class="far fa fa-edit nav-icon"></i>
                   <p>Create Batch</p>
                 </a>
               </li>
+              {% endif %}
               <li class="nav-item">
                   <a href="{%url 'list_batch'%}" class="nav-link">
                       <i class="far fa fa-list nav-icon"></i>
                       <p>Batches List</p>
                   </a>
               </li>
+              <li class="nav-item">
+                  <a href="{%url 'list_user_batch'%}" class="nav-link">
+                      <i class="far fa fa-list nav-icon"></i>
+                      <p>My Batches</p>
+                  </a>
+                </li>
             </ul>
           </li>
-          {% endif %}
+          
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

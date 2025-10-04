@@ -1,0 +1,69 @@
+{% extends 'base/base.html' %}
+{% block title %}My Batches{% endblock title %}
+{% block breadcrumb %}My Batches{% endblock breadcrumb %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Summary Box -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white shadow-lg border-0" style="background-color: #0dcaf0;">
+                <div class="card-body">
+                    <h3>{{ user_batches.count }}</h3>
+                    <p>My Batches</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'list_batch' %}" class="text-white fw-bold text-decoration-none">
+                        View All Batches <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             style="background-color: #0dcaf0; color: #fff;">
+            <h5 class="mb-0">My Assigned Batches</h5>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Batch Name</th>
+                        <th>Description</th>
+                        <th>Required Events</th>
+                        <th>Earned At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ub in user_batches %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ ub.batch.name }}</td>
+                        <td>{{ ub.batch.description|default:"—" }}</td>
+                        <td>{{ ub.batch.required_events }}</td>
+                        <td>{{ ub.earned_at|date:"d M Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'detail_batch' ub.batch.pk %}" 
+                               class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No batches assigned to you.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

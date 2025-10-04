@@ -15,10 +15,11 @@ def create_profile(sender,instance,created,**kwargs):
 def save_profile(sender,instance,**kwargs):
     instance.profile.save()
 
-@receiver(post_save,sender=Event)
-def assign_batch_on_event(sender,instance,created,**kwargs):
+@receiver(post_save, sender=Event)
+def assign_batch_on_event(sender, instance, created, **kwargs):
     if created:
-        # user=instance.organizer
-        # for batch in Batch.objects.filter(required_events__lte= user.events.count()):
-        #     UserBatch.objects.get_or_create(user=user,batch=batch)
-        pass
+        user = instance.organizer
+        event_count = Event.objects.filter(organizer=user).count()
+        eligible_batches = Batch.objects.filter(required_events__lte=event_count)
+        for batch in eligible_batches:
+            UserBatch.objects.get_or_create(user=user, batch=batch)

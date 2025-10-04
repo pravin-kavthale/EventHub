@@ -51,11 +51,10 @@ class EventList(ListView):
     model=Event
     template_name='Event/event_list.html'
     context_object_name='events'
-    ordering=['-start_time']
-    paginate_by=10
+    
 
     def get_queryset(self):
-        return Event.objects.all()
+        return Event.objects.all().order_by('-start_time')
 
 class MyEvents(LoginRequiredMixin, ListView):
     model = Event
