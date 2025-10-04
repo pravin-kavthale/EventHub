@@ -1,0 +1,115 @@
+{% extends 'base/base.html' %}
+{% block title %}Batch List{% endblock title %}
+{% block breadcrumb %}Batch List{% endblock breadcrumb %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <div class="row g-3 mb-4">
+        <!-- TOTAL BATCHES CARD -->
+        <div class="col-md-3">
+            <div class="card text-white shadow-lg border border-5 border-light" style="background-color: #0dcaf0;">
+                <div class="card-body">
+                    <h3>{{ batches.count }}</h3>
+                    <p>Total Batches</p>
+                </div>
+                <div class="card-footer p-2">
+                    <a href="{% url 'create_batch' %}" 
+                       class="small-box-footer text-white d-block text-center fw-bold"
+                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem; text-decoration: none;">
+                        Create New Batch <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center" 
+             style="background-color: #0dcaf0; color: #ffffff;">
+            <h5 class="mb-0">Batch List</h5>
+            <a href="{% url 'create_batch' %}" class="btn btn-dark btn-sm">
+                <i class="fas fa-plus-circle"></i> Create Batch
+            </a>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Required Events</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in batches %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ batch.name }}</td>
+                        <td>{{ batch.description }}</td>
+                        <td>{{ batch.required_events }}</td>
+                        <td>
+                            <a href="{% url 'detail_batch' batch.pk %}" 
+                               class="btn btn-info btn-sm" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'delete_batch' batch.pk %}" 
+                               class="btn btn-danger btn-sm" title="Delete"
+                               onclick="return confirm('Are you sure you want to delete this batch?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No batches found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

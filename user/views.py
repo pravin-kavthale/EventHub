@@ -99,8 +99,8 @@ class CreateBatch(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     model=Batch
     fields=['name','description','required_events']
     template_name='user/batch_form.html'
-    success_url=reverse_lazy('batch_list')
-
+    success_url=reverse_lazy('list_batch')
+    
     def test_func(self):
         return self.request.user.is_superuser
 
@@ -137,7 +137,7 @@ class DetailBatch(LoginRequiredMixin,DetailView):
 class DeleteBatch(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     model=Batch
     template_name='user/batch_confirm_delete.html'
-    success_url=reverse_lazy('batch_list')
+    success_url=reverse_lazy('list_batch')
 
     def test_func(self):
         return self.request.user.is_superuser

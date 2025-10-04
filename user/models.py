@@ -38,7 +38,7 @@ class Notification(models.Model):
 class Batch(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField(blank=True)
-    required_events=models.PositiveIntegerField(default=0)
+    required_events=models.PositiveIntegerField(unique=True,default=0)
 
     def __str__(self):
         return f"{self.name} needs (≥{self.event_threshold} events)"
