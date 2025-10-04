@@ -1,0 +1,141 @@
+{% extends 'base/base.html' %}
+{% block title %}Batch Detail: {{ batch.name }}{% endblock title %}
+{% block breadcrumb %}Batch Detail{% endblock breadcrumb %}
+
+{% block content %}
+<!-- Custom styles for the Achievement Badge look (inspired by the LeetCode image) -->
+<style>
+    /* 1. Global Background Change to Light Gray for contrast */
+    body {
+        background-color: #f0f2f5 !important; /* Very Light Gray */
+    }
+
+    /* 2. Keyframe for Subtle Glow Animation */
+    @keyframes subtleGlow {
+        0% { box-shadow: 0 0 10px rgba(40, 167, 69, 0.2); }
+        50% { box-shadow: 0 0 15px rgba(40, 167, 69, 0.4), 0 0 5px rgba(40, 167, 69, 0.1); }
+        100% { box-shadow: 0 0 10px rgba(40, 167, 69, 0.2); }
+    }
+
+    /* 3. Main Card Styling (Central Focus) */
+    .achievement-card {
+        background: #ffffff; /* Pure White Card */
+        color: #343a40; /* Dark text for contrast */
+        border: 1px solid #ced4da; /* Light Gray border */
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+        animation: subtleGlow 4s infinite alternate; /* Apply glow effect */
+    }
+    .achievement-card:hover {
+        transform: scale(1.01); /* Subtle lift on hover */
+    }
+
+    /* 4. Header & Button Styling */
+    .custom-header, .header-btn, .footer-btn {
+        background-color: #e9ecef !important; /* Light Gray elements */
+        color: #343a40 !important;
+        border: 1px solid #ced4da !important;
+        transition: background-color 0.3s;
+    }
+    .data-label {
+        font-weight: 400; /* Slightly heavier weight for readability */
+        color: #6c757d; /* Muted gray text for labels */
+        margin-bottom: 0.1rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+    .data-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #28a745; /* Green highlight for main values (remains the same) */
+        line-height: 1.2;
+    }
+    .description-box {
+        background: #f8f9fa; /* Very light gray for description box */
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: left;
+        color: #343a40;
+        font-size: 1rem;
+        border: 1px solid #e9ecef;
+    }
+
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <!-- Use a slightly smaller column for the badge effect -->
+        <div class="col-lg-8 col-md-10">
+
+            <!-- Main Achievement Card Container -->
+            <div class="card shadow-lg border-0 achievement-card">
+                
+                <!-- 1. Top Section (No separate header needed, use card padding) -->
+                <div class="d-flex justify-content-end mb-4">
+                     <a href="{% url 'list_batch' %}" class="btn btn-sm header-btn rounded-pill">
+                        <i class="fas fa-list-ul me-2"></i> Batch List
+                    </a>
+                </div>
+                
+                <!-- Main Title -->
+                <h1 class="display-4 mb-4" style="color: #343a40; font-weight: 300;">
+                    Batch Details
+                </h1>
+                
+                <h2 class="mb-5" style="color: #28a745;">
+                    "{{ batch.name }}"
+                </h2>
+
+                <!-- Core Data - Name and Required Events -->
+                <div class="row mb-5 justify-content-center">
+                    
+                    <!-- Batch Name -->
+                    <div class="col-md-5 mb-4 mb-md-0">
+                        <span class="data-label">Batch Identifier</span>
+                        <div class="data-value">{{ batch.name }}</div>
+                    </div>
+
+                    <!-- Required Events Display (The Badge Number) -->
+                    <div class="col-md-5">
+                        <span class="data-label">Required Events</span>
+                        <div class="data-value">{{ batch.required_events }}</div>
+                        <p class="text-muted mt-1 mb-0" style="font-size: 0.8rem;">
+                            Target events for badge certification.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Description Section (Full Width, Contained) -->
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <h4 class="mb-3" style="color: #6c757d; text-transform: uppercase;">Description</h4>
+                        <div class="description-box text-center">
+                            {% if batch.description %}
+                                {{ batch.description|linebreaksbr }}
+                            {% else %}
+                                <em class="text-muted">No detailed description provided for this batch.</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Action Button -->
+                <div class="mt-5 pt-3 border-top border-secondary d-flex justify-content-center">
+                    
+                    <a href="{% url 'delete_batch' batch.pk %}" class="btn footer-btn" style="background-color: #dc3545 !important; color: white !important;">
+                        <i class="fas fa-trash me-1"></i> Delete Batch
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ensure the body background is dark when base/base.html loads.
+    document.body.style.backgroundColor = '#f0f2f5';
+</script>
+{% endblock content %}

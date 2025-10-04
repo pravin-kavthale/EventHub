@@ -1,8 +1,5 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
-from .forms import UserRegisterForm
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserRegisterForm,UserUpdateForm,ProfileUpdateForm
 from django.views.generic import CreateView,UpdateView,DetailView,ListView,DeleteView,View
@@ -10,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Notification,Profile,Batch,UserBatch,UserConnection
 from django.urls import reverse_lazy
+from Event.models import Event,Like,Comment
 
 def register(request):
     if request.method == 'POST':
@@ -121,15 +119,16 @@ class DetailBatch(LoginRequiredMixin,DetailView):
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
         batch=self.get_object()
+        count=Event.objects.filter(participants=self.request.user).count()
 
-        if batch.required_events <= self.request.user.events.count():
+        if batch.required_events <= count:
             context['show_description'] = True
         else:
             context['show_description'] = False
             messages.info(
                 self.request,
                 f"You need {batch.required_events} events to earn this batch "
-                f"(Currently: {self.request.user.events.count()})."
+                f"(Currently: {count})."
             )
 
         return context
