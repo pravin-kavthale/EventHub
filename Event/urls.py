@@ -4,7 +4,7 @@ from user import views as user_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', views.home, name='Event-home'),
+    # User Authentication URLs
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
 

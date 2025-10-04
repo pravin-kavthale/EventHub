@@ -62,27 +62,36 @@ class MyEvents(LoginRequiredMixin, ListView):
     context_object_name = 'events'
 
     def get_queryset(self):
-        status_filter = self.request.GET.get('status', 'all').lower()
         now = timezone.now()
+
         qs = Event.objects.filter(organizer=self.request.user)
+
         qs = qs.annotate(
-            status=Case(
-                When(date__lt=now, then=Value('completed')),
-                When(date__gt=now, then=Value('upcoming')),
-                default=Value('ongoing'),
-                output_field=CharField()
-            )
+        status=Case(
+                    When(
+                                date__date=now.date(),
+                                start_time__lte=now.time(),
+                                end_time__gte=now.time(),
+                                then=Value('ongoing')
+                        ),
+                    When(date__lt=now, then=Value('completed')),
+                    When(date__gt=now, then=Value('upcoming')),
+                    default=Value('ongoing'),
+                    output_field=CharField()
+                )
         )
+        status_filter = self.request.GET.get('status', 'all').lower()
         if status_filter in ['completed', 'ongoing', 'upcoming']:
-            qs = qs.filter(status=status_filter)
-        return qs.order_by('-start_time')
+            qs = qs.filter(status__iexact=status_filter)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
         user_events = Event.objects.filter(organizer=self.request.user)
 
-        context['current_status'] = self.request.GET.get('status', 'all')
+        context['current_status'] = self.request.GET.get('status', 'all').lower()
         context['total_events'] = user_events.count()
         context['completed_events_count'] = user_events.filter(date__lt=now).count()
         context['ongoing_events_count'] = user_events.filter(date=now.date()).count()

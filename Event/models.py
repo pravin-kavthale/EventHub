@@ -48,7 +48,13 @@ class Event(models.Model):
         now = timezone.now()
         
         event_start_datetime = self.date
-        
+        if now.date()==event_start_datetime.date():
+            if self.start_time <= now.time() <= self.end_time:
+                return "Ongoing"
+            elif now.time() < self.start_time:
+                return "Upcoming"
+            else:
+                return "Completed" 
         if now > event_start_datetime:
             return "Completed"
         if now < event_start_datetime:
