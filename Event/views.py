@@ -50,12 +50,22 @@ class EventList(ListView):
     model=Event
     template_name='Event/event_list.html'
     context_object_name='events'
+
     def get_queryset(self):
         qs=Event.objects.all().order_by('-start_time')
-        user=self.request.user
+        category_filter = self.request.GET.get('category')  
+        if category_filter:
+            qs = qs.filter(category__id=category_filter)
+        user = self.request.user
         for event in qs:
-            event.is_liked=event.is_likeby(user) 
+            event.is_liked = event.is_likeby(user)
         return qs
+
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        context['categories']=Category.objects.all()
+        context['selected_category'] = self.request.GET.get('category', '')
+        return context
 
 class MyEvents(LoginRequiredMixin, ListView):
     model = Event
