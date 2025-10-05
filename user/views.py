@@ -45,43 +45,26 @@ def profile(request):
     }
     return render(request,'profile.html',context)
 
-class CreateNotification(LoginRequiredMixin,UserPassesTestMixin,CreateView):
-    def post(self,request,*args,**kwargs):
-        event=Event.object.get_object_or_404(id=self.kwargs.get('event_id'))
-        Like,creates=Like.object.get_object_or_404(user=request.user,event=event)
-        if creates:
-            Notification.objects.create(
-                sender=request.user,
-                receiver=Like.event.organizer,
-                evet=Like.event,
-                message=f"{request.user.username} Liked your event {Like.event.title}",
-            )
-        comment,creates=Comment.object.get_object_or_404(user=request.user,event=event)
-        if creates:
-            Notification.objects.create(
-                sender=request.user,
-                receiver=Comment.event.organizer,
-                evet=Comment.event,
-                message=f"{request.user.username} Commented on your event {Comment.event.title}: {comment.content}  ",
-            )
-        follow,creates=UserConnection.object.get_object_or_404(follower=request.user,following=event.organizer)
-        if creates:
-            Notification.objects.create(
-                sender=request.user,
-                receiver=event.organizer,
-                message=f"{request.user.username} started following you.",
-            )
-    def test_func(self):
-        event = get_object_or_404(Event, id=self.kwargs.get('event_id'))
-        return request.user is not event.organizer
+class ListNotification(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = 'user/List_notification.html'
+    context_object_name = 'notifications'
 
-class ListNotification(LoginRequiredMixin,ListView):
-    model=Notification
-    template_name='user/List_notification.html'
-    context_object_name='notifications'
-    
     def get_queryset(self):
-        return Notification.objects.filter(receiver=self.request.user).order_by('-timestamp')
+        qs = Notification.objects.filter(receiver=self.request.user).order_by('-timestamp')
+        qs.update(is_read=True)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        navbar_notifications = Notification.objects.filter(receiver=self.request.user).order_by('-timestamp')[:5]
+        navbar_unread_count = navbar_notifications.filter(is_read=False).count()
+
+        context['notifications'] = self.get_queryset()  # List page notifications
+        context['navbar_notifications'] = navbar_notifications  # For navbar dropdown
+        context['navbar_unread_count'] = navbar_unread_count  # For bell badge
+        return context
+
 
 class DetailNotification(LoginRequiredMixin,DetailView):
     model=Notification

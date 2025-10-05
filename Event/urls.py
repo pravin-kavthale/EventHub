@@ -36,10 +36,6 @@ urlpatterns = [
     path('attendance-list/<int:pk>/', views.getEventAttendance.as_view(), name='attendance_list'),
     # Notification URLs
     path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
-    path('create-notification/<int:event_id>/', user_views.CreateNotification.as_view(), name='create_notification'),
-    path('detail-notification/<int:pk>/', user_views.DetailNotification.as_view(), name='detail_notification'),
-
-
     #UserConnection URLs
     path('user-connection',user_views.CreateUserConnection.as_view(),name='user_connection'),
     path('list-followers',user_views.ListFollowers.as_view(),name='list_followers'),

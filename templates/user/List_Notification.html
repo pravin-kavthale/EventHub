@@ -1,0 +1,58 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Notifications{% endblock title %}
+{% block breadcrumb %}Notifications{% endblock breadcrumb %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">Your Notifications</h3>
+
+    {% if notifications %}
+        <ul class="list-group">
+            {% for notification in notifications %}
+            <li class="list-group-item d-flex justify-content-between align-items-start {% if not notification.is_read %}bg-light{% endif %}">
+                <div>
+                    <strong>{{ notification.sender.username }}</strong>
+                    {% if notification.type %}
+                        <span class="badge bg-primary ms-1">{{ notification.type }}</span>
+                    {% endif %}
+                    <p class="mb-1">{{ notification.message }}</p>
+                    <small class="text-muted">{{ notification.timestamp|date:"d M Y, h:i A" }}</small>
+                </div>
+                {% if not notification.is_read %}
+                    <span class="badge bg-success rounded-pill">New</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Optional: Pagination -->
+        {% if is_paginated %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for num in paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-info">You have no notifications.</div>
+    {% endif %}
+
+</div>
+{% endblock content %}

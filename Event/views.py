@@ -12,6 +12,7 @@ from django.contrib import messages
 from .forms import CategoryForm 
 from django.utils import timezone
 from django.db.models import Case, When, Value, CharField
+from user.models import Notification
 
 def home(request):
     return render(request,'base/base.html')
@@ -198,6 +199,15 @@ class LikeView(LoginRequiredMixin,View):
         like,created=Like.objects.get_or_create(user=request.user,event=event)
         if not created:
             like.delete()
+        else:
+            if event.organizer != request.user:
+                Notification.objects.create(
+                    sender=request.user,
+                    receiver=event.organizer,
+                    event=event,
+                    message=f"{request.user.username} has liked your event {event.title}",
+                    type='Like'
+                )
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 class EventAttendanceView(LoginRequiredMixin, View):
@@ -262,8 +272,24 @@ class CommentView(LoginRequiredMixin, View):
             if parent_id:
                 parent_comment = get_object_or_404(Comment, id=parent_id, event=event)
                 Comment.objects.create(user=request.user, content=content, event=event, parent=parent_comment)
+                if parent_comment.user != request.user:
+                    Notification.objects.create(
+                        sender=request.user,
+                        receiver=parent_comment.user,
+                        event=event,
+                        message=f"{request.user} replied to your comment {parent_comment.content}",
+                        type="Comment"
+                    )
             else:
                 Comment.objects.create(user=request.user, content=content, event=event)
+                if event.organizer!=request.user:
+                    Notification.objects.create(
+                        sender=request.user,
+                        receiver=event.organizer,
+                        event=event,
+                        message=f"{request.user} Commented on your event {event.title}",
+                        type="Comment"
+                    )
         return redirect('comment_event', pk=pk)
 
 class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
