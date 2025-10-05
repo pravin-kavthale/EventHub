@@ -1,21 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect, get_object_or_404,redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment,Report
 from django.urls import reverse_lazy 
 from django.db.models import Count
-from django.shortcuts import get_object_or_404,redirect
 from django.views import View
-from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import CategoryForm 
 from django.utils import timezone
 from django.db.models import Case, When, Value, CharField
 from user.models import Notification
-
-def home(request):
-    return render(request,'base/base.html')
 
 # Event Views
 class CreateEvent(CreateView):
@@ -31,7 +26,6 @@ class CreateEvent(CreateView):
 class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
-
         if request.user in event.participants.all():
             event.participants.remove(request.user)
             messages.success(request, "You have left the event.")
@@ -40,7 +34,12 @@ class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
             event.participants.add(request.user)
             messages.success(request, "You have joined the event.")
             EventAttendance.objects.get_or_create(user=request.user, event=event, defaults={'status': 'going'})
-
+            Notification.objects    .create(
+                sender=request.user,
+                receiver=event.organizer,
+                message=f"{request.user} has joined your event {event}",
+                type='Join',
+            )
         return redirect('event_detail', pk=pk)
 
     def test_func(self):
@@ -237,7 +236,6 @@ class getEventAttendance(LoginRequiredMixin,UserPassesTestMixin,ListView):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user == self.event.organizer
 
-
 class ChatRoomView(LoginRequiredMixin,View):
     def get(self,request,pk):
         event=get_object_or_404(Event,pk=pk)
@@ -253,7 +251,6 @@ class ChatRoomView(LoginRequiredMixin,View):
             return redirect('chatroom',pk=pk)
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
-
 # Comment Views 
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
@@ -316,7 +313,6 @@ class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user == self.get_object().user
-
 #Report View 
 class ReportView(LoginRequiredMixin, View):
     def post(self, request, pk):
