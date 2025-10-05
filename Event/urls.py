@@ -24,7 +24,6 @@ urlpatterns = [
     #like URL and comment
     path('like/<int:pk>/',views.LikeView.as_view(),name='like_event'),
     path('comment/<int:pk>/',views.CommentView.as_view(),name='comment_event'),
-    path('comment-replies/<int:pk>/',views.ReplyCommentView.as_view(),name='comment_replies'),
     path('comment-delete/<int:pk>/',views.DeleteComment.as_view(),name='comment_delete'),
     path('comment-update/<int:pk>',views.UpdateComment.as_view(),name='comment_update'),
     path('events/<int:pk>/report/', views.ReportView.as_view(), name='event_report'),

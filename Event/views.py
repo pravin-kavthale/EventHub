@@ -266,26 +266,6 @@ class CommentView(LoginRequiredMixin, View):
                 Comment.objects.create(user=request.user, content=content, event=event)
         return redirect('comment_event', pk=pk)
 
-class ReplyCommentView(LoginRequiredMixin,View):
-    def get(self,request,pk):
-        parent=get_object_or_404(Comment,pk=pk)
-        comments_replies=parent.replies.all()
-        return render(request,'Event/event_comments.html',{'parent':parent,'replies':comments_replies})
-
-    def post(self,request,pk):
-        parent=get_object_or_404(Comment,pk=pk)
-        content=request.POST.get('content')
-        if content:
-            Comment.objects.create(
-                user=request.user,
-                event=parent.event,
-                parent=parent,
-                content=content
-            )
-            return redirect('event_detail',pk=parent.event.pk)
-        comments_replies=parent.replies.all()
-        return render(request,'Event/event_comments.html',{'parent':parent,'replies':comments_replies})
-
 class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = 'Event/comment_confirm_delete.html'
