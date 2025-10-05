@@ -1,7 +1,41 @@
 <li class="list-group-item">
-    <strong>{{ comment.user.username }}</strong>
-    <small class="text-muted">{{ comment.created_at|date:"d M Y, h:i A" }}</small>
-    <p>{{ comment.content }}</p>
+    <!-- Top row: username + buttons -->
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex align-items-center">
+            <strong>{{ comment.user.username }}</strong>
+            <small class="text-muted ms-2">{{ comment.created_at|date:"d M Y, h:i A" }}</small>
+        </div>
+
+        {% if request.user == comment.user or request.user.is_staff %}
+        <div class="d-flex align-items-center">
+            <!-- Edit button -->
+            <button class="btn btn-link text-primary p-0 ms-2" title="Edit"
+                    onclick="editComment({{ comment.id }})">
+                <i class="fas fa-edit"></i>
+            </button>
+            <!-- Delete button -->
+            <a href="{% url 'comment_delete' comment.pk %}"
+               class="btn btn-link text-danger p-1 ms-2"
+               title="Delete">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Comment content -->
+    <p class="mt-2 mb-1 comment-text" id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
+
+    <!-- Inline edit form (hidden by default) -->
+    <form method="post" action="{% url 'comment_update' comment.pk %}" 
+          class="edit-comment-form mt-2" id="edit-form-{{ comment.id }}">
+        {% csrf_token %}
+        <input type="text" name="content" value="{{ comment.content }}" 
+               class="form-control form-control-sm rounded-pill me-2" style="flex:1;" required>
+        <button type="submit" class="btn btn-success btn-sm me-1">Update</button>
+        <button type="button" class="btn btn-secondary btn-sm" 
+                onclick="cancelEdit({{ comment.id }})">Cancel</button>
+    </form>
 
     <!-- Reply toggle button -->
     <a href="#replies{{ comment.id }}" class="text-primary text-decoration-none small" data-bs-toggle="collapse">
@@ -32,3 +66,25 @@
         </form>
     </div>
 </li>
+
+<!-- CSS to hide edit form by default -->
+<style>
+.edit-comment-form {
+    display: none;       /* hidden initially */
+    flex-wrap: nowrap;   /* keep input + buttons on one line */
+    gap: 0.5rem;         /* spacing between input and buttons */
+}
+</style>
+
+<!-- JavaScript for inline edit toggle -->
+<script>
+function editComment(commentId) {
+    document.getElementById("comment-text-" + commentId).style.display = "none";
+    document.getElementById("edit-form-" + commentId).style.display = "flex";
+}
+
+function cancelEdit(commentId) {
+    document.getElementById("comment-text-" + commentId).style.display = "block";
+    document.getElementById("edit-form-" + commentId).style.display = "none";
+}
+</script>

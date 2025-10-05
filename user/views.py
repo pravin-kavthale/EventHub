@@ -21,6 +21,7 @@ def register(request):
         form = UserRegisterForm()
 
     return render(request, 'register.html', {'form': form})
+
 @login_required
 def profile(request):
     u_form=UserUpdateForm()
@@ -64,19 +65,6 @@ class ListNotification(LoginRequiredMixin, ListView):
         context['navbar_notifications'] = navbar_notifications  # For navbar dropdown
         context['navbar_unread_count'] = navbar_unread_count  # For bell badge
         return context
-
-
-class DetailNotification(LoginRequiredMixin,DetailView):
-    model=Notification
-    template_name='user/Detail_notification.html'
-    context_object_name='notification'
-    
-    def get_object(self,queryset=None):
-        notification=super().get_object(queryset)
-        if not notification.is_read:   # 👈 optional but avoids extra DB writes
-            notification.is_read = True
-            notification.save()
-        return notification
 
 class CreateBatch(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     model=Batch

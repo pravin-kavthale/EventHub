@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment,Report
@@ -298,20 +298,21 @@ class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     context_object_name = "comment"
 
     def get_success_url(self):
-        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+        return reverse_lazy('comment_event', kwargs={'pk': self.object.event.pk})
 
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.user or self.request.user.is_staff
 
 class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-
     model = Comment
     fields = ['content']
-    template_name = "Event/comment_update.html"  # use a dedicated template
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(reverse_lazy('comment_event', kwargs={'pk': self.object.event.pk}))
 
-    def get_success_url(self):
-        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse_lazy('comment_event', kwargs={'pk': self.get_object().event.pk}))
 
     def test_func(self):
         return self.request.user == self.get_object().user
