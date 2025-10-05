@@ -245,22 +245,26 @@ class ChatRoomView(LoginRequiredMixin,View):
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
 
 # Comment Views 
-class CommentView(LoginRequiredMixin,View):
+class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
-    def get(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
-        comments=event.comments.all().order_by('-created_at')
-        return render(request,'Event/event_comments.html',{'event':event,'comments':comments})
-                
-    def post(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
+    def get(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        comments = event.comments.filter(parent__isnull=True).order_by('-created_at')
+        return render(request, self.template_name, {'event': event, 'comments': comments})
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
         if not event.comments_enabled:
-            return HttpResponse("Comments are disabled for this event.",status=403)
-        content=request.POST.get('content')
+            return HttpResponse("Comments are disabled for this event.", status=403)
+        content = request.POST.get('content')
+        parent_id = request.POST.get('parent_id')  
+
         if content:
-            event.comments.create(user=request.user, content=content)
-            return redirect('event_detail',pk=pk)
-        return render(request,'Event/event_comments.html',{'event':event,'comments':event.comments.all().order_by('-created_at')})
+            if parent_id:
+                parent_comment = get_object_or_404(Comment, id=parent_id, event=event)
+                Comment.objects.create(user=request.user, content=content, event=event, parent=parent_comment)
+            else:
+                Comment.objects.create(user=request.user, content=content, event=event)
+        return redirect('comment_event', pk=pk)
 
 class ReplyCommentView(LoginRequiredMixin,View):
     def get(self,request,pk):

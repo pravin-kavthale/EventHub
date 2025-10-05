@@ -1,0 +1,34 @@
+<li class="list-group-item">
+    <strong>{{ comment.user.username }}</strong>
+    <small class="text-muted">{{ comment.created_at|date:"d M Y, h:i A" }}</small>
+    <p>{{ comment.content }}</p>
+
+    <!-- Reply toggle button -->
+    <a href="#replies{{ comment.id }}" class="text-primary text-decoration-none small" data-bs-toggle="collapse">
+        Reply →
+    </a>
+
+    <!-- Replies section -->
+    <div class="collapse mt-2" id="replies{{ comment.id }}">
+        {% if comment.replies.all %}
+            <small class="text-muted d-block mb-2">
+                {{ comment.replies.count }} {{ comment.replies.count|pluralize:"reply,replies" }}
+            </small>
+            <ul class="list-group ms-4 mb-2">
+                {% for reply in comment.replies.all %}
+                    {% include 'Event/comment_item.html' with comment=reply %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Reply input -->
+        <form method="post" action="{% url 'comment_event' comment.event.id %}" class="ms-4 mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+            <div class="input-group input-group-sm">
+                <input type="text" name="content" class="form-control" placeholder="Write a reply..." required>
+                <button class="btn btn-primary btn-sm" type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+</li>

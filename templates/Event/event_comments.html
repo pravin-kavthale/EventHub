@@ -10,63 +10,23 @@
     {% if comments %}
         <ul class="list-group">
             {% for comment in comments %}
-            <li class="list-group-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <strong>{{ comment.user.username }}</strong> 
-                        <small class="text-muted">{{ comment.created_at|date:"d M Y, h:i A" }}</small>
-                        <p>{{ comment.content }}</p>
-                    </div>
-                    <div>
-                        {% if comment.replies.all %}
-                        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#replies{{ comment.id }}">
-                            View Replies ({{ comment.replies.count }})
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-
-                {# Replies Section #}
-                <div class="collapse mt-2" id="replies{{ comment.id }}">
-                    <ul class="list-group ms-4">
-                        {% for reply in comment.replies.all %}
-                        <li class="list-group-item">
-                            <strong>{{ reply.user.username }}</strong> 
-                            <small class="text-muted">{{ reply.created_at|date:"d M Y, h:i A" }}</small>
-                            <p>{{ reply.content }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                {# Reply Form #}
-                <div class="mt-2 ms-4">
-                    <form method="post" action="#">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="text" name="content" class="form-control form-control-sm" placeholder="Write a reply..." required>
-                            <button class="btn btn-sm btn-primary" type="submit">Reply</button>
-                        </div>
-                    </form>
-                </div>
-
-            </li>
+                {% include 'Event/comment_item.html' with comment=comment %}
             {% endfor %}
         </ul>
     {% else %}
         <div class="alert alert-info">No comments yet. Be the first to comment!</div>
     {% endif %}
 
-    {# New Comment Form #}
+    <!-- New Comment Form -->
     {% if event.comments_enabled %}
     <div class="mt-4">
         <h5>Add a Comment</h5>
-        <form method="post">
+        <form method="post" action="{% url 'comment_event' event.id %}">
             {% csrf_token %}
-            <div class="mb-3">
-                <textarea name="content" class="form-control" rows="3" placeholder="Write your comment..." required></textarea>
+            <div class="input-group">
+                <input type="text" name="content" class="form-control" placeholder="Write your comment..." required>
+                <button class="btn btn-success" type="submit">Post Comment</button>
             </div>
-            <button class="btn btn-success" type="submit">Post Comment</button>
         </form>
     </div>
     {% else %}

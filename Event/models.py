@@ -136,6 +136,9 @@ class Comment(models.Model):
 
     class Meta:
         ordering=["-created_at"]
+        
+    def is_reply(self):
+        return self.parent is not None
     
 
 class Report(models.Model):
