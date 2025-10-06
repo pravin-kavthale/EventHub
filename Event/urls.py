@@ -8,6 +8,8 @@ urlpatterns = [
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
     path('profile/<str:username>/', user_views.profile, name='user_profile'),
+    path('ProfilePrivacy/<int:pk>/', user_views.ProfilePrivacy.as_view(), name='Profile_Privacy'),
+
     # Event URLs
     path('create-event/', views.CreateEvent.as_view(), name='create_event'),
     path('events/', views.EventList.as_view(), name='event_list'),

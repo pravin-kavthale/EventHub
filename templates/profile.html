@@ -10,36 +10,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% include 'base/header.html' %}
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-  <style>
-    /* Styling the full-width header card for a clean look */
-    .profile-header-card .card-header {
-      padding: 20px;
-      border-bottom: none;
-      background-color: #f8f9fa; /* Light background for contrast */
-    }
-    .profile-header-card .profile-user-img {
-      border: 3px solid #ced4da; /* Light border around image */
-    }
-    .profile-header-card .header-content {
-      display: flex;
-      align-items: center;
-    }
-    .profile-header-card .user-details {
-      margin-left: 20px;
-    }
-    /* Make the stats interactive */
-    .description-block {
-      cursor: pointer; /* Indicate it's clickable */
-    }
-    /* Override for standard AdminLTE look */
-    .description-block .description-header {
-      font-size: 1.6rem;
-    }
-    .description-block .description-text {
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-  </style>
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
@@ -64,53 +34,64 @@
 
         <div class="row">
           <div class="col-md-12">
-            <div class="card profile-header-card">
+            <div class="card"> 
 
-              <div class="card-header">
-                  <div class="header-content">
+              <div class="card-header bg-light border-0 p-4">
+                  <div class="d-flex align-items-center">
                       
+                      <!-- Profile Image with Modal Trigger -->
                       <img class="profile-user-img img-fluid img-circle"
-                           style="height: 90px; width: 90px;"
+                           style="height: 90px; width: 90px; border: 3px solid #ced4da; cursor: pointer;"
                            src="{{ target_user.profile.image.url }}"
-                           alt="{{ target_user.username }} profile picture">
+                           alt="{{ target_user.username }} profile picture"
+                           data-toggle="modal" 
+                           data-target="#imageModal">
                             
-                      <div class="user-details flex-grow-1">
+                      <div class="user-details flex-grow-1 ml-3 ml-md-4">
                           <h2 class="profile-username m-0">{{ target_user.username }}</h2>
+                          {%if not target_user.profile.is_private or target_user == request.user or target_user.is_superuser %}
                           <h5 class="text-muted m-0">{{ target_user.email }}</h5>
                           <p class="text-secondary mt-1 mb-0" style="font-size: 0.95rem;">
                               <i class="fas fa-quote-left mr-1"></i>
                               {{ target_user.profile.Bio|default:"No bio set yet." }}
                           </p>
+                          {%else%}
+                          <p class="text-secondary mt-1 mb-0" style="font-size: 0.95rem;">
+                              <i class="fas fa-quote-left mr-1"></i>
+                              {{ "This profile is Private" }}
+                          </p>
+                          {%endif%}
+
                       </div>
 
-                      <div class="row text-center" style="min-width: 300px;">
-                          <div class="col-4 border-right">
+                      <div class="row text-center flex-shrink-0" style="min-width: 300px;">
+                          <div class="col-4 border-right" style="cursor: pointer;">
                               <button class="description-block btn p-0 text-dark" 
                                           data-toggle="modal" 
                                           data-target="#followersModal"
                                           style="border: none; background: none;">
-                                  <h5 class="description-header">{{ followers_count }}</h5>
-                                  <span class="description-text">FOLLOWERS</span>
+                                  <h5 class="description-header" style="font-size: 1.6rem;">{{ followers_count }}</h5>
+                                  <span class="description-text text-uppercase font-weight-bold">FOLLOWERS</span>
                               </button>
                           </div>
-                          <div class="col-4 border-right">
+                          <div class="col-4 border-right" style="cursor: pointer;">
                               <button class="description-block btn p-0 text-dark" 
                                           data-toggle="modal" 
                                           data-target="#followingModal"
                                           style="border: none; background: none;">
-                                  <h5 class="description-header">{{ following_count }}</h5>
-                                  <span class="description-text">FOLLOWING</span>
+                                  <h5 class="description-header" style="font-size: 1.6rem;">{{ following_count }}</h5>
+                                  <span class="description-text text-uppercase font-weight-bold">FOLLOWING</span>
                               </button>
                           </div>
                           <div class="col-4">
                               <div class="description-block">
-                                  <h5 class="description-header">{{ events_count }}</h5>
-                                  <span class="description-text">EVENTS</span>
+                                  <h5 class="description-header" style="font-size: 1.6rem;">{{ events_count }}</h5>
+                                  <span class="description-text text-uppercase font-weight-bold">EVENTS</span>
                               </div>
                           </div>
                       </div>
                       
-                      {% if is_current_user %}
+                      {%if not target_user.profile.is_private or target_user == request.user or target_user.is_superuser %}
                           <form action="{% url 'logout' %}" method="post" class="m-0 p-0 ml-4">
                               {% csrf_token %}
                               <button type="submit" class="btn btn-danger">
@@ -137,8 +118,8 @@
               
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#details" data-toggle="tab">Details</a></li>
+                  
+                  <li class="nav-item"><a class="nav-link active" href="#details" data-toggle="tab">Details</a></li>
                   
                   {% if is_current_user %}
                     <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
@@ -148,25 +129,9 @@
               
               <div class="card-body">
                 <div class="tab-content">
-
-                  <div class="active tab-pane" id="activity">
-                    <div class="timeline timeline-inverse">
-                      <div class="time-label"><span class="bg-danger">Oct 3, 2025</span></div>
-                      <div>
-                        <i class="fas fa-envelope bg-primary"></i>
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 12:05 PM</span>
-                          <h3 class="timeline-header"><a href="#">Event Joined</a> Event Name</h3>
-                          <div class="timeline-body">{{ target_user.username }} joined an event.</div>
-                        </div>
-                      </div>
-                      <div><i class="far fa-clock bg-gray"></i></div>
-                    </div>
-                  </div>
-                  
-                  <div class="tab-pane" id="details">
+                  <div class="active tab-pane" id="details">
                     <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
-                    <p class="text-muted">{{ target_user.get_full_name|default:"N/A" }}</p>
+                    <p class="text-muted">{{ target_user.get_full_name|default:target_user.username }}</p>
                     <hr>
 
                     <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
@@ -183,51 +148,100 @@
 
                   {% if is_current_user %}
                   <div class="tab-pane" id="settings">
-                    <form class="form-horizontal" method="post" enctype="multipart/form-data">
-                      {% csrf_token %}
-                      
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Username</label>
-                        <div class="col-sm-10">
-                          {{ u_form.username|add_class:"form-control" }}
-                          {% if u_form.username.errors %}<p class="text-danger small">{{ u_form.username.errors|striptags }}</p>{% endif %}
-                        </div>
+
+                    <!-- Update Profile Card -->
+                    <div class="card card-outline card-primary mb-4">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title m-0">Update Profile</h3>
+                        <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#updateProfileForm" aria-expanded="false" aria-controls="updateProfileForm">
+                          <i class="fas fa-chevron-down"></i>
+                        </button>
                       </div>
 
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          {{ u_form.email|add_class:"form-control" }}
-                          {% if u_form.email.errors %}<p class="text-danger small">{{ u_form.email.errors|striptags }}</p>{% endif %}
-                        </div>
-                      </div>
-                      
-                      <hr>
-                      
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Bio</label>
-                        <div class="col-sm-10">
-                            {{ p_form.Bio|attr:"rows:3"|add_class:"form-control" }} 
-                            {% if p_form.Bio.errors %}
-                                <p class="text-danger small">{{ p_form.Bio.errors|striptags }}</p>
-                            {% endif %}
-                        </div>
-                      </div>
+                      <div id="updateProfileForm" class="collapse">
+                        <div class="card-body">
+                          <form class="form-horizontal" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="form-group row">
+                              <label class="col-sm-2 col-form-label">Username</label>
+                              <div class="col-sm-10">
+                                {{ u_form.username|add_class:"form-control" }}
+                                {% if u_form.username.errors %}
+                                  <p class="text-danger small">{{ u_form.username.errors|striptags }}</p>
+                                {% endif %}
+                              </div>
+                            </div>
 
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Profile Image</label>
-                        <div class="col-sm-10">
-                          {{ p_form.image }}
-                          {% if p_form.image.errors %}<p class="text-danger small">{{ p_form.image.errors|striptags }}</p>{% endif %}
-                        </div>
-                      </div>
+                            <div class="form-group row">
+                              <label class="col-sm-2 col-form-label">Email</label>
+                              <div class="col-sm-10">
+                                {{ u_form.email|add_class:"form-control" }}
+                                {% if u_form.email.errors %}
+                                  <p class="text-danger small">{{ u_form.email.errors|striptags }}</p>
+                                {% endif %}
+                              </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="form-group row">
+                              <label class="col-sm-2 col-form-label">Bio</label>
+                              <div class="col-sm-10">
+                                  {{ p_form.Bio|attr:"rows:3"|add_class:"form-control" }} 
+                                  {% if p_form.Bio.errors %}
+                                      <p class="text-danger small">{{ p_form.Bio.errors|striptags }}</p>
+                                  {% endif %}
+                              </div>
+                            </div>
 
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-success">Save Changes</button>
+                            <div class="form-group row">
+                              <label class="col-sm-2 col-form-label">Profile Image</label>
+                              <div class="col-sm-10">
+                                {{ p_form.image }}
+                                {% if p_form.image.errors %}
+                                  <p class="text-danger small">{{ p_form.image.errors|striptags }}</p>
+                                {% endif %}
+                              </div>
+                            </div>
+
+                            <div class="form-group row">
+                              <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-success">Save Changes</button>
+                              </div>
+                            </div>
+                          </form>
                         </div>
                       </div>
-                    </form>
+                    </div>
+
+                    <!-- Privacy Settings Card -->
+                    <div class="card card-outline card-warning">
+                      <div class="card-header">
+                        <h3 class="card-title">Privacy Settings</h3>
+                      </div>
+                      <div class="card-body text-center">
+                        <form action="{% url 'Profile_Privacy' target_user.id %}" method="post" id="privacyForm">
+                          {% csrf_token %}
+                          <div class="custom-control custom-switch">
+                            <input type="checkbox" 
+                                   class="custom-control-input" 
+                                   id="privacySwitch"
+                                   name="is_private"
+                                   {% if target_user.profile.is_private %}checked{% endif %}
+                                   onchange="document.getElementById('privacyForm').submit();">
+                            <label class="custom-control-label" for="privacySwitch">
+                              {% if target_user.profile.is_private %}
+                                Profile is Private
+                              {% else %}
+                                Profile is Public
+                              {% endif %}
+                            </label>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+
                   </div>
                   {% endif %}
                   
@@ -244,6 +258,7 @@
   {% include 'base/footer.html' %}
 </div>
 
+<!-- Followers Modal -->
 <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -263,6 +278,7 @@
   </div>
 </div>
 
+<!-- Following Modal -->
 <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -282,34 +298,37 @@
   </div>
 </div>
 
+<!-- Profile Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content bg-transparent border-0 shadow-none">
+      <div class="modal-body p-0 text-center">
+        <img src="{{ target_user.profile.image.url }}" 
+             id="zoomImage"
+             class="img-fluid rounded"
+             style="max-height: 80vh; transition: transform 0.3s ease-in-out; cursor: zoom-in;">
+      </div>
+    </div>
+  </div>
+</div>
+
 {% include 'base/js.html' %}
 
 <script>
 $(document).ready(function() {
-    // 1. Get the ID of the user whose profile we are currently viewing
     const targetUserId = "{{ target_user.id }}";
-    
-    // 2. Define the base URLs using your actual URL names ('list_followers' and 'list_followings')
-    // We use '0' as a placeholder for the user_id that will be replaced.
+   
     const followersUrl = "{% url 'list_followers' user_id=0 %}".replace('0', targetUserId);
     const followingsUrl = "{% url 'list_followings' user_id=0 %}".replace('0', targetUserId);
 
-    /**
-     * Fetches the content from the Django view via AJAX and inserts it into the modal body.
-     * @param {string} url - The URL (with ID) to call.
-     * @param {string} bodyId - The ID of the modal-body element to fill.
-     */
     function loadModalContent(url, bodyId) {
         const $modalBody = $(`#${bodyId}`);
-        
-        // Show loading state while fetching data
         $modalBody.html('<p class="text-center text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Loading list...</p>');
 
         $.ajax({
             url: url,
             type: 'GET',
             success: function(data) {
-                // Insert the HTML content returned by the ListView (e.g., user/followers.html)
                 $modalBody.html(data);
             },
             error: function(xhr, status, error) {
@@ -318,15 +337,25 @@ $(document).ready(function() {
             }
         });
     }
-
-    // Event listener: Load Followers list when the Followers modal is shown
     $('#followersModal').on('show.bs.modal', function (e) {
         loadModalContent(followersUrl, 'followers-modal-body');
     });
-
-    // Event listener: Load Following list when the Following modal is shown
     $('#followingModal').on('show.bs.modal', function (e) {
         loadModalContent(followingsUrl, 'following-modal-body');
+    });
+
+    // Zoom effect for profile image
+    let zoomed = false;
+    $('#zoomImage').on('click', function() {
+        if (!zoomed) {
+            $(this).css('transform', 'scale(1.5)');
+            $(this).css('cursor', 'zoom-out');
+            zoomed = true;
+        } else {
+            $(this).css('transform', 'scale(1)');
+            $(this).css('cursor', 'zoom-in');
+            zoomed = false;
+        }
     });
 });
 </script>

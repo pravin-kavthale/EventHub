@@ -200,3 +200,25 @@ class ListFollowing(LoginRequiredMixin,ListView):
         context = super().get_context_data(**kwargs)
         context['users'] = [conn.following for conn in context['connections']]
         return context
+
+class ProfilePrivacy(LoginRequiredMixin, UserPassesTestMixin, View):
+    model = Profile
+    
+
+    def test_func(self):
+        profile = get_object_or_404(Profile, user=self.request.user)
+        return self.request.user == profile.user
+    
+    def post(self, request, *args, **kwargs):
+        profile = get_object_or_404(Profile, user=self.request.user)
+
+        profile.is_private=not profile.is_private
+        profile.save()
+    
+        if profile.is_private:
+            messages.success(request, "Your profile is now Private.")
+        else:
+            messages.success(request, "Your profile is now Public.")
+            
+        return redirect(request.META.get('HTTP_REFERER', 'profile'))
+    
