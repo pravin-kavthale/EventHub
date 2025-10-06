@@ -7,7 +7,7 @@ urlpatterns = [
     # User Authentication URLs
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
-
+    path('profile/<str:username>/', user_views.profile, name='user_profile'),
     # Event URLs
     path('create-event/', views.CreateEvent.as_view(), name='create_event'),
     path('events/', views.EventList.as_view(), name='event_list'),
@@ -37,12 +37,9 @@ urlpatterns = [
     # Notification URLs
     path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
     #UserConnection URLs
-    path('user-connection',user_views.CreateUserConnection.as_view(),name='user_connection'),
-    path('list-followers',user_views.ListFollowers.as_view(),name='list_followers'),
-    path('list-following',user_views.ListFollowing.as_view(),name='list_followings'),
-
-
-    
+    path('connect/<int:user_id>/', user_views.CreateUserConnection.as_view(), name='connect_user'),
+    path('followers/<int:user_id>/', user_views.ListFollowers.as_view(), name='list_followers'),
+    path('following/<int:user_id>/', user_views.ListFollowing.as_view(), name='list_followings'),
     #Batches URLs
     path('create-batch/', user_views.CreateBatch.as_view(), name='create_batch'),
     path('list-batch/', user_views.ListBatch.as_view(), name='list_batch'),

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "user",
     'crispy_forms',
     'crispy_bootstrap5',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 'user.context_processors.notifications',
+                
             ],
         },
     },

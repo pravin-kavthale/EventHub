@@ -22,29 +22,58 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+User = get_user_model() 
+
 @login_required
-def profile(request):
-    u_form=UserUpdateForm()
-    p_form=ProfileUpdateForm()
-    
-    if request.method=='POST':
-        u_form=UserUpdateForm(request.POST,instance=request.user)
-        p_form=ProfileUpdateForm(request.POST,request.FILES,instance=request.user.profile)
-        
-        if u_form.is_valid() and p_form.is_valid():
-            u_form.save()
-            p_form.save()
-            messages.success(request,f'Your account has been updated!')
-            return redirect('profile')
+def profile(request, username=None):
+    is_current_user = True 
+
+    if username:
+        target_user = get_object_or_404(User, username=username)
+        is_current_user = (target_user == request.user) 
     else:
-        u_form=UserUpdateForm(instance=request.user)
-        p_form=ProfileUpdateForm(instance=request.user.profile)
-            
-    context={
-        'u_form':u_form,
-        'p_form':p_form
+        target_user = request.user
+
+    followers_count = UserConnection.objects.filter(following=target_user).count()
+    following_count = UserConnection.objects.filter(follower=target_user).count()
+    is_following = UserConnection.objects.filter(
+        follower=request.user,
+        following=target_user
+    ).exists()
+    event_count = Event.objects.filter(organizer=target_user).count() 
+
+    u_form = None
+    p_form = None
+
+    if is_current_user:
+        if request.method == 'POST':
+            u_form = UserUpdateForm(request.POST, instance=request.user)
+            p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+            if u_form.is_valid() and p_form.is_valid():
+                u_form.save()
+                p_form.save()
+                messages.success(request, f'Your account has been updated!')
+                return redirect('profile')
+        else:
+            u_form = UserUpdateForm(instance=request.user)
+            p_form = ProfileUpdateForm(instance=request.user.profile)
+    
+    context = {
+        'target_user': target_user,
+        'u_form': u_form,
+        'p_form': p_form,
+        'is_current_user': is_current_user,
+        'is_following': is_following,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'events_count': event_count, 
     }
-    return render(request,'profile.html',context)
+    return render(request, 'profile.html', context)
 
 class ListNotification(LoginRequiredMixin, ListView):
     model = Notification
@@ -124,7 +153,7 @@ class ListUserBatch(LoginRequiredMixin,ListView):
         return UserBatch.objects.filter(user=self.request.user).order_by('-earned_at')
 
 class CreateUserConnection(LoginRequiredMixin,View):
-    success_url=reverse_lazy('profile')
+    
     def post(self,request,*args,**kwargs):
         following=get_object_or_404(User,id=self.kwargs.get('user_id'))
         connection = UserConnection.objects.filter(
@@ -135,20 +164,39 @@ class CreateUserConnection(LoginRequiredMixin,View):
             connection.delete()
         else:
             UserConnection.objects.create(following=following,follower=request.user)
-        return redirect(self.success_url)
+            Notification.objects.create(
+                sender=request.user,
+                receiver=following,
+                message=f'{request.user} has followed you ',
+                type='Follow'
+            )
+        return redirect('user_profile', username=following.username)
 
 class ListFollowers(LoginRequiredMixin,ListView):
     model=UserConnection
     template_name='user/followers.html'
-    context_object_name= 'followers'
-
+    context_object_name= 'connections'
+    
     def get_queryset(self):
-        return UserConnection.objects.filter(following=self.request.user)
+        target_user_id=self.kwargs.get('user_id')
+        target_user=get_object_or_404(User,id=target_user_id)
+        return UserConnection.objects.filter(following=target_user).select_related('follower')
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        context['users'] = [conn.follower for conn in context['connections']]
+        return context
 
 class ListFollowing(LoginRequiredMixin,ListView):
-    model=UserConnection
-    template_name='user/followers.html'
-    context_object_name= 'followings'
+    model = UserConnection
+    template_name = 'user/following.html' 
+    context_object_name = 'connections'
 
     def get_queryset(self):
-        return UserConnection.objects.filter(follower=self.request.user)
+        target_user_id = self.kwargs.get('user_id')
+        target_user = get_object_or_404(User, id=target_user_id)
+        return UserConnection.objects.filter(follower=target_user).select_related('following')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users'] = [conn.following for conn in context['connections']]
+        return context

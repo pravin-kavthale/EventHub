@@ -6,7 +6,6 @@
 {% block content %}
 <div class="container-fluid">
 
-    <!-- Search + Sort Row -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
             <form method="get" class="d-flex">
@@ -17,8 +16,12 @@
             </form>
         </div>
         <div class="col-md-6 text-end d-flex justify-content-end align-items-center">
-            <!-- Category Filter Dropdown -->
             <form method="get" class="d-inline me-2">
+                {% for key, value in request.GET.items %}
+                    {% if key != 'category' and key != 'page' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
                 <select name="category" class="form-select w-auto d-inline-block" onchange="this.form.submit()">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
@@ -29,7 +32,6 @@
                 </select>
             </form>
 
-            <!-- Create Event Button -->
             <a href="{% url 'create_event' %}" class="btn btn-primary ms-2">
                 <i class="fas fa-plus-circle me-1"></i> Create Event
             </a>
@@ -37,13 +39,11 @@
 
     </div>
 
-    <!-- Event Cards Grid -->
     <div class="row g-4">
         {% for event in events %}
         <div class="col-md-4 d-flex">
             <div class="card shadow-sm border-0 rounded-4 overflow-hidden flex-fill">
 
-                <!-- Event Image -->
                 {% if event.image %}
                 <img src="{{ event.image.url }}" 
                      class="card-img-top rounded-top-4" 
@@ -56,21 +56,24 @@
                      style="height:200px; object-fit:cover;">
                 {% endif %}
 
-                <!-- Card Body -->
                 <div class="card-body d-flex flex-column">
                     
-                    <!-- Event Title -->
                     <h5 class="card-title fw-bold text-dark mb-2" style="font-size:1.1rem;">
                         {{ event.title }}
                     </h5>
 
-                    <!-- Location + Date -->
+                    <div class="mb-2">
+                        <span class="text-muted small me-1">Organized by:</span>
+                        <a href="{% url 'user_profile' username=event.organizer.username %}" 
+                           class="fw-bold text-primary text-decoration-none">
+                            {{ event.organizer.username }}
+                        </a>
+                    </div>
                     <p class="card-text text-muted small mb-2">
                         <i class="fas fa-map-marker-alt me-1"></i> {{ event.location }} <br>
                         <i class="fas fa-clock me-1"></i> {{ event.date|date:"d M Y, h:i A" }}
                     </p>
 
-                    <!-- Category + Status -->
                     <div class="mb-2">
                         {% if event.category %}
                         <span class="badge bg-info">
@@ -80,13 +83,10 @@
                         <span class="badge bg-success">{{ event.get_status }}</span>
                     </div>
 
-                    <!-- Description -->
                     <p class="card-text flex-grow-1">{{ event.description|truncatewords:20 }}</p>
 
-                    <!-- Action Buttons -->
                     <div class="d-flex justify-content-between align-items-center mt-3">
 
-                        <!-- Like Button -->
                         <form action="{% url 'like_event' event.pk %}" method="post" class="d-inline me-2">
                             {% csrf_token %}
                             <button type="submit" style="background:none; border:none;" class="p-0 m-0">
@@ -99,18 +99,15 @@
                             <span class="ms-1 small text-muted">{{ event.like_set.count }}</span>
                         </form>
 
-                        <!-- Comment Button -->
                         <a href="{% url 'comment_event' event.pk %}" class="btn p-0 m-0 d-flex align-items-center text-decoration-none">
                             <i class="far fa-comment" style="color:gray; font-size:1.3rem;"></i>
                             <span class="ms-1 small text-muted">{{ event.comments.count }}</span>
                         </a>
 
-                        <!-- View Button -->
                         <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-eye"></i> View
                         </a>
 
-                        <!-- Join Button (if not organizer) -->
                         {% if request.user != event.organizer %}
                         <form action="{% url 'join_event' event.id %}" method="post" class="d-inline">
                             {% csrf_token %}
@@ -124,7 +121,6 @@
                         </form>
                         {% endif %}
 
-                        <!-- Organizer dropdown menu -->
                         {% if request.user == event.organizer %}
                         <div class="dropdown">
                             <button class="btn p-0 m-0 text-secondary" type="button" id="dropdownMenu{{ event.pk }}" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: transparent;">
@@ -144,7 +140,7 @@
                                 <li>
                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#participantsModal{{ event.pk }}">
                                         <i class="fas fa-users me-2"></i>View Participants
-                                    </a>    
+                                    </a>    
                                 </li>
                             </ul>
                         </div>
@@ -155,7 +151,6 @@
             </div>
         </div>
 
-        <!-- Participants Modal -->
         <div class="modal fade" id="participantsModal{{ event.pk }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
@@ -167,7 +162,11 @@
                         {% if event.participants.all %}
                             <ul class="list-group">
                                 {% for user in event.participants.all %}
-                                    <li class="list-group-item">{{ user.username }}</li>
+                                    <li class="list-group-item">
+                                        <a href="{% url 'user_profile' username=user.username %}" class="text-decoration-none">
+                                            {{ user.username }}
+                                        </a>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         {% else %}
@@ -190,20 +189,21 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
     <div class="d-flex justify-content-center mt-4">
         <nav>
             <ul class="pagination">
                 {% if events.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ events.previous_page_number }}">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ events.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Previous</a></li>
                 {% endif %}
+                
                 {% for num in events.paginator.page_range %}
                     <li class="page-item {% if events.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
                     </li>
                 {% endfor %}
+                
                 {% if events.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ events.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ events.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Next</a></li>
                 {% endif %}
             </ul>
         </nav>
