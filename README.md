@@ -68,30 +68,29 @@
 Visit `http://127.0.0.1:8000/` in your browser.
 
 ---
+## 💡 Usage
 
-## Usage
-
-- **Register/Login**: Users must register or log in to access event features.
-- **Create Events**: Logged-in users can create events with details such as title, description, date, and category.
-- **View Events**: Browse ongoing, upcoming, or completed events.
-- **Interact**: Comment on events and engage with other participants.
+- **📝 Register/Login**: Users must register or log in to access event features.  
+- **🎉 Create Events**: Logged-in users can create events with details such as title, description, date, and category.  
+- **👀 View Events**: Browse ongoing, upcoming, or completed events.  
+- **💬 Interact**: Comment on events and engage with other participants.  
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
 
 ```bash
-# Fork the repository
-# Create a new branch
+# 🍴 Fork the repository
+# 🌿 Create a new branch
 git checkout -b feature-name
 
-# Make your changes
-# Commit your changes
+# ✏️ Make your changes
+# 💾 Commit your changes
 git commit -m "Add some feature"
 
-# Push to the branch
+# 🚀 Push to the branch
 git push origin feature-name
 
-# Submit a pull request
+# 📩 Submit a pull request
