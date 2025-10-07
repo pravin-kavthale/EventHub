@@ -21,7 +21,7 @@
 ### Home Page
 ![Home Page](output/output1.png)
 
-### Event Details / Profile Page
+### My Event Page
 ![Event/Profile Page](output/output2.png)
 
 ---
