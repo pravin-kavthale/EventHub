@@ -11,6 +11,7 @@ from .forms import CategoryForm
 from django.utils import timezone
 from django.db.models import Case, When, Value, CharField
 from user.models import Notification
+from django.shortcuts import reverse
 
 # Event Views
 class CreateEvent(CreateView):
@@ -215,6 +216,7 @@ class LikeView(LoginRequiredMixin,View):
                     receiver=event.organizer,
                     event=event,
                     message=f"{request.user.username} has liked your event {event.title}",
+                    action_url=reverse('event_detail', kwargs={'pk': event.pk}),
                     type='Like'
                 )
         return redirect(request.META.get('HTTP_REFERER', '/'))
@@ -264,39 +266,58 @@ class ChatRoomView(LoginRequiredMixin,View):
 # Comment Views 
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
+
     def get(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         comments = event.comments.filter(parent__isnull=True).order_by('-created_at')
         return render(request, self.template_name, {'event': event, 'comments': comments})
+
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         if not event.comments_enabled:
             return HttpResponse("Comments are disabled for this event.", status=403)
+
         content = request.POST.get('content')
         parent_id = request.POST.get('parent_id')  
 
         if content:
             if parent_id:
+                # Reply to an existing comment
                 parent_comment = get_object_or_404(Comment, id=parent_id, event=event)
-                Comment.objects.create(user=request.user, content=content, event=event, parent=parent_comment)
+                new_comment = Comment.objects.create(
+                    user=request.user,
+                    content=content,
+                    event=event,
+                    parent=parent_comment
+                )
+                # Notify the parent comment's author
                 if parent_comment.user != request.user:
                     Notification.objects.create(
                         sender=request.user,
                         receiver=parent_comment.user,
                         event=event,
-                        message=f"{request.user} replied to your comment {parent_comment.content}",
+                        message=f"{request.user.username} replied to your comment: {parent_comment.content}",
+                        action_url=reverse('event_detail', kwargs={'pk': event.pk}) + f"#comment-{new_comment.id}",
                         type="Comment"
                     )
             else:
-                Comment.objects.create(user=request.user, content=content, event=event)
-                if event.organizer!=request.user:
+                # New top-level comment
+                new_comment = Comment.objects.create(
+                    user=request.user,
+                    content=content,
+                    event=event
+                )
+                # Notify the event organizer
+                if event.organizer != request.user:
                     Notification.objects.create(
                         sender=request.user,
                         receiver=event.organizer,
                         event=event,
-                        message=f"{request.user} Commented on your event {event.title}",
+                        message=f"{request.user.username} commented on your event {event.title}",
+                        action_url=reverse('event_detail', kwargs={'pk': event.pk}) + f"#comment-{new_comment.id}",
                         type="Comment"
                     )
+
         return redirect('comment_event', pk=pk)
 
 class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

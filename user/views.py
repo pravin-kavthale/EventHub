@@ -8,6 +8,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Notification,Profile,Batch,UserBatch,UserConnection
 from django.urls import reverse_lazy
 from Event.models import Event,Like,Comment
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+User = get_user_model() 
+
 
 def register(request):
     if request.method == 'POST':
@@ -21,13 +29,6 @@ def register(request):
         form = UserRegisterForm()
 
     return render(request, 'register.html', {'form': form})
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import get_user_model
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-User = get_user_model() 
 
 @login_required
 def profile(request, username=None):
@@ -81,7 +82,7 @@ class ListNotification(LoginRequiredMixin, ListView):
     context_object_name = 'notifications'
 
     def get_queryset(self):
-        qs = Notification.objects.filter(receiver=self.request.user).order_by('-timestamp')
+        qs = Notification.objects.filter(receiver=self.request.user,is_read=False).order_by('-timestamp')
         qs.update(is_read=True)
         return qs
 
@@ -90,10 +91,18 @@ class ListNotification(LoginRequiredMixin, ListView):
         navbar_notifications = Notification.objects.filter(receiver=self.request.user).order_by('-timestamp')[:5]
         navbar_unread_count = navbar_notifications.filter(is_read=False).count()
 
-        context['notifications'] = self.get_queryset()  # List page notifications
-        context['navbar_notifications'] = navbar_notifications  # For navbar dropdown
-        context['navbar_unread_count'] = navbar_unread_count  # For bell badge
+        context['notifications'] = self.get_queryset()  
+        context['navbar_notifications'] = navbar_notifications 
+        context['navbar_unread_count'] = navbar_unread_count  
         return context
+
+@login_required
+def mark_all_notifications_read(request):
+    Notification.objects.filter(
+        receiver=request.user,
+        is_read=False
+    ).update(is_read=True)
+    return JsonResponse({"success": True})
 
 class CreateBatch(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     model=Batch
@@ -168,6 +177,7 @@ class CreateUserConnection(LoginRequiredMixin,View):
                 sender=request.user,
                 receiver=following,
                 message=f'{request.user} has followed you ',
+                action_url=reverse('user_profile', kwargs={'username': request.user.username}),
                 type='Follow'
             )
         return redirect('user_profile', username=following.username)
@@ -203,22 +213,17 @@ class ListFollowing(LoginRequiredMixin,ListView):
 
 class ProfilePrivacy(LoginRequiredMixin, UserPassesTestMixin, View):
     model = Profile
-    
-
     def test_func(self):
         profile = get_object_or_404(Profile, user=self.request.user)
         return self.request.user == profile.user
-    
+
     def post(self, request, *args, **kwargs):
         profile = get_object_or_404(Profile, user=self.request.user)
-
         profile.is_private=not profile.is_private
         profile.save()
-    
         if profile.is_private:
             messages.success(request, "Your profile is now Private.")
         else:
             messages.success(request, "Your profile is now Public.")
-            
         return redirect(request.META.get('HTTP_REFERER', 'profile'))
     

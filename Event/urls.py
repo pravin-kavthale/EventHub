@@ -30,7 +30,6 @@ urlpatterns = [
     path('comment-update/<int:pk>',views.UpdateComment.as_view(),name='comment_update'),
     path('events/<int:pk>/report/', views.ReportView.as_view(), name='event_report'),
     path('event_attendance/<int:pk>/', views.JoinEvent.as_view(), name='join_event'),
-
     # Event Attendance URLs
     path('attend/<int:pk>/', views.EventAttendanceView.as_view(), name='attend_event'),
     path('chatroom/<int:pk>/',views.ChatRoomView.as_view(),name='chat_room'),
@@ -38,6 +37,7 @@ urlpatterns = [
     path('attendance-list/<int:pk>/', views.getEventAttendance.as_view(), name='attendance_list'),
     # Notification URLs
     path('notifications/', user_views.ListNotification.as_view(), name='notification_list'),
+     path("notifications/mark-all-read/", user_views.mark_all_notifications_read, name="mark_all_notifications_read"),
     #UserConnection URLs
     path('connect/<int:user_id>/', user_views.CreateUserConnection.as_view(), name='connect_user'),
     path('followers/<int:user_id>/', user_views.ListFollowers.as_view(), name='list_followers'),
