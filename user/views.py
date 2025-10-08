@@ -16,7 +16,6 @@ from django.http import JsonResponse
 
 User = get_user_model() 
 
-
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -226,4 +225,4 @@ class ProfilePrivacy(LoginRequiredMixin, UserPassesTestMixin, View):
         else:
             messages.success(request, "Your profile is now Public.")
         return redirect(request.META.get('HTTP_REFERER', 'profile'))
-    
+

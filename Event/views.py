@@ -263,6 +263,7 @@ class ChatRoomView(LoginRequiredMixin,View):
             return redirect('chatroom',pk=pk)
         messages=chatroom.messages.all()
         return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
+
 # Comment Views 
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
@@ -344,6 +345,7 @@ class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user == self.get_object().user
+
 #Report View 
 class ReportView(LoginRequiredMixin, View):
     def post(self, request, pk):

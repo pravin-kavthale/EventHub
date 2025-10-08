@@ -20,7 +20,14 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model=Profile
-        fields=['is_private','Bio','image']
+        fields=['FullName','Bio','Age','Gender','image','MobileNumber','is_private']
+        widgets = {
+            'FullName': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
+            'Bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Bio'}),
+            'Age': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age'}),
+            'Gender': forms.Select(attrs={'class': 'form-control'}),
+            'MobileNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Mobile Number'}),
+        }
 
 
 

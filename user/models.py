@@ -6,8 +6,12 @@ from Event.models import Event
 
 class Profile(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
-    image=models.ImageField(default='default.jpg',upload_to='profile_pics')
+    FullName=models.TextField(max_length=30,blank=True)
     Bio=models.TextField(blank=True)
+    Age=models.PositiveIntegerField(null=True,blank=True)
+    Gender=models.CharField(max_length=10,choices=[('Male','Male'),('Female','Female'),('Other','Other')],blank=True)
+    image=models.ImageField(default='default.jpg',upload_to='profile_pics')
+    MobileNumber=models.PositiveIntegerField(null=True,blank=True)
     is_private=models.BooleanField(default=False)
     def __str__(self):
         return f'{self.user.username} profile'
@@ -51,6 +55,7 @@ class UserBatch(models.Model):
     
     def __str__(self):
         return f"{self.user.username} earned {self.batch.name}"
+
 class UserConnection(models.Model):
     follower = models.ForeignKey(
         User,
