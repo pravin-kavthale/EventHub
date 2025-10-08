@@ -1,2 +1,9 @@
-*.js linguist-detectable=false
-*.css linguist-detectable=false
+# Ignore static files
+*.js linguist-vendored
+*.css linguist-vendored
+
+# Ignore templates
+*.html linguist-vendored
+
+# Force Python to be detected
+*.py linguist-detectable=true
