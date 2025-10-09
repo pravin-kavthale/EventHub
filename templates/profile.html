@@ -316,7 +316,32 @@
                         </form>
                       </div>
                     </div>
+                    <!-- Password Reset Card -->
+                    <div class="card card-outline card-info mt-4">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title m-0">Password Reset</h3>
+                        <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#passwordResetForm" aria-expanded="false" aria-controls="passwordResetForm">
+                          <i class="fas fa-chevron-down"></i>
+                        </button>
+                      </div>
 
+                      <div id="passwordResetForm" class="collapse">
+                        <div class="card-body">
+                          <p>Reset your password by entering your email address. A reset link will be sent to your inbox.</p>
+
+                          <form method="post" action="{% url 'password_reset' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                              <label for="id_email">Email</label>
+                              <input type="email" name="email" class="form-control" id="id_email" value="{{ request.user.email }}" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-info mt-2">
+                              <i class="fas fa-envelope me-1"></i> Send Reset Link
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   {% endif %}
                   

@@ -7,3 +7,5 @@
 
 # Force Python to be detected
 *.py linguist-detectable=true
+
+.env

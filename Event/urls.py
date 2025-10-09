@@ -9,6 +9,38 @@ urlpatterns = [
     path('profile/', user_views.profile, name='profile'),
     path('profile/<str:username>/', user_views.profile, name='user_profile'),
     path('ProfilePrivacy/<int:pk>/', user_views.ProfilePrivacy.as_view(), name='Profile_Privacy'),
+    path(
+        'password-reset/',
+        auth_views.PasswordResetView.as_view(
+            template_name='user/password_reset.html',
+            extra_context={'view_type': 'reset_form'}
+        ),
+        name='password_reset'
+    ),
+    path(
+        'password-reset/done/',
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='user/password_reset.html',
+            extra_context={'view_type': 'reset_done'}
+        ),
+        name='password_reset_done'
+    ),
+    path(
+        'password-reset-confirm/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='user/password_reset.html',
+            extra_context={'view_type': 'reset_confirm'}
+        ),
+        name='password_reset_confirm'
+    ),
+    path(
+        'password-reset-complete/',
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='user/password_reset.html',
+            extra_context={'view_type': 'reset_complete'}
+        ),
+        name='password_reset_complete'
+    ),
 
     # Event URLs
     path('create-event/', views.CreateEvent.as_view(), name='create_event'),
