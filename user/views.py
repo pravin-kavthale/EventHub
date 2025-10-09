@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm,UserUpdateForm,ProfileUpdateForm
+from .forms import UserRegisterForm,UserUpdateForm,ProfileUpdateForm,CustomPasswordChangeForm
 from django.views.generic import CreateView,UpdateView,DetailView,ListView,DeleteView,View
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.contrib.auth import update_session_auth_hash
 
 User = get_user_model() 
 
@@ -24,55 +25,87 @@ def register(request):
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('login')
-    else:  # <-- this belongs outside POST check
+    else:  
         form = UserRegisterForm()
 
     return render(request, 'register.html', {'form': form})
 
 @login_required
-def profile(request, username=None):
-    is_current_user = True 
+def password_change(request):
+    if request.method == "POST":
+        form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Your password was successfully updated! 🎉")
+            return redirect("profile")
+        else:
+            print(form.errors)  # <-- Add this line
+            target_user = request.user
+            u_form = UserUpdateForm(instance=target_user)
+            p_form = ProfileUpdateForm(instance=target_user.profile)
 
+            context = {
+                'target_user': target_user,
+                'u_form': u_form,
+                'p_form': p_form,
+                'password_form': form,
+                'is_current_user': True,
+                'followers_count': UserConnection.objects.filter(following=target_user).count(),
+                'following_count': UserConnection.objects.filter(follower=target_user).count(),
+                'is_following': False,
+                'events_count': Event.objects.filter(organizer=target_user).count(),
+            }
+            return render(request, 'profile.html', context)
+
+    return redirect("profile")
+
+@login_required
+def profile(request, username=None):
     if username:
         target_user = get_object_or_404(User, username=username)
-        is_current_user = (target_user == request.user) 
+        is_current_user = (target_user == request.user)
     else:
         target_user = request.user
+        is_current_user = True
 
+    # Followers / following counts, etc.
     followers_count = UserConnection.objects.filter(following=target_user).count()
     following_count = UserConnection.objects.filter(follower=target_user).count()
-    is_following = UserConnection.objects.filter(
-        follower=request.user,
-        following=target_user
-    ).exists()
-    event_count = Event.objects.filter(organizer=target_user).count() 
+    is_following = UserConnection.objects.filter(follower=request.user, following=target_user).exists()
+    events_count = Event.objects.filter(organizer=target_user).count()
 
+    # User & profile update forms
     u_form = None
     p_form = None
-
     if is_current_user:
-        if request.method == 'POST':
+        if request.method == 'POST' and 'update_profile' in request.POST:
             u_form = UserUpdateForm(request.POST, instance=request.user)
             p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
             if u_form.is_valid() and p_form.is_valid():
                 u_form.save()
                 p_form.save()
-                messages.success(request, f'Your account has been updated!')
+                messages.success(request, 'Your account has been updated!')
                 return redirect('profile')
         else:
             u_form = UserUpdateForm(instance=request.user)
             p_form = ProfileUpdateForm(instance=request.user.profile)
-    
+
+    # Password change form (for display only)
+    password_form = CustomPasswordChangeForm(user=request.user) if is_current_user else None
+
     context = {
         'target_user': target_user,
         'u_form': u_form,
         'p_form': p_form,
+        'password_form': password_form,
         'is_current_user': is_current_user,
         'is_following': is_following,
         'followers_count': followers_count,
         'following_count': following_count,
-        'events_count': event_count, 
+        'events_count': events_count,
     }
+
     return render(request, 'profile.html', context)
 
 class ListNotification(LoginRequiredMixin, ListView):

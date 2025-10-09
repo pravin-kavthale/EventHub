@@ -34,19 +34,18 @@
 
         <div class="row">
           <div class="col-md-12">
-            <div class="card"> 
+            <div class="card">
 
               <div class="card-header bg-light border-0 p-4">
                   <div class="d-flex align-items-center">
-                      
-                      <!-- Profile Image with Modal Trigger -->
+
                       <img class="profile-user-img img-fluid img-circle"
                            style="height: 90px; width: 90px; border: 3px solid #ced4da; cursor: pointer;"
                            src="{{ target_user.profile.image.url }}"
                            alt="{{ target_user.username }} profile picture"
-                           data-toggle="modal" 
+                           data-toggle="modal"
                            data-target="#imageModal">
-                            
+
                       <div class="user-details flex-grow-1 ml-3 ml-md-4">
                           <h2 class="profile-username m-0">{{ target_user.username }}</h2>
                           {%if not target_user.profile.is_private or target_user == request.user or target_user.is_superuser %}
@@ -66,21 +65,21 @@
 
                       <div class="row text-center flex-shrink-0" style="min-width: 300px;">
                           <div class="col-4 border-right" style="cursor: pointer;">
-                              <button class="description-block btn p-0 text-dark" 
-                                          data-toggle="modal" 
-                                          data-target="#followersModal"
-                                          style="border: none; background: none;">
-                                  <h5 class="description-header" style="font-size: 1.6rem;">{{ followers_count }}</h5>
-                                  <span class="description-text text-uppercase font-weight-bold">FOLLOWERS</span>
+                              <button class="description-block btn p-0 text-dark"
+                                              data-toggle="modal"
+                                              data-target="#followersModal"
+                                              style="border: none; background: none;">
+                                      <h5 class="description-header" style="font-size: 1.6rem;">{{ followers_count }}</h5>
+                                      <span class="description-text text-uppercase font-weight-bold">FOLLOWERS</span>
                               </button>
                           </div>
                           <div class="col-4 border-right" style="cursor: pointer;">
-                              <button class="description-block btn p-0 text-dark" 
-                                          data-toggle="modal" 
-                                          data-target="#followingModal"
-                                          style="border: none; background: none;">
-                                  <h5 class="description-header" style="font-size: 1.6rem;">{{ following_count }}</h5>
-                                  <span class="description-text text-uppercase font-weight-bold">FOLLOWING</span>
+                              <button class="description-block btn p-0 text-dark"
+                                              data-toggle="modal"
+                                              data-target="#followingModal"
+                                              style="border: none; background: none;">
+                                      <h5 class="description-header" style="font-size: 1.6rem;">{{ following_count }}</h5>
+                                      <span class="description-text text-uppercase font-weight-bold">FOLLOWING</span>
                               </button>
                           </div>
                           <div class="col-4">
@@ -90,8 +89,8 @@
                               </div>
                           </div>
                       </div>
-                      
-                      {%if not target_user.profile.is_private or target_user == request.user or target_user.is_superuser %}
+
+                      {%if target_user == request.user and not target_user.profile.is_private or target_user.is_superuser %}
                           <form action="{% url 'logout' %}" method="post" class="m-0 p-0 ml-4">
                               {% csrf_token %}
                               <button type="submit" class="btn btn-danger">
@@ -99,7 +98,7 @@
                                   Logout
                               </button>
                           </form>
-                      {% else %}
+                      {% elif target_user != request.user %}
                           <form action="{% url 'connect_user' user_id=target_user.id %}" method="post" class="m-0 p-0 ml-4">
                               {% csrf_token %}
                               <button type="submit" class="btn btn-{{ is_following|yesno:'secondary,primary' }}">
@@ -115,66 +114,62 @@
                       {% endif %}
                       </div>
               </div>
-              
+
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  
+
                   <li class="nav-item"><a class="nav-link active" href="#details" data-toggle="tab">Details</a></li>
-                  
-                  {% if is_current_user %}
+
+                  {% if target_user == request.user %}
                     <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
                   {% endif %}
                 </ul>
               </div>
-              
+
               <div class="card-body">
                 <div class="tab-content">
                   <div class="active tab-pane" id="details">
-  <div class="row">
-    <!-- Left Column -->
-    <div class="col-md-6">
-      <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
-      <p class="text-muted">{{ target_user.profile.FullName|default:target_user.username }}</p>
-      <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
+        <p class="text-muted">{{ target_user.profile.FullName|default:target_user.username }}</p>
+        <hr>
 
-      <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
-      {% if is_current_user %}
-        <p class="text-muted">{{ target_user.email }}</p>
-      {% else %}
-        <p class="text-muted">Private</p>
-      {% endif %}
-      <hr>
+        <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+        {% if target_user == request.user or target_user.is_superuser %}
+          <p class="text-muted">{{ target_user.email }}</p>
+        {% else %}
+          <p class="text-muted">Private</p>
+        {% endif %}
+        <hr>
 
-      <strong><i class="fas fa-quote-left mr-1"></i> Bio</strong>
-      <p class="text-muted">{{ target_user.profile.Bio|default:"No bio set yet." }}</p>
-      <hr>
+        <strong><i class="fas fa-quote-left mr-1"></i> Bio</strong>
+        <p class="text-muted">{{ target_user.profile.Bio|default:"No bio set yet." }}</p>
+        <hr>
 
-      <strong><i class="fas fa-calendar mr-1"></i> Date Joined</strong>
-      <p class="text-muted">{{ target_user.date_joined|date:"M. d, Y, h:i a." }}</p>
-    </div>
+        <strong><i class="fas fa-calendar mr-1"></i> Date Joined</strong>
+        <p class="text-muted">{{ target_user.date_joined|date:"M. d, Y, h:i a." }}</p>
+      </div>
 
-    <!-- Right Column -->
-    <div class="col-md-6">
-      <strong><i class="fas fa-birthday-cake mr-1"></i> Age</strong>
-      <p class="text-muted">{{ target_user.profile.Age|default:"-" }}</p>
-      <hr>
+      <div class="col-md-6">
+        <strong><i class="fas fa-birthday-cake mr-1"></i> Age</strong>
+        <p class="text-muted">{{ target_user.profile.Age|default:"-" }}</p>
+        <hr>
 
-      <strong><i class="fas fa-venus-mars mr-1"></i> Gender</strong>
-      <p class="text-muted">{{ target_user.profile.Gender|default:"-" }}</p>
-      <hr>
+        <strong><i class="fas fa-venus-mars mr-1"></i> Gender</strong>
+        <p class="text-muted">{{ target_user.profile.Gender|default:"-" }}</p>
+        <hr>
 
-      <strong><i class="fas fa-phone mr-1"></i> Mobile Number</strong>
-      <p class="text-muted">{{ target_user.profile.MobileNumber|default:"-" }}</p>
+        <strong><i class="fas fa-phone mr-1"></i> Mobile Number</strong>
+        <p class="text-muted">{{ target_user.profile.MobileNumber|default:"-" }}</p>
+      </div>
     </div>
   </div>
-</div>
 
 
-
-                  {% if is_current_user %}
+                  {% if target_user == request.user %}
                   <div class="tab-pane" id="settings">
 
-                    <!-- Update Profile Card -->
                     <div class="card card-outline card-primary mb-4">
                       <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title m-0">Update Profile</h3>
@@ -187,8 +182,8 @@
                         <div class="card-body">
                           <form class="form-horizontal" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
+                            <input type="hidden" name="update_profile" value="1">
 
-                            <!-- Username -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Username</label>
                               <div class="col-sm-10">
@@ -199,7 +194,6 @@
                               </div>
                             </div>
 
-                            <!-- Email -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Email</label>
                               <div class="col-sm-10">
@@ -212,7 +206,6 @@
 
                             <hr>
 
-                            <!-- Full Name (Single Line) -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">FullName</label>
                               <div class="col-sm-10">
@@ -223,7 +216,6 @@
                               </div>
                             </div>
 
-                            <!-- Bio -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Bio</label>
                               <div class="col-sm-10">
@@ -234,7 +226,6 @@
                               </div>
                             </div>
 
-                            <!-- Age -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Age</label>
                               <div class="col-sm-10">
@@ -245,7 +236,6 @@
                               </div>
                             </div>
 
-                            <!-- Gender -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Gender</label>
                               <div class="col-sm-10">
@@ -256,7 +246,6 @@
                               </div>
                             </div>
 
-                            <!-- Mobile Number -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Mobile Number</label>
                               <div class="col-sm-10">
@@ -267,7 +256,6 @@
                               </div>
                             </div>
 
-                            <!-- Profile Image -->
                             <div class="form-group row">
                               <label class="col-sm-2 col-form-label">Profile Image</label>
                               <div class="col-sm-10">
@@ -278,7 +266,6 @@
                               </div>
                             </div>
 
-                            <!-- Submit -->
                             <div class="form-group row">
                               <div class="offset-sm-2 col-sm-10">
                                 <button type="submit" class="btn btn-success">Save Changes</button>
@@ -290,7 +277,6 @@
                       </div>
                     </div>
 
-                    <!-- Privacy Settings Card -->
                     <div class="card card-outline card-warning">
                       <div class="card-header">
                         <h3 class="card-title">Privacy Settings</h3>
@@ -299,12 +285,12 @@
                         <form action="{% url 'Profile_Privacy' target_user.id %}" method="post" id="privacyForm">
                           {% csrf_token %}
                           <div class="custom-control custom-switch">
-                            <input type="checkbox" 
-                                   class="custom-control-input" 
-                                   id="privacySwitch"
-                                   name="is_private"
-                                   {% if target_user.profile.is_private %}checked{% endif %}
-                                   onchange="document.getElementById('privacyForm').submit();">
+                            <input type="checkbox"
+                                          class="custom-control-input"
+                                          id="privacySwitch"
+                                          name="is_private"
+                                          {% if target_user.profile.is_private %}checked{% endif %}
+                                          onchange="document.getElementById('privacyForm').submit();">
                             <label class="custom-control-label" for="privacySwitch">
                               {% if target_user.profile.is_private %}
                                 Profile is Private
@@ -316,35 +302,56 @@
                         </form>
                       </div>
                     </div>
-                    <!-- Password Reset Card -->
-                    <div class="card card-outline card-info mt-4">
-                      <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title m-0">Password Reset</h3>
-                        <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#passwordResetForm" aria-expanded="false" aria-controls="passwordResetForm">
-                          <i class="fas fa-chevron-down"></i>
-                        </button>
-                      </div>
+<div class="card card-outline card-danger mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title m-0">Change Password</h3>
+    <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#changePasswordForm" aria-expanded="false" aria-controls="changePasswordForm">
+      <i class="fas fa-chevron-down"></i>
+    </button>
+  </div>
 
-                      <div id="passwordResetForm" class="collapse">
-                        <div class="card-body">
-                          <p>Reset your password by entering your email address. A reset link will be sent to your inbox.</p>
+  <div id="changePasswordForm" class="collapse">
+    <div class="card-body">
+      <form method="post" action="{% url 'password_change' %}">
+        {% csrf_token %}
+        {{ password_form.non_field_errors }}
 
-                          <form method="post" action="{% url 'password_reset' %}">
-                            {% csrf_token %}
-                            <div class="form-group">
-                              <label for="id_email">Email</label>
-                              <input type="email" name="email" class="form-control" id="id_email" value="{{ request.user.email }}" readonly>
-                            </div>
-                            <button type="submit" class="btn btn-info mt-2">
-                              <i class="fas fa-envelope me-1"></i> Send Reset Link
-                            </button>
-                          </form>
-                        </div>
-                      </div>
+        <div class="form-group">
+          {{ password_form.old_password.label_tag }}
+          {{ password_form.old_password }}
+          {% for error in password_form.old_password.errors %}
+            <p class="text-danger small">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ password_form.new_password1.label_tag }}
+          {{ password_form.new_password1 }}
+          {% for error in password_form.new_password1.errors %}
+            <p class="text-danger small">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ password_form.new_password2.label_tag }}
+          {{ password_form.new_password2 }}
+          {% for error in password_form.new_password2.errors %}
+            <p class="text-danger small">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn btn-danger">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
                     </div>
-                  </div>
                   {% endif %}
-                  
+
                 </div>
               </div>
             </div>
@@ -358,7 +365,6 @@
   {% include 'base/footer.html' %}
 </div>
 
-<!-- Followers Modal -->
 <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -378,7 +384,6 @@
   </div>
 </div>
 
-<!-- Following Modal -->
 <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -398,12 +403,11 @@
   </div>
 </div>
 
-<!-- Profile Image Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content bg-transparent border-0 shadow-none">
       <div class="modal-body p-0 text-center">
-        <img src="{{ target_user.profile.image.url }}" 
+        <img src="{{ target_user.profile.image.url }}"
              id="zoomImage"
              class="img-fluid rounded"
              style="max-height: 80vh; transition: transform 0.3s ease-in-out; cursor: zoom-in;">
@@ -417,32 +421,37 @@
 <script>
 $(document).ready(function() {
     const targetUserId = "{{ target_user.id }}";
-   
-    const followersUrl = "{% url 'list_followers' user_id=0 %}".replace('0', targetUserId);
-    const followingsUrl = "{% url 'list_followings' user_id=0 %}".replace('0', targetUserId);
 
-    function loadModalContent(url, bodyId) {
-        const $modalBody = $(`#${bodyId}`);
-        $modalBody.html('<p class="text-center text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Loading list...</p>');
+    // Only set up URLs if targetUserId is available (i.e., not an empty string or 0 if that's possible)
+    if (targetUserId) {
+        // Replace '0' placeholder with the actual user ID
+        const followersUrl = "{% url 'list_followers' user_id=0 %}".replace('0', targetUserId);
+        const followingsUrl = "{% url 'list_followings' user_id=0 %}".replace('0', targetUserId);
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(data) {
-                $modalBody.html(data);
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error loading connection list:", error);
-                $modalBody.html('<p class="text-center text-danger">Error loading list. Check your URL configuration and templates.</p>');
-            }
+        function loadModalContent(url, bodyId) {
+            const $modalBody = $(`#${bodyId}`);
+            $modalBody.html('<p class="text-center text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Loading list...</p>');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    $modalBody.html(data);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error loading connection list:", error);
+                    $modalBody.html('<p class="text-center text-danger">Error loading list. Check your URL configuration and templates.</p>');
+                }
+            });
+        }
+        $('#followersModal').on('show.bs.modal', function (e) {
+            loadModalContent(followersUrl, 'followers-modal-body');
+        });
+        $('#followingModal').on('show.bs.modal', function (e) {
+            loadModalContent(followingsUrl, 'following-modal-body');
         });
     }
-    $('#followersModal').on('show.bs.modal', function (e) {
-        loadModalContent(followersUrl, 'followers-modal-body');
-    });
-    $('#followingModal').on('show.bs.modal', function (e) {
-        loadModalContent(followingsUrl, 'following-modal-body');
-    });
+
 
     // Zoom effect for profile image
     let zoomed = false;
@@ -458,6 +467,7 @@ $(document).ready(function() {
         }
     });
 });
+
 </script>
 </body>
 </html>
