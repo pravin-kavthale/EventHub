@@ -36,7 +36,6 @@
                 <i class="fas fa-plus-circle me-1"></i> Create Event
             </a>
         </div>
-
     </div>
 
     <div class="row g-4">
@@ -87,6 +86,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
 
+                        <!-- Like Button -->
                         <form action="{% url 'like_event' event.pk %}" method="post" class="d-inline me-2">
                             {% csrf_token %}
                             <button type="submit" style="background:none; border:none;" class="p-0 m-0">
@@ -99,15 +99,23 @@
                             <span class="ms-1 small text-muted">{{ event.like_set.count }}</span>
                         </form>
 
+                        <!-- Comment Button -->
                         <a href="{% url 'comment_event' event.pk %}" class="btn p-0 m-0 d-flex align-items-center text-decoration-none">
                             <i class="far fa-comment" style="color:gray; font-size:1.3rem;"></i>
                             <span class="ms-1 small text-muted">{{ event.comments.count }}</span>
                         </a>
 
+                        <!-- View Event -->
                         <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-eye"></i> View
                         </a>
 
+                        <!-- Chatroom Button -->
+                        <a href="{% url 'chat_room' event.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-comments"></i> Chatroom
+                        </a>
+
+                        <!-- Join/Leave Event -->
                         {% if request.user != event.organizer %}
                         <form action="{% url 'join_event' event.id %}" method="post" class="d-inline">
                             {% csrf_token %}
@@ -121,6 +129,7 @@
                         </form>
                         {% endif %}
 
+                        <!-- Organizer Dropdown -->
                         {% if request.user == event.organizer %}
                         <div class="dropdown">
                             <button class="btn p-0 m-0 text-secondary" type="button" id="dropdownMenu{{ event.pk }}" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: transparent;">
@@ -140,7 +149,7 @@
                                 <li>
                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#participantsModal{{ event.pk }}">
                                         <i class="fas fa-users me-2"></i>View Participants
-                                    </a>    
+                                    </a>    
                                 </li>
                             </ul>
                         </div>
@@ -151,6 +160,7 @@
             </div>
         </div>
 
+        <!-- Participants Modal -->
         <div class="modal fade" id="participantsModal{{ event.pk }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
@@ -189,6 +199,7 @@
         {% endfor %}
     </div>
 
+    <!-- Pagination -->
     <div class="d-flex justify-content-center mt-4">
         <nav>
             <ul class="pagination">

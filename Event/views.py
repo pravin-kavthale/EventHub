@@ -248,23 +248,50 @@ class getEventAttendance(LoginRequiredMixin,UserPassesTestMixin,ListView):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user == self.event.organizer
 
-class ChatRoomView(LoginRequiredMixin,View):
-    def get(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
-        chatroom,create=ChatRoom.objects.get_or_create(event=event)
-        messages=chatroom.messages.all()
-        return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
-    def post(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
-        chatroom,create=ChatRoom.objects.get_or_create(event=event)
-        content=request.POST.get('content')
-        if content:
-            messages=chatroom.messages.create(user=request.user,content=content)
-            return redirect('chatroom',pk=pk)
-        messages=chatroom.messages.all()
-        return render(request,'Event/chatroom.html',{'chatroom':chatroom,'messages':messages,'event':event})
+class ChatRoomView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        chatroom, created = ChatRoom.objects.get_or_create(event=event)
 
-# Comment Views 
+        # Check access
+        can_access = request.user.is_superuser or request.user == event.organizer or request.user in event.participants.all()
+
+        messages = chatroom.messages.all() if can_access else None
+
+        return render(request, 'Event/chatroom.html', {
+            'chatroom': chatroom,
+            'messages': messages,
+            'event': event,
+            'can_access': can_access
+        })
+
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        chatroom, created = ChatRoom.objects.get_or_create(event=event)
+        can_access = request.user.is_superuser or request.user == event.organizer or request.user in event.participants.all()
+
+        if not can_access:
+            return render(request, 'Event/chatroom.html', {
+                'chatroom': chatroom,
+                'messages': None,
+                'event': event,
+                'can_access': False
+            })
+
+        content = request.POST.get('content')
+        if content:
+            chatroom.messages.create(user=request.user, content=content)
+            return redirect('chat_room', pk=pk)
+
+        messages = chatroom.messages.all()
+        return render(request, 'Event/chatroom.html', {
+            'chatroom': chatroom,
+            'messages': messages,
+            'event': event,
+            'can_access': True
+        })
+    
+
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
 

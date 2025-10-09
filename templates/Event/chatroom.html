@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Chatroom - {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4 text-dark">{{ event.name }} Chatroom</h2>
+
+    {% if can_access %}
+        <!-- Messages section -->
+        <div id="chat-messages" class="p-3 rounded shadow-sm" 
+             style="height: 450px; overflow-y: auto; background-color: #f8f9fa; border: 1px solid #ddd;">
+            
+            {% for msg in messages %}
+                <div class="d-flex mb-3 {% if msg.user == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                    <div class="p-3" 
+                         style="
+                            max-width: 70%;
+                            border-radius: 15px;
+                            background-color: {% if msg.user == request.user %}#d1e7ff{% else %}#e9ecef{% endif %};
+                            color: #212529;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                         ">
+                        <strong>{{ msg.user.username }}</strong><br>
+                        {{ msg.content }}
+                        <br>
+                        <small style="font-size: 0.75rem; color: #6c757d;">
+                            {{ msg.created_at|date:"M d, Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted text-center">No messages yet. Start the conversation!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Message input form -->
+        <form method="POST" class="d-flex mt-3">
+            {% csrf_token %}
+            <input type="text" name="content" placeholder="Type your message..." 
+                   class="form-control me-2" 
+                   style="border-radius: 25px; padding: 0.5rem 1rem; border: 1px solid #ced4da;" required>
+            <button type="submit" class="btn btn-primary" 
+                    style="border-radius: 25px; padding: 0.5rem 1.5rem; box-shadow: 0 2px 5px rgba(0,123,255,0.3);">
+                Send
+            </button>
+        </form>
+
+        <!-- Auto-scroll to bottom -->
+        <script>
+            const chatBox = document.getElementById("chat-messages");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        </script>
+
+    {% else %}
+    <div class="alert alert-warning text-center p-4">
+        <p>You have not joined this event yet. Please join the event to access the chat.</p>
+        <form method="POST" action="{% url 'join_event' event.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" 
+                    style="border-radius: 25px; padding: 0.5rem 1.5rem; font-weight: 500;">
+                Join Event
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+
+</div>
+{% endblock %}
