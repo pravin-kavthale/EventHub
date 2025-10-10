@@ -325,24 +325,22 @@ class CommentView(LoginRequiredMixin, View):
                         receiver=parent_comment.user,
                         event=event,
                         message=f"{request.user.username} replied to your comment: {parent_comment.content}",
-                        action_url=reverse('event_detail', kwargs={'pk': event.pk}) + f"#comment-{new_comment.id}",
+                        action_url = reverse('comment_event', kwargs={'pk': event.pk}) + f"?highlight={new_comment.id}",
                         type="Comment"
                     )
             else:
-                # New top-level comment
                 new_comment = Comment.objects.create(
                     user=request.user,
                     content=content,
                     event=event
                 )
-                # Notify the event organizer
                 if event.organizer != request.user:
                     Notification.objects.create(
                         sender=request.user,
                         receiver=event.organizer,
                         event=event,
                         message=f"{request.user.username} commented on your event {event.title}",
-                        action_url=reverse('event_detail', kwargs={'pk': event.pk}) + f"#comment-{new_comment.id}",
+                        action_url = reverse('comment_event', kwargs={'pk': event.pk}) + f"?highlight={new_comment.id}",
                         type="Comment"
                     )
 

@@ -1,4 +1,4 @@
-<li class="list-group-item">
+<li class="list-group-item" id="comment-{{ comment.id }}">
     <!-- Top row: username + buttons -->
     <div class="d-flex justify-content-between align-items-start">
         <div class="d-flex align-items-center">
@@ -74,17 +74,24 @@
     flex-wrap: nowrap;   /* keep input + buttons on one line */
     gap: 0.5rem;         /* spacing between input and buttons */
 }
+.highlighted-comment {
+    background-color: #fff3cd !important; 
+    transition: background-color 1s ease;
+}
 </style>
 
-<!-- JavaScript for inline edit toggle -->
-<script>
-function editComment(commentId) {
-    document.getElementById("comment-text-" + commentId).style.display = "none";
-    document.getElementById("edit-form-" + commentId).style.display = "flex";
-}
 
-function cancelEdit(commentId) {
-    document.getElementById("comment-text-" + commentId).style.display = "block";
-    document.getElementById("edit-form-" + commentId).style.display = "none";
-}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const highlightId = params.get("highlight");
+    if (highlightId) {
+        const target = document.getElementById(`comment-${highlightId}`);
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+            target.classList.add("highlighted-comment");
+            setTimeout(() => target.classList.remove("highlighted-comment"), 3000);
+        }
+    }
+});
 </script>
