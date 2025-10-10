@@ -12,12 +12,36 @@
                     <h4 class="mb-0">Create New Batch</h4>
                 </div>
                 <div class="card-body">
-                    <form method="get">
+                    <form method="post" enctype="multipart/form-data" class="row g-3">
                         {% csrf_token %}
-                        {{ form.as_p }}
 
-                        <div class="mt-3 text-end">
-                            <a href="{% url 'list_batch' %}" class="btn btn-secondary">Cancel</a>
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label for="id_name" class="form-label">Batch Name</label>
+                            <input type="text" name="name" class="form-control" id="id_name" placeholder="Enter batch name" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea name="description" class="form-control" id="id_description" rows="4" placeholder="Enter batch description"></textarea>
+                        </div>
+
+                        <!-- Required Events -->
+                        <div class="col-12">
+                            <label for="id_required_events" class="form-label">Required Events</label>
+                            <input type="number" name="required_events" class="form-control" id="id_required_events" min="0" placeholder="Enter required events">
+                        </div>
+
+                        <!-- Image -->
+                        <div class="col-12">
+                            <label for="id_image" class="form-label">Batch Image</label>
+                            <input type="file" name="image" class="form-control" id="id_image" accept="image/*">
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12 text-end mt-3">
+                            <a href="{% url 'list_batch' %}" class="btn btn-secondary me-2">Cancel</a>
                             <button type="submit" class="btn btn-success">Create Batch</button>
                         </div>
                     </form>

@@ -41,7 +41,8 @@ class Batch(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField(blank=True)
     required_events=models.PositiveIntegerField(unique=True,default=0)
-
+    image=models.ImageField(upload_to='batch_images/',null=True,blank=True)
+    
     def __str__(self):
         return f"{self.name} needs (≥{self.event_threshold} events)"
 

@@ -3,67 +3,79 @@
 {% block breadcrumb %}My Batches{% endblock breadcrumb %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container mt-4">
 
-    <!-- Summary Box -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card text-white shadow-lg border-0" style="background-color: #0dcaf0;">
-                <div class="card-body">
-                    <h3>{{ user_batches.count }}</h3>
-                    <p>My Batches</p>
+    <h3 class="mb-4">My Earned Batches</h3>
+
+    {% if user_batches %}
+    <div class="row g-4 justify-content-center">
+        {% for ub in user_batches %}
+        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
+            <div class="batch-flip">
+                <div class="flip-inner">
+                    <!-- Front -->
+                    <div class="flip-front">
+                        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image">
+                    </div>
+                    <!-- Back (same image) -->
+                    <div class="flip-back">
+                        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image">
+                    </div>
                 </div>
-                <div class="card-footer text-center">
-                    <a href="{% url 'list_batch' %}" class="text-white fw-bold text-decoration-none">
-                        View All Batches <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
+                <h5 class="mt-3">{{ ub.batch.name }}</h5>
             </div>
         </div>
+        {% endfor %}
     </div>
-
-    <!-- Batch Table -->
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center"
-             style="background-color: #0dcaf0; color: #fff;">
-            <h5 class="mb-0">My Assigned Batches</h5>
-        </div>
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Batch Name</th>
-                        <th>Description</th>
-                        <th>Required Events</th>
-                        <th>Earned At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ub in user_batches %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ ub.batch.name }}</td>
-                        <td>{{ ub.batch.description|default:"—" }}</td>
-                        <td>{{ ub.batch.required_events }}</td>
-                        <td>{{ ub.earned_at|date:"d M Y H:i" }}</td>
-                        <td>
-                            <a href="{% url 'detail_batch' ub.batch.pk %}" 
-                               class="btn btn-info btn-sm">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">No batches assigned to you.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    {% else %}
+    <div class="alert alert-info">You haven't earned any batches yet.</div>
+    {% endif %}
 
 </div>
+
+<style>
+/* Flip container */
+.batch-flip {
+    perspective: 1000px;
+    display: inline-block;
+}
+
+/* Inner container that rotates */
+.flip-inner {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    transform-style: preserve-3d;
+    animation: flip 4s infinite linear;
+    margin: 0 auto;
+}
+
+/* Front & back faces */
+.flip-front, .flip-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+/* Circle image */
+.batch-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Back face rotated */
+.flip-back {
+    transform: rotateY(180deg);
+}
+
+/* Continuous flip animation */
+@keyframes flip {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+}
+</style>
 {% endblock content %}
