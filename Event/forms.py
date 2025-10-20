@@ -5,10 +5,13 @@ from .models import Category,Comment  # use Category, not EventCategory
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'description', 'favicon']  # slug is auto
+        fields = ['name', 'description', 'favicon']  
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter category description'}),
             'name': forms.TextInput(attrs={'placeholder': 'Enter category name'}),
+            'favicon': forms.ClearableFileInput(attrs={
+                'class': 'form-control-file',
+            }),
         }
 class commentForm(forms.ModelForm):
     class Meta:

@@ -3,79 +3,79 @@
 {% block breadcrumb %}My Batches{% endblock breadcrumb %}
 
 {% block content %}
-<div class="container mt-4">
-
-    <h3 class="mb-4">My Earned Batches</h3>
+<div class="container-fluid py-5 batch-display-container">
 
     {% if user_batches %}
-    <div class="row g-4 justify-content-center">
+    {# Changed row to use a custom modern grid class #}
+    <div class="modern-batch-grid">
         {% for ub in user_batches %}
-        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
-            <div class="batch-flip">
-                <div class="flip-inner">
-                    <!-- Front -->
-                    <div class="flip-front">
-                        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image">
-                    </div>
-                    <!-- Back (same image) -->
-                    <div class="flip-back">
-                        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image">
-                    </div>
-                </div>
-                <h5 class="mt-3">{{ ub.batch.name }}</h5>
-            </div>
-        </div>
+        {# Outputting the image directly with the new modern class #}
+        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image-modern">
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-info">You haven't earned any batches yet.</div>
+    {# Updated alert for better contrast on a dark background #}
+    <div class="alert alert-dark text-center alert-no-batches">
+        You haven't earned any batches yet.
+    </div>
     {% endif %}
 
 </div>
 
 <style>
-/* Flip container */
-.batch-flip {
-    perspective: 1000px;
-    display: inline-block;
+/* 1. Set a dark background for the content area to make the batches stand out */
+.batch-display-container {
+    /* Deep charcoal gray background (Hex: #212529) */
+    background-color: #212529; 
+    min-height: 100vh;
+    padding-top: 50px !important;
+    padding-bottom: 50px !important;
+    border-radius: 8px; /* Subtle modern rounding */
 }
 
-/* Inner container that rotates */
-.flip-inner {
-    position: relative;
-    width: 150px;
+/* Ensure the main body background doesn't interfere */
+body {
+    background-color: #f4f6f9 !important; 
+}
+
+/* 2. Modern CSS Grid Layout */
+.modern-batch-grid {
+    display: grid;
+    /* Responsive columns: minimum size 150px, adjust to fit */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+    justify-items: center;
+    gap: 40px; 
+    padding: 20px;
+}
+
+/* 3. Modern Image Styling - Clean and Ready to Glow */
+.batch-image-modern {
+    width: 150px; 
     height: 150px;
-    transform-style: preserve-3d;
-    animation: flip 4s infinite linear;
-    margin: 0 auto;
+    object-fit: contain; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    
+    /* Ensure the badge itself is the focus, no extra borders */
+    border-radius: 0; 
 }
 
-/* Front & back faces */
-.flip-front, .flip-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
+/* 4. Enhanced Modern Hover Effect (Subtle 3D Lift and Glow) */
+.batch-image-modern:hover {
+    transform: scale(1.15) translateY(-5px); /* Lift and zoom */
+    
+    /* Soft white/blue glow effect */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4), 
+                0 0 5px rgba(0, 191, 255, 0.6); 
+    z-index: 10;
 }
 
-/* Circle image */
-.batch-image {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
+/* 5. Styling the Alert Message */
+.alert-no-batches {
+    background-color: #343a40 !important; /* Darker than container background */
+    color: #fff !important;
+    border: 1px solid #495057 !important;
 }
 
-/* Back face rotated */
-.flip-back {
-    transform: rotateY(180deg);
-}
-
-/* Continuous flip animation */
-@keyframes flip {
-    0%   { transform: rotateY(0deg); }
-    50%  { transform: rotateY(180deg); }
-    100% { transform: rotateY(360deg); }
-}
 </style>
 {% endblock content %}
