@@ -1,45 +1,201 @@
 {% extends 'base/base.html' %}
 {% block title %}Create Event{% endblock title %}
 {% block breadcrumb %}Create Event{% endblock breadcrumb %}
-{% load crispy_forms_tags %}
 
 {% block content %}
+
+<style>
+    body {
+        background: linear-gradient(140deg, #b088bb, #d3b5c6) !important;
+    }
+
+    .event-wrapper {
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 0 35px rgba(0,0,0,0.35);
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .event-left-panel {
+        background: linear-gradient(150deg, #A88CF7, #a77fff);
+        padding: 55px 25px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .event-left-panel img {
+        width: 80%;
+        margin-bottom: 18px;
+    }
+
+    .event-right-panel { 
+        background: #ffffff; 
+    }
+
+    .event-header-box {
+        background: #fff;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 18px 25px;
+    }
+
+    .event-header-box h5 {
+        color: #1d1b27;
+        font-weight: 600;
+    }
+
+    /* ---- FIXED INPUT ALIGNMENT ---- */
+    .event-form-container input,
+    .event-form-container select,
+    .event-form-container textarea {
+        background: #f8f6fb !important;
+        border: 1px solid #d8cdec !important;
+        border-radius: 10px !important;
+        padding: 8px 14px !important;        /* reduced vertical padding */
+        line-height: 1.4 !important;         /* centers text */
+        height: 44px !important;             /* fixed height for perfect alignment */
+        color: #2c2335 !important;
+    }
+
+    textarea.event-form-textarea {
+        height: auto !important;
+        line-height: 1.5 !important;
+        padding: 12px 14px !important;
+    }
+
+    /* ---- FIX SELECT CATEGORY FIX ---- */
+    .event-form-container select {
+        appearance: none !important;
+        background-position: right 14px center !important;
+    }
+
+    /* ---- FIX CHOOSE IMAGE BUTTON ---- */
+    input[type="file"] {
+        padding: 6px 10px !important;
+        height: auto !important;
+        line-height: normal !important;
+    }
+
+    .btn-create-event {
+        background: #ab5cff;
+        color: white;
+        font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: none;
+    }
+
+    .btn-cancel-event {
+        background: #ece8f6;
+        color: #3d2c50;
+        font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: none;
+    }
+</style>
+
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow-lg border-0">
-                
-                <!-- Header -->
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar-plus me-2"></i>Create Event
-                    </h5>
-                    <a href="{% url 'event_list' %}" class="btn btn-light btn-sm">
-                        <i class="fas fa-list me-1"></i> Event List
-                    </a>
+        <div class="col-lg-10">
+            <div class="row g-0 event-wrapper">
+
+                <!-- LEFT PANEL -->
+                <div class="col-md-4 event-left-panel">
+                    <img src="/media/event_illustration_new.png" alt="Event Illustration">
+                    <h4 class="fw-semibold">Create Your Event</h4>
+                    <p class="small">Organize details, choose category, and publish listings.</p>
                 </div>
 
-                <!-- Body -->
-                <div class="card-body bg-light">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            {{ form|crispy }}
-                        </div>
+                <!-- RIGHT PANEL -->
+                <div class="col-md-8 event-right-panel">
 
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check-circle me-1"></i> Create
-                            </button>
-                            <a href="{% url 'event_list' %}" class="btn btn-secondary">
-                                <i class="fas fa-times me-1"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
+                    <div class="event-header-box">
+                        <h5><i class="fas fa-calendar-plus text-primary me-2"></i>Create Event</h5>
+                    </div>
+
+                    <div class="card-body event-form-container">
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="row g-4 mb-4">
+
+                                <!-- Title -->
+                                <div class="col-md-12">
+                                    <label class="form-label">Event Title</label>
+                                    <input type="text" name="title" class="form-control" placeholder="Enter event title" required>
+                                </div>
+
+                                <!-- Category -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Category</label>
+                                    <select name="category" class="form-control" required>
+                                        <option value="" disabled selected>Select category</option>
+                                        {% for cat in categories %}
+                                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Location</label>
+                                    <input type="text" name="location" class="form-control" placeholder="Enter location" required>
+                                </div>
+
+                                <!-- Date -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Event Date</label>
+                                    <input type="date" name="date" class="form-control" required>
+                                </div>
+
+                                <!-- Start Time -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" name="start_time" class="form-control" required>
+                                </div>
+
+                                <!-- End Time -->
+                                <div class="col-md-6">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" name="end_time" class="form-control" required>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-md-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" rows="4" class="form-control event-form-textarea" placeholder="Enter event description" required></textarea>
+                                </div>
+
+                                <!-- Image -->
+                                <div class="col-md-12">
+                                    <label class="form-label">Event Banner</label>
+                                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{% url 'event_list' %}" class="btn-cancel-event">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn-create-event">
+                                    <i class="fas fa-check-circle me-2"></i>Create
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 </div>
+
 {% endblock content %}

@@ -23,6 +23,10 @@ class CreateEvent(CreateView):
     def form_valid(self,form):
         form.instance.organizer=self.request.user
         return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
 
 class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
