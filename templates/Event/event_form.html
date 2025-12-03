@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
-{% block title %}Create Event{% endblock title %}
-{% block breadcrumb %}Create Event{% endblock breadcrumb %}
+{% block title %}{{ view.object.pk|yesno:"Update Event,Create Event" }}{% endblock title %}
+{% block breadcrumb %}{{ view.object.pk|yesno:"Update Event,Create Event" }}{% endblock breadcrumb %}
 
 {% block content %}
 
@@ -8,14 +8,12 @@
     body {
         background: linear-gradient(140deg, #b088bb, #d3b5c6) !important;
     }
-
     .event-wrapper {
         border-radius: 22px;
         overflow: hidden;
         box-shadow: 0 0 35px rgba(0,0,0,0.35);
         border: 1px solid rgba(255,255,255,0.12);
     }
-
     .event-left-panel {
         background: linear-gradient(150deg, #A88CF7, #a77fff);
         padding: 55px 25px;
@@ -26,14 +24,13 @@
         justify-content: center;
         align-items: center;
     }
+    .event-right-panel { 
+        background: #ffffff; 
+    }
 
     .event-left-panel img {
         width: 80%;
         margin-bottom: 18px;
-    }
-
-    .event-right-panel { 
-        background: #ffffff; 
     }
 
     .event-header-box {
@@ -47,36 +44,20 @@
         font-weight: 600;
     }
 
-    /* ---- FIXED INPUT ALIGNMENT ---- */
     .event-form-container input,
     .event-form-container select,
     .event-form-container textarea {
         background: #f8f6fb !important;
         border: 1px solid #d8cdec !important;
         border-radius: 10px !important;
-        padding: 8px 14px !important;        /* reduced vertical padding */
-        line-height: 1.4 !important;         /* centers text */
-        height: 44px !important;             /* fixed height for perfect alignment */
+        padding: 8px 14px !important;
+        height: 44px !important;
         color: #2c2335 !important;
     }
 
     textarea.event-form-textarea {
         height: auto !important;
-        line-height: 1.5 !important;
         padding: 12px 14px !important;
-    }
-
-    /* ---- FIX SELECT CATEGORY FIX ---- */
-    .event-form-container select {
-        appearance: none !important;
-        background-position: right 14px center !important;
-    }
-
-    /* ---- FIX CHOOSE IMAGE BUTTON ---- */
-    input[type="file"] {
-        padding: 6px 10px !important;
-        height: auto !important;
-        line-height: normal !important;
     }
 
     .btn-create-event {
@@ -98,6 +79,7 @@
     }
 </style>
 
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -106,15 +88,18 @@
                 <!-- LEFT PANEL -->
                 <div class="col-md-4 event-left-panel">
                     <img src="/media/event_illustration_new.png" alt="Event Illustration">
-                    <h4 class="fw-semibold">Create Your Event</h4>
-                    <p class="small">Organize details, choose category, and publish listings.</p>
+                    <h4 class="fw-semibold">{{ view.object.pk|yesno:"Update Your Event,Create Your Event" }}</h4>
+                    <p class="small">Manage all your event details easily.</p>
                 </div>
 
                 <!-- RIGHT PANEL -->
                 <div class="col-md-8 event-right-panel">
 
                     <div class="event-header-box">
-                        <h5><i class="fas fa-calendar-plus text-primary me-2"></i>Create Event</h5>
+                        <h5>
+                            <i class="fas fa-calendar-plus text-primary me-2"></i>
+                            {{ view.object.pk|yesno:"Update Event,Create Event" }}
+                        </h5>
                     </div>
 
                     <div class="card-body event-form-container">
@@ -124,19 +109,24 @@
 
                             <div class="row g-4 mb-4">
 
-                                <!-- Title -->
+                                <!-- Event Title -->
                                 <div class="col-md-12">
                                     <label class="form-label">Event Title</label>
-                                    <input type="text" name="title" class="form-control" placeholder="Enter event title" required>
+                                    <input type="text" name="title" class="form-control"
+                                           value="{{ form.instance.title }}"
+                                           placeholder="Enter the event name" required>
                                 </div>
 
                                 <!-- Category -->
                                 <div class="col-md-6">
                                     <label class="form-label">Category</label>
                                     <select name="category" class="form-control" required>
-                                        <option value="" disabled selected>Select category</option>
+                                        <option disabled>Select event category</option>
                                         {% for cat in categories %}
-                                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                            <option value="{{ cat.id }}"
+                                            {% if form.instance.category.id == cat.id %}selected{% endif %}>
+                                                {{ cat.name }}
+                                            </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -144,37 +134,57 @@
                                 <!-- Location -->
                                 <div class="col-md-6">
                                     <label class="form-label">Location</label>
-                                    <input type="text" name="location" class="form-control" placeholder="Enter location" required>
+                                    <input type="text" name="location" class="form-control"
+                                           value="{{ form.instance.location }}"
+                                           placeholder="Enter event location" required>
                                 </div>
 
                                 <!-- Date -->
                                 <div class="col-md-6">
                                     <label class="form-label">Event Date</label>
-                                    <input type="date" name="date" class="form-control" required>
+                                    <input type="date" id="eventDate" name="date"
+                                           class="form-control"
+                                           value="{{ form.instance.date|date:'Y-m-d' }}"
+                                           required>
                                 </div>
 
                                 <!-- Start Time -->
                                 <div class="col-md-6">
                                     <label class="form-label">Start Time</label>
-                                    <input type="time" name="start_time" class="form-control" required>
+                                    <input type="time" id="startTime" name="start_time"
+                                           class="form-control"
+                                           value="{{ form.instance.start_time|time:'H:i' }}"
+                                           required>
                                 </div>
 
                                 <!-- End Time -->
                                 <div class="col-md-6">
                                     <label class="form-label">End Time</label>
-                                    <input type="time" name="end_time" class="form-control" required>
+                                    <input type="time" id="endTime" name="end_time"
+                                           class="form-control"
+                                           value="{{ form.instance.end_time|time:'H:i' }}"
+                                           required>
                                 </div>
 
                                 <!-- Description -->
                                 <div class="col-md-12">
                                     <label class="form-label">Description</label>
-                                    <textarea name="description" rows="4" class="form-control event-form-textarea" placeholder="Enter event description" required></textarea>
+                                    <textarea name="description"
+                                              rows="4"
+                                              class="form-control event-form-textarea"
+                                              placeholder="Describe the event"
+                                              required>{{ form.instance.description }}</textarea>
                                 </div>
 
                                 <!-- Image -->
                                 <div class="col-md-12">
                                     <label class="form-label">Event Banner</label>
-                                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                                    <input type="file" name="image" class="form-control" accept="image/*">
+                                    
+                                    {% if form.instance.image %}
+                                        <p class="mt-2 text-muted">Current image:</p>
+                                        <img src="{{ form.instance.image.url }}" width="120" class="rounded">
+                                    {% endif %}
                                 </div>
 
                             </div>
@@ -184,7 +194,7 @@
                                     <i class="fas fa-times me-2"></i>Cancel
                                 </a>
                                 <button type="submit" class="btn-create-event">
-                                    <i class="fas fa-check-circle me-2"></i>Create
+                                    <i class="fas fa-check-circle me-2"></i>{{ view.object.pk|yesno:"Update,Create" }}
                                 </button>
                             </div>
 
@@ -197,5 +207,18 @@
         </div>
     </div>
 </div>
+
+<!-- JAVASCRIPT VALIDATION -->
+<script>
+    // Restrict past dates
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("eventDate").setAttribute("min", today);
+
+    // Ensure end time is always after start time
+    document.getElementById("startTime").addEventListener("change", function() {
+        let start = this.value;
+        document.getElementById("endTime").setAttribute("min", start);
+    });
+</script>
 
 {% endblock content %}

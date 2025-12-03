@@ -160,6 +160,12 @@ class EventUpdate(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
+
 
 class EventDelete(LoginRequiredMixin,DeleteView):
     model=Event
