@@ -1,152 +1,163 @@
 {% extends 'base/base.html' %}
 {% block title %}Joined Events{% endblock title %}
 {% block breadcrumb %}Joined Events{% endblock breadcrumb %}
+{% load static %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", sans-serif;
+    }
 
-    <div class="row g-3 mb-4">
-        <!-- ALL EVENTS CARD -->
+    .summary-card {
+        background: #3b3b3b;
+        border-radius: 8px;
+        padding: 15px 10px;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        color: #d8d8e6;
+        transition: 0.25s ease;
+    }
+
+    .summary-card h2 {
+        font-size: 42px;
+        font-weight: 700;
+        margin: 0;
+        color: #ffffff;
+    }
+
+    .summary-card p {
+        font-size: 17px;
+        margin-top: 6px;
+        font-weight: 600;
+    }
+
+    .summary-card.highlight {
+        background: #7e5fdc !important;
+        color: #fff !important;
+        box-shadow: inset 0 0 12px rgba(255,255,255,0.22);
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- TOP SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
+
         <div class="col-md-3">
-            <div class="card text-white bg-info 
-                {% if current_status == 'all' or not current_status %}
-                    shadow-lg border border-5 border-light
-                {% endif %}">
-                <div class="card-body">
-                    <h3>{{ total_events }}</h3>
+            <a href="{% url 'joined_events' %}" class="text-decoration-none">
+                <div class="summary-card {% if current_status == 'all' or not current_status %}highlight{% endif %}">
                     <p>All Joined Events</p>
+                    <h2>{{ total_events }}</h2>
                 </div>
-                <div class="card-footer p-2">
-                    <a href="{% url 'joined_events' %}" 
-                       class="small-box-footer text-white d-block text-center"
-                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
-                        More info <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
-        
-        <!-- ONGOING EVENTS CARD -->
+
         <div class="col-md-3">
-            <div class="card text-white bg-success 
-                {% if current_status == 'ongoing' %}
-                    shadow-lg border border-5 border-light
-                {% endif %}">
-                <div class="card-body">
-                    <h3>{{ ongoing_events_count }}</h3>
-                    <p>Ongoing Events</p>
+            <a href="?status=ongoing" class="text-decoration-none">
+                <div class="summary-card {% if current_status == 'ongoing' %}highlight{% endif %}">
+                    <p>Ongoing</p>
+                    <h2>{{ ongoing_events_count }}</h2>
                 </div>
-                <div class="card-footer p-2">
-                    <a href="{% url 'joined_events' %}?status=ongoing" 
-                       class="small-box-footer text-white d-block text-center"
-                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
-                        More info <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
-        
-        <!-- UPCOMING EVENTS CARD -->
+
         <div class="col-md-3">
-            <div class="card text-white bg-warning 
-                {% if current_status == 'upcoming' %}
-                    shadow-lg border border-5 border-light
-                {% endif %}">
-                <div class="card-body">
-                    <h3>{{ upcoming_events_count }}</h3>
-                    <p>Upcoming Events</p>
+            <a href="?status=upcoming" class="text-decoration-none">
+                <div class="summary-card {% if current_status == 'upcoming' %}highlight{% endif %}">
+                    <p>Upcoming</p>
+                    <h2>{{ upcoming_events_count }}</h2>
                 </div>
-                <div class="card-footer p-2">
-                    <a href="{% url 'joined_events' %}?status=upcoming" 
-                       class="small-box-footer text-white d-block text-center"
-                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
-                        More info <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
-        
-        <!-- COMPLETED EVENTS CARD -->
+
         <div class="col-md-3">
-            <div class="card text-white bg-danger 
-                {% if current_status == 'completed' %}
-                    shadow-lg border border-5 border-light
-                {% endif %}">
-                <div class="card-body">
-                    <h3>{{ completed_events_count }}</h3>
-                    <p>Completed Events</p>
+            <a href="?status=completed" class="text-decoration-none">
+                <div class="summary-card {% if current_status == 'completed' %}highlight{% endif %}">
+                    <p>Completed</p>
+                    <h2>{{ completed_events_count }}</h2>
                 </div>
-                <div class="card-footer p-2">
-                    <a href="{% url 'joined_events' %}?status=completed" 
-                       class="small-box-footer text-white d-block text-center"
-                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem;">
-                        More info <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
+
     </div>
 
-    <!-- Table of Joined Events -->
-    <div class="card">
-        <div class="card-header">
-            <h4>
-                {% if current_status == 'ongoing' %}
-                    <span class="text-success">Ongoing Joined Events</span>
-                {% elif current_status == 'upcoming' %}
-                    <span class="text-warning">Upcoming Joined Events</span>
-                {% elif current_status == 'completed' %}
-                    <span class="text-danger">Completed Joined Events</span>
+    <!-- EVENT CARDS -->
+    <div class="row g-4">
+
+        {% for event in events %}
+        <div class="col-md-4 d-flex">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden flex-fill">
+
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
                 {% else %}
-                    <span class="text-info">All Joined Events</span>
+                    <img src="{% static 'images/default_event.jpg' %}" class="card-img-top" style="height:200px; object-fit:cover;">
                 {% endif %}
-            </h4>
-        </div>
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Venue</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in events %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ event.title }}</td>
-                        <td>{{ event.category.name }}</td>
-                        <td>{{ event.start_time|date:"M d, Y" }}</td>
-                        <td>{{ event.end_time|date:"M d, Y" }}</td>
-                        <td>{{ event.location }}</td>
-                        <td>
-                            {% if event.status == "completed" %}
-                                <span class="badge bg-danger">Completed</span>
-                            {% elif event.status == "ongoing" %}
-                                <span class="badge bg-success">Ongoing</span>
-                            {% elif event.status == "upcoming" %}
-                                <span class="badge bg-warning text-dark">Upcoming</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{% url 'event_detail' event.id %}" class="btn btn-info btn-sm" title="View"><i class="fas fa-eye"></i></a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">No joined events found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="fw-bold mb-2">{{ event.title }}</h5>
+
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i> {{ event.location }} <br>
+                        <i class="fas fa-clock me-1"></i> {{ event.date|date:"d M Y, h:i A" }}
+                    </p>
+
+                    <div class="mb-2">
+                        {% if event.category %}
+                            <span class="badge bg-info">{{ event.category.name }}</span>
+                        {% endif %}
+                        <span class="badge bg-success">{{ event.get_status }}</span>
+                    </div>
+
+                    <p class="flex-grow-1 text-dark">{{ event.description|truncatewords:20 }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+
+                        <!-- Like -->
+                        <form action="{% url 'like_event' event.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" style="background:none;border:none;">
+                                {% if event.is_liked %}
+                                    <i class="fas fa-heart text-danger"></i>
+                                {% else %}
+                                    <i class="far fa-heart text-secondary"></i>
+                                {% endif %}
+                            </button>
+                            <span class="small text-muted">{{ event.like_set.count }}</span>
+                        </form>
+
+                        <!-- Comment -->
+                        <a href="{% url 'comment_event' event.pk %}">
+                            <i class="far fa-comment text-secondary"></i>
+                            <span class="small text-muted">{{ event.comments.count }}</span>
+                        </a>
+
+                        <!-- View -->
+                        <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+
+                        <!-- Chat -->
+                        <a href="{% url 'chat_room' event.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-comments"></i> Chatroom
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">No joined events found.</div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
 {% endblock content %}
