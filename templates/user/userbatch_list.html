@@ -3,79 +3,139 @@
 {% block breadcrumb %}My Batches{% endblock breadcrumb %}
 
 {% block content %}
-<div class="container-fluid py-5 batch-display-container">
-
-    {% if user_batches %}
-    {# Changed row to use a custom modern grid class #}
-    <div class="modern-batch-grid">
-        {% for ub in user_batches %}
-        {# Outputting the image directly with the new modern class #}
-        <img src="{{ ub.batch.image.url }}" alt="{{ ub.batch.name }}" class="batch-image-modern">
-        {% endfor %}
-    </div>
-    {% else %}
-    {# Updated alert for better contrast on a dark background #}
-    <div class="alert alert-dark text-center alert-no-batches">
-        You haven't earned any batches yet.
-    </div>
-    {% endif %}
-
-</div>
-
 <style>
-/* 1. Set a dark background for the content area to make the batches stand out */
-.batch-display-container {
-    /* Deep charcoal gray background (Hex: #212529) */
-    background-color: #212529; 
-    min-height: 100vh;
-    padding-top: 50px !important;
-    padding-bottom: 50px !important;
-    border-radius: 8px; /* Subtle modern rounding */
-}
-
-/* Ensure the main body background doesn't interfere */
-body {
-    background-color: #f4f6f9 !important; 
-}
-
-/* 2. Modern CSS Grid Layout */
-.modern-batch-grid {
+/* ===== GRID LAYOUT ===== */
+.batch-grid {
     display: grid;
-    /* Responsive columns: minimum size 150px, adjust to fit */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-    justify-items: center;
-    gap: 40px; 
-    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 35px;
+    padding: 30px 10px;
 }
 
-/* 3. Modern Image Styling - Clean and Ready to Glow */
-.batch-image-modern {
-    width: 150px; 
-    height: 150px;
-    object-fit: contain; 
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* ===== COMMON ICON STYLE ===== */
+.batch-icon {
+    width: 140px;
+    height: 140px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    color: #fff;
     cursor: pointer;
-    
-    /* Ensure the badge itself is the focus, no extra borders */
-    border-radius: 0; 
+
+    /* 3D depth */
+    box-shadow:
+        0 18px 30px rgba(0,0,0,0.18),
+        inset 0 2px 4px rgba(255,255,255,0.4);
+
+    transition: 
+        transform 0.35s ease,
+        box-shadow 0.35s ease;
 }
 
-/* 4. Enhanced Modern Hover Effect (Subtle 3D Lift and Glow) */
-.batch-image-modern:hover {
-    transform: scale(1.15) translateY(-5px); /* Lift and zoom */
-    
-    /* Soft white/blue glow effect */
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4), 
-                0 0 5px rgba(0, 191, 255, 0.6); 
-    z-index: 10;
+/* ===== HOVER EFFECT ===== */
+.batch-icon:hover {
+    transform: translateY(-10px) scale(1.07);
+    box-shadow:
+        0 30px 55px rgba(0,0,0,0.28),
+        inset 0 2px 6px rgba(255,255,255,0.55);
 }
 
-/* 5. Styling the Alert Message */
-.alert-no-batches {
-    background-color: #343a40 !important; /* Darker than container background */
-    color: #fff !important;
-    border: 1px solid #495057 !important;
+/* ===== ADVANCED MATERIAL COLORS ===== */
+
+/* Bronze */
+.bronze {
+    background: linear-gradient(145deg,
+        #5a2d16,
+        #c47a4a,
+        #8a4b2e
+    );
+}
+
+/* Silver */
+.silver {
+    background: linear-gradient(145deg,
+        #7a7f87,
+        #e6ebef,
+        #9aa0a6
+    );
+    color: #1a1a1a;
+}
+
+/* Gold */
+.gold {
+    background: linear-gradient(145deg,
+        #7a5a00,
+        #ffd369,
+        #b08d2c
+    );
+    color: #1a1a1a;
+}
+
+/* Platinum */
+.platinum {
+    background: linear-gradient(145deg,
+        #1f3f4f,
+        #e9f3f6,
+        #9fb6c1
+    );
+    color: #1a1a1a;
+}
+
+/* Diamond (premium, crystal feel) */
+.diamond {
+    background: linear-gradient(145deg,
+        #f8fcff,
+        #cfdfff,
+        #ffffff
+    );
+    color: #3a3a6a;
+}
+.batch-name {
+    margin-top: 12px;
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.batch-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
 }
 
 </style>
+
+{% if user_batches %}
+
+<div class="batch-grid">
+    {% for ub in user_batches %}
+    <a href="{% url 'detail_batch' ub.batch.pk %}" class="batch-link">
+        <div class="batch-icon
+            {% if ub.batch.name|lower == 'bronze' %}bronze
+            {% elif ub.batch.name|lower == 'silver' %}silver
+            {% elif ub.batch.name|lower == 'gold' %}gold
+            {% elif ub.batch.name|lower == 'platinum' %}platinum
+            {% elif ub.batch.name|lower == 'diamond' or ub.batch.name|lower == 'dimond' %}diamond
+            {% endif %}">
+            <i class="fas fa-gem"></i>
+        </div>
+        <div class="batch-name">
+            {{ ub.batch.name }}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{%else%}
+<p class="text-center text-muted mt-5">
+    You haven’t earned any batches yet.
+</p>
+{% endif %}
+<p class="text-center text-muted mt-5">
+
 {% endblock content %}

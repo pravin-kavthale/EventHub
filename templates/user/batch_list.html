@@ -1,117 +1,213 @@
 {% extends 'base/base.html' %}
-{% block title %}Batch List{% endblock title %}
-{% block breadcrumb %}Batch List{% endblock breadcrumb %}
+{% block title %}My Batches{% endblock title %}
+{% block breadcrumb %}My Batches{% endblock breadcrumb %}
 {% load static %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<style>
+    body {
+        background: radial-gradient(circle at top, #12121a, #0a0a10);
+        font-family: "Inter", sans-serif;
+    }
 
-    <div class="row g-3 mb-4">
-        <!-- TOTAL BATCHES CARD -->
-        <div class="col-md-3">
-            <div class="card text-white shadow-lg border border-5 border-light" style="background-color: #0dcaf0;">
-                <div class="card-body">
-                    <h3>{{ batches.count }}</h3>
-                    <p>Total Batches</p>
+    .batch-wrapper {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .batch-title {
+        color: #fff;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    /* ===== BATCH STRIP ===== */
+    .batch-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 30px;
+        margin-bottom: 18px;
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        background: rgba(255,255,255,0.06);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+        transition: transform .35s ease, box-shadow .35s ease;
+    }
+
+    .batch-strip:hover {
+        transform: translateY(-6px) scale(1.01);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+    }
+
+    /* ===== LEFT ===== */
+    .batch-left {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+
+    .batch-badge {
+        width: 70px;
+        height: 70px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        color: #fff;
+        box-shadow: inset 0 0 20px rgba(255,255,255,0.25);
+    }
+
+   .bronze {
+        background: linear-gradient(
+            135deg,
+            #4b2e1f 0%,
+            #8c5a3c 30%,
+            #cd8c5f 55%,
+            #8c5a3c 75%,
+            #4b2e1f 100%
+        );
+    }
+
+    .silver {
+        background: linear-gradient(
+            135deg,
+            #6f7782 0%,
+            #cfd6dc 25%,
+            #ffffff 50%,
+            #cfd6dc 75%,
+            #6f7782 100%
+        );
+        color: #111;
+    }
+
+    .gold {
+        background: linear-gradient(
+            135deg,
+            #6b4f00 0%,
+            #b08d2c 25%,
+            #ffdf6c 50%,
+            #b08d2c 75%,
+            #6b4f00 100%
+        );
+        color: #111;
+    }
+
+    .platinum {
+        background: linear-gradient(
+            135deg,
+            #1f3b4d 0%,
+            #e5eaeb 30%,
+            #e6fbff 50%,
+            #c8d0d2 70%,
+            #1f3b4d 100%
+        );
+        color: #111;
+    }
+
+    .diamond {
+        background: linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #e6f4ff 25%,
+            #c9dcff 50%,
+            #e6f4ff 75%,
+            #ffffff 100%
+        );
+        color: #1a1a2e;
+    }
+
+
+    .batch-info h4 {
+        color: #fff;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .batch-info p {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: #b9b9d3;
+    }
+
+    /* ===== RIGHT ===== */
+    .batch-right {
+        text-align: right;
+    }
+
+    .batch-meta {
+        color: #e0e0ff;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .batch-action {
+        margin-top: 8px;
+    }
+
+    .batch-action a {
+        padding: 8px 18px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background .25s ease;
+    }
+
+    .batch-action a:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="batch-wrapper">
+
+        <div class="batch-title">Batches</div>
+
+        {% for batch in batches %}
+        <div class="batch-strip">
+
+            <!-- LEFT -->
+            <div class="batch-left">
+                <div class="batch-badge 
+                    {% if batch.name|lower == 'bronze' %}bronze
+                    {% elif batch.name|lower == 'silver' %}silver
+                    {% elif batch.name|lower == 'gold' %}gold
+                    {% elif batch.name|lower == 'platinum' %}platinum
+                    {% elif batch.name|lower == 'dimond' %}diamond
+                    {% endif %}">
+                    <i class="fas fa-gem"></i>
                 </div>
-                <div class="card-footer p-2">
-                    <a href="{% url 'create_batch' %}" 
-                       class="small-box-footer text-white d-block text-center fw-bold"
-                       style="background: rgba(0,0,0,0.1); padding: 8px 0; border-radius: 0 0 .25rem .25rem; text-decoration: none;">
-                        Create New Batch <i class="fas fa-arrow-circle-right"></i>
+
+                <div class="batch-info">
+                    <h4>{{ batch.name }} Batch</h4>
+                    <p>{{ batch.description }}</p>
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="batch-right">
+                <div class="batch-meta">
+                    Required Events: {{ batch.required_events }}
+                </div>
+                <div class="batch-action">
+                    <a href="{% url 'detail_batch' batch.pk %}">
+                        View Details →
                     </a>
                 </div>
             </div>
+
         </div>
-    </div>
+        {% empty %}
+        <p class="text-center text-muted">No batches assigned.</p>
+        {% endfor %}
 
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center" 
-             style="background-color: #0dcaf0; color: #ffffff;">
-            <h5 class="mb-0">Batch List</h5>
-            <a href="{% url 'create_batch' %}" class="btn btn-dark btn-sm">
-                <i class="fas fa-plus-circle"></i> Create Batch
-            </a>
-        </div>
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Required Events</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for batch in batches %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ batch.name }}</td>
-                        <td>{{ batch.description }}</td>
-                        <td>{{ batch.required_events }}</td>
-                        <td>
-                            <a href="{% url 'detail_batch' batch.pk %}" 
-                               class="btn btn-info btn-sm" title="View">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            {%if request.user.is_superuser%}
-                            <a href="{% url 'delete_batch' batch.pk %}" 
-                               class="btn btn-danger btn-sm" title="Delete"
-                               onclick="return confirm('Are you sure you want to delete this batch?');">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No batches found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Pagination -->
-            {% if is_paginated %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&laquo;</span>
-                        </li>
-                    {% endif %}
-
-                    {% for num in paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-        </div>
     </div>
 </div>
 {% endblock content %}
