@@ -3,35 +3,117 @@
 {% block breadcrumb %}Comments{% endblock breadcrumb %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+    body {
+        background-color: #f2f3f5;
+    }
 
-    <h3 class="mb-4">Comments for "{{ event.title }}"</h3>
+    .comment-wrapper {
+        max-width: 900px;
+        margin: auto;
+    }
+    .event-title {
+        font-weight: 600;
+        color: #e3e8ee;
+    }
+    /* Comment Card */
+    .comment-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #6366f1;
+    }
+    .comment-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 6px;
+    }
+    .comment-text {
+        color: #374151;
+        font-size: 0.95rem;
+    }
+    /* Add Comment Box */
+    .comment-form {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        margin-top: 30px;
+    }
+
+    .comment-input {
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+    }
+
+    .comment-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    }
+
+    .post-btn {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .post-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+    }
+
+    .alert {
+        border-radius: 14px;
+    }
+</style>
+
+<div class="container mt-5 comment-wrapper">
+    <h3 class="mb-4 event-title">
+        💬 Comments for “{{ event.title }}”
+    </h3>
 
     {% if comments %}
-        <ul class="list-group">
-            {% for comment in comments %}
+        {% for comment in comments %}
+            <div class="comment-card">
                 {% include 'Event/comment_item.html' with comment=comment %}
-            {% endfor %}
-        </ul>
+            </div>
+        {% endfor %}
     {% else %}
-        <div class="alert alert-info">No comments yet. Be the first to comment!</div>
+        <div class="alert alert-info">
+            No comments yet. Start the discussion.
+        </div>
     {% endif %}
 
-    <!-- New Comment Form -->
     {% if event.comments_enabled %}
-    <div class="mt-4">
-        <h5>Add a Comment</h5>
+    <div class="comment-form">
+        <h5 class="mb-3">Add a Comment</h5>
         <form method="post" action="{% url 'comment_event' event.id %}">
             {% csrf_token %}
-            <div class="input-group">
-                <input type="text" name="content" class="form-control" placeholder="Write your comment..." required>
-                <button class="btn btn-success" type="submit">Post Comment</button>
+            <div class="d-flex gap-2">
+                <input
+                    type="text"
+                    name="content"
+                    class="form-control comment-input"
+                    placeholder="Write something meaningful..."
+                    required
+                >
+                <button class="post-btn" type="submit">
+                    Post
+                </button>
             </div>
         </form>
     </div>
     {% else %}
-    <div class="alert alert-warning mt-4">Comments are disabled for this event.</div>
+        <div class="alert alert-warning mt-4">
+            Comments are disabled for this event.
+        </div>
     {% endif %}
-
 </div>
 {% endblock content %}
