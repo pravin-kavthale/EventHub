@@ -1,139 +1,253 @@
 {% extends 'base/base.html' %}
-{% block title %}{{ event.title }}{% endblock title %}
-{% block breadcrumb %}Event Details{% endblock breadcrumb %}
 {% load static %}
+
+{% block title %}{{ event.title }}{% endblock %}
+{% block breadcrumb %}Event Details{% endblock %}
 
 {% block content %}
 <style>
-/* Custom hover effect for dropdown items */
+/* ================= GLOBAL ================= */
+body {
+    background-color: #f1f3f6;
+    color: #1f2937;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ================= WRAPPER ================= */
+.event-wrapper {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.08);
+}
+
+/* ================= HERO ================= */
+.event-hero {
+    position: relative;
+    height: 360px;
+}
+.event-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.event-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.2),
+        rgba(0,0,0,0.75)
+    );
+}
+.event-title {
+    position: absolute;
+    bottom: 30px;
+    left: 40px;
+    color: #ffffff;
+}
+.event-title h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+}
+.event-title span {
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+/* ================= DESCRIPTION ================= */
+.event-wrapper p {
+    color: #374151;
+    line-height: 1.7;
+}
+
+/* ================= INFO GRID ================= */
+.event-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+.info-card {
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e5e7eb;
+}
+.info-card i {
+    font-size: 1.6rem;
+    color: #4f46e5;
+}
+.info-card small {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+.info-card strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ================= ACTION BAR ================= */
+.action-bar {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+    margin-top: 36px;
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    font-weight: 500;
+    padding: 0.55rem 1.5rem;
+    border-radius: 999px;
+}
+
+.btn-primary {
+    background: #4f46e5;
+    border: none;
+    color: #fff;
+}
+.btn-primary:hover { background: #4338ca; }
+
+.btn-success {
+    background: #16a34a;
+    border: none;
+    color: #fff;
+}
+.btn-success:hover { background: #15803d; }
+
+.btn-danger {
+    background: #dc2626;
+    border: none;
+    color: #fff;
+}
+.btn-danger:hover { background: #b91c1c; }
+
+.btn-outline-secondary {
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+.btn-outline-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* ================= DROPDOWN ================= */
+.dropdown button {
+    background: #f3f4f6;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dropdown-menu {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
 .custom-dropdown .dropdown-item:hover {
-    background-color: #e0e0e0;  /* Light grey */
-    color: #000;               /* Black text */
-    transition: background-color 0.2s ease-in-out;
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .event-title {
+        left: 20px;
+        bottom: 20px;
+    }
+    .event-title h1 {
+        font-size: 1.8rem;
+    }
 }
 </style>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-sm border-0 rounded-3">
-               
-                {% if event.image %}
-                    <img src="{{ event.image.url }}" class="card-img-top rounded-top"
-                          alt="{{ event.title }}" style="max-height: 350px; object-fit: cover;">
-                {% endif %}
-                
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-3">{{ event.title }}</h2>
-                    <p class="card-text fs-5">{{ event.description }}</p>
+<div class="container my-5">
+    <div class="event-wrapper">
 
-                    <p class="mb-1">
-                        <i class="bi bi-calendar-event"></i>
-                        <strong>Date:</strong> {{ event.date|date:"F d, Y" }}
-                    </p>
-                    <p class="mb-1">
-                        <i class="bi bi-clock"></i>
-                        <strong>Time:</strong> {{ event.time|time:"h:i A" }}
-                    </p>
-                    <p class="mb-1">
-                        <i class="bi bi-geo-alt"></i>
-                        <strong>Location:</strong> {{ event.location }}
-                    </p>
-                    <p class="mb-1">
-                        <i class="bi bi-person"></i>
-                        <strong>Organizer:</strong> {{ event.organizer.username }}
-                    </p>
-                </div>
+        {% if event.image %}
+        <div class="event-hero">
+            <img src="{{ event.image.url }}" alt="{{ event.title }}">
+            <div class="event-overlay"></div>
+            <div class="event-title">
+                <h1>{{ event.title }}</h1>
+                <span>Organized by {{ event.organizer.username }}</span>
+            </div>
+        </div>
+        {% endif %}
 
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <a href="{% url 'event_list' %}" class="btn btn-secondary">Back to Events</a>
+        <div class="p-4 p-md-5">
+            <p class="fs-5">{{ event.description }}</p>
 
-                    <div class="d-flex align-items-center gap-2">
-                        {% if request.user == event.organizer %}
-                            <a href="{% url 'event_update' event.pk %}" class="btn btn-primary">Edit</a>
-                            <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
-                        {% else %}
-                           <form action="{% url 'join_event' event.id %}" method="post" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-success">
-                                    {% if request.user in event.participants.all %}
-                                        Leave
-                                    {% else %}
-                                        Join
-                                    {% endif %}
-                                </button>
-                            </form>
-
-                            <!-- Dropup Menu -->
-                            <div class="dropdown dropup">
-                                <button class="btn p-0" type="button" 
-                                    id="dropdown3{{ event.pk }}" data-bs-toggle="dropdown" aria-expanded="false"
-                                    style="width: 40px; height: 40px; border: none; background: transparent; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end custom-dropdown" aria-labelledby="dropdown3{{ event.pk }}">
-                                    <li>
-                                        <a class="dropdown-item" href="#">View Participants</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ event.id }}">
-                                            Report
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- End Dropup -->
-
-                        {% endif %}
+            <div class="event-info">
+                <div class="info-card">
+                    <i class="bi bi-calendar-event"></i>
+                    <div>
+                        <small>Date</small>
+                        <strong>{{ event.date|date:"F d, Y" }}</strong>
                     </div>
                 </div>
 
+                <div class="info-card">
+                    <i class="bi bi-clock"></i>
+                    <div>
+                        <small>Time</small>
+                        <strong>{{ event.time|time:"h:i A" }}</strong>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <i class="bi bi-geo-alt"></i>
+                    <div>
+                        <small>Location</small>
+                        <strong>{{ event.location }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">← Back</a>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if request.user == event.organizer %}
+                        <a href="{% url 'event_update' event.pk %}" class="btn btn-primary">Edit</a>
+                        <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
+                    {% else %}
+                        <form method="post" action="{% url 'join_event' event.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-success">
+                                {% if request.user in event.participants.all %}
+                                    Leave Event
+                                {% else %}
+                                    Join Event
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <div class="dropdown">
+                            <button data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+                                <li><a class="dropdown-item" href="#">View Participants</a></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" data-bs-toggle="modal"
+                                       data-bs-target="#reportModal{{ event.id }}">
+                                        Report Event
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{% if request.user != event.organizer %}
-<div class="modal fade" id="reportModal{{ event.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'event_report' event.id %}">
-                {% csrf_token %}
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title"><i class="fas fa-flag"></i> Report Event</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p class="mb-2">Why are you reporting <b>{{ event.title }}</b>?</p>
-                    
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="reason" id="spam{{ event.id }}" value="spam" required>
-                        <label class="form-check-label" for="spam{{ event.id }}">Spam or Misleading</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="reason" id="inappropriate{{ event.id }}" value="inappropriate">
-                        <label class="form-check-label" for="inappropriate{{ event.id }}">Inappropriate Content</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="reason" id="harassment{{ event.id }}" value="harassment">
-                        <label class="form-check-label" for="harassment{{ event.id }}">Harassment or Hate Speech</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="reason" id="other{{ event.id }}" value="other">
-                        <label class="form-check-label" for="other{{ event.id }}">Other</label>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-paper-plane"></i> Submit Report
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock content %}
+{% endblock %}
