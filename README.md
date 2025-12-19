@@ -15,7 +15,43 @@
 | 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
 
 ---
+## ⚙️ Architecture
+![Architecture](output/architecture.png)
+- **🌐 Presentation Layer (HTML, CSS, JavaScript)
+- This layer is responsible for user interaction and UI rendering.
+- Built using Django templates
+- Displays events, comments, and chat messages
+- Sends user actions (login, join event, send message) to the backend via HTTP requests
+- Contains no business logic — only data rendering and form submission
 
+- **⚙️ Application Layer (Django Views, URLs)
+- This layer acts as the request–response controller.
+- Django views receive HTTP requests from the frontend
+- URL routing maps requests to appropriate views
+- Handles form validation, request parsing, and response generation
+- Acts as the bridge between UI and business logic
+
+-**🧠 Business Logic Layer (User App & Event App)
+- This is the core of the system, where application rules are enforced.
+- Split into two Django apps:
+- User App: authentication, authorization, profiles
+- Event App: event creation, joining, comments, chat access
+- Enforces rules like:
+  - Only joined users can access chat
+  - Comments enabled/disabled per event
+  - Keeps domain logic separate from views and templates
+- **🛡️ Security Layer (Authentication, Middleware, CSRF)
+- This layer ensures system safety and access control.
+- Django authentication system for login/session management
+- CSRF protection for all form submissions
+- Middleware handles request filtering, sessions, and permissions
+- Prevents unauthorized access to events and chatrooms
+- **🗄️ Data Layer (MySQL via Django ORM)
+- This layer manages data persistence and retrieval.
+- MySQL database stores users, events, comments, and chat messages
+- Django ORM abstracts raw SQL queries
+- Ensures data consistency, integrity, and portability
+---
 ## 🖼 Screenshots
 
 ### Home Page
