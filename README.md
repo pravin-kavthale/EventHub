@@ -16,7 +16,7 @@
 
 ---
 ## ⚙️ Architecture
-![Architecture](output/architecture.png)
+![Architecture](output/Architecture.png)
 - **🌐 Presentation Layer (HTML, CSS, JavaScript)
 - This layer is responsible for user interaction and UI rendering.
 - Built using Django templates
