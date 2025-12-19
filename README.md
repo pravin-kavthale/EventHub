@@ -14,7 +14,8 @@
 | 💬 **Comments & Notifications** | Interact with other users and get notified about updates. | 🛎️ |
 | 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
 
----## ⚙️ Architecture
+---
+## ⚙️ Architecture
 
 <p align="center">
   <img src="output/Architecture.png" alt="Architecture Diagram" width="700">
