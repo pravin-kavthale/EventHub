@@ -1,55 +1,82 @@
 {% extends 'base/base.html' %}
-{% block title %}Event List{% endblock title %}
-{% block breadcrumb %}Event List{% endblock breadcrumb %}
+{% block title %}Search Events{% endblock title %}
+{% block breadcrumb %}Search Events{% endblock breadcrumb %}
 {% load static %}
 
 {% block content %}
-<div class="container-fluid">
+<style>
+    body {
+        background: #0f0f16;
+        font-family: "Inter", sans-serif;
+    }
 
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <form method="get" action="{% url 'event_search' %}" class="d-flex">
-                <input type="text" name="q" class="form-control me-2" placeholder="Search events..." value="{{ request.GET.q|default:'' }}" >
-                <button class="btn btn-outline-primary" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-        </div>
-        <div class="col-md-6 text-end d-flex justify-content-end align-items-center">
-            <form method="get" class="d-inline me-2">
-                {% for key, value in request.GET.items %}
-                    {% if key != 'category' and key != 'page' %}
-                        <input type="hidden" name="{{ key }}" value="{{ value }}">
-                    {% endif %}
-                {% endfor %}
-                <select name="category" class="form-select w-auto d-inline-block" onchange="this.form.submit()">
-                    <option value="">All Categories</option>
-                    {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if selected_category|add:'' == cat.id|stringformat:'s' %}selected{% endif %}>
-                            {{ cat.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        transition: transform 0.25s, box-shadow 0.25s;
+        background: #ffffff;
+        color: #d8d8e6;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(190, 62, 215, 0.719);
+    }
 
-            <a href="{% url 'create_event' %}" class="btn btn-primary ms-2">
-                <i class="fas fa-plus-circle me-1"></i> Create Event
-            </a>
-        </div>
-    </div>
+    .card-body {
+        display: flex;
+        flex-direction: column;
+    }   
 
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .card-text {
+        font-size: 0.95rem;
+        color: #d8d8e6;
+    }
+
+    .text-primary {
+        color: #4f46e5 !important;
+    }
+
+    .text-muted {
+        color: #a1a1aa !important;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+    }
+
+    .event-rank {
+        background-color: #7e5fdc;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+</style>
+
+<div class="container mt-4">
+
+    {% if results %}
     <div class="row g-4">
-        {% for event in events %}
+        {% for event in results %}
         <div class="col-md-4 d-flex">
             <div class="card shadow-sm border-0 rounded-4 overflow-hidden flex-fill">
 
                 {% if event.image %}
-                <img src="{{ event.image.url }}" 
+                    <img src="{{ event.image.url }}" 
                      class="card-img-top rounded-top-4" 
                      alt="{{ event.title }}" 
                      style="height:200px; object-fit:cover;">
-                {% else %}
-                <img src="{% static 'img/user.jpg' %}" 
+                {%else%}
+                    <img src="{% static 'images/default_event.jpg' %}" 
                      class="card-img-top rounded-top-4" 
                      alt="Default Event" 
                      style="height:200px; object-fit:cover;">
@@ -199,26 +226,13 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center mt-4">
-        <nav>
-            <ul class="pagination">
-                {% if events.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ events.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Previous</a></li>
-                {% endif %}
-                
-                {% for num in events.paginator.page_range %}
-                    <li class="page-item {% if events.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
-                    </li>
-                {% endfor %}
-                
-                {% if events.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ events.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Next</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+    {% else %}
+    <div class="text-center mt-5">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-1"></i> No events found.
+        </div>
     </div>
+    {% endif %}
 
 </div>
 {% endblock content %}

@@ -1,7 +1,7 @@
 {% load static %}
 
 <nav class="main-header navbar navbar-expand navbar-dark bg-secondary">
-    <!-- Left navbar links -->
+    <!-- Left navbar -->
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link text-light" data-widget="pushmenu" href="#" role="button">
@@ -16,74 +16,100 @@
         </li>
     </ul>
 
-    <!-- SEARCH FORM -->
+    <!-- Search -->
     <form class="form-inline ml-3">
-    <div class="input-group input-group-sm">
-        <input class="form-control form-control-navbar" 
-            type="search" placeholder="Search" aria-label="Search" id="search-input">
-        <div class="input-group-append">
-        <button class="btn btn-navbar" type="submit" id="search-btn">
-            <i class="fas fa-search"></i>
-        </button>
+        <div class="input-group input-group-sm">
+            <input class="form-control form-control-navbar"
+                   type="search"
+                   placeholder="Search"
+                   id="search-input">
+            <div class="input-group-append">
+                <button class="btn btn-navbar" type="submit" id="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
         </div>
-    </div>
     </form>
 
-    <style>
-    /* When the input is focused, make it white */
-    #search-input:focus {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border-color: #ffffff !important;
-    box-shadow: none !important; /* optional: remove glow */
-    }
-    </style>
-
-
-
-    <!-- Right navbar links -->
+    <!-- Right navbar -->
     <ul class="navbar-nav ml-auto">
-        <!-- Notifications Dropdown Menu -->
+
+        <!-- 🔔 Notifications -->
         <li class="nav-item dropdown">
-            <a class="nav-link text-light" data-toggle="dropdown" href="#" id="notif-bell">
+            <a class="nav-link text-light position-relative"
+               data-toggle="dropdown"
+               href="#"
+               id="notif-bell">
                 <i class="far fa-bell"></i>
+
                 {% if navbar_unread_count > 0 %}
-                    <span id="notif-count" class="badge bg-warning text-dark navbar-badge">{{ navbar_unread_count }}</span>
+                    <span id="notif-count"
+                          class="badge bg-danger navbar-badge">
+                        {{ navbar_unread_count }}
+                    </span>
                 {% endif %}
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end bg-secondary text-light p-0" style="min-width: 300px;">
-                <h6 class="dropdown-header bg-dark text-white text-center mb-0 py-2">Notifications</h6>
-                <div class="list-group" style="max-height: 300px; overflow-y: auto;">
+
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end
+                        bg-dark text-light p-0 shadow"
+                 style="min-width: 340px;">
+
+                <h6 class="dropdown-header text-center bg-secondary text-white py-2 mb-0">
+                    Notifications
+                </h6>
+
+                <div class="list-group list-group-flush"
+                     style="max-height: 320px; overflow-y: auto;">
+
                     {% if navbar_notifications %}
                         {% for notif in navbar_notifications %}
-                            <a href="{{ notif.action_url|default:'#' }}" 
-                               class="list-group-item list-group-item-action bg-secondary text-light border-0">
-                                <span class="small">{{ notif.message }}</span>
-                                <small class="text-light-50">{{ notif.timestamp|timesince }} ago</small>
+                            <a href="{{ notif.action_url|default:'#' }}"
+                               class="list-group-item list-group-item-action
+                               {% if not notif.is_read %}
+                                    bg-dark text-light shadow
+                                {% else %}
+                                    bg-light text-dark
+                                {% endif %}">
+                                                                
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="small">
+                                        {{ notif.message }}
+                                    </span>
+                                    {% if not notif.is_read %}
+                                        <span class="badge bg-info rounded-pill ms-2">
+                                            New
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <small class="text-muted d-block mt-1">
+                                    {{ notif.timestamp|timesince }} ago
+                                </small>
                             </a>
                         {% endfor %}
-                        <div class="dropdown-divider bg-dark m-0"></div>
                     {% else %}
-                        <span class="dropdown-item text-center small py-2 bg-secondary text-light">No notifications</span>
+                        <div class="text-center py-3 text-muted bg-light">
+                            No notifications
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </li>
 
-        <!-- User Dropdown Menu -->
+        <!-- 👤 User -->
         <li class="nav-item dropdown">
             <a class="nav-link text-light" data-toggle="dropdown" href="#">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-user"></i>
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end bg-secondary text-light">
+            <div class="dropdown-menu dropdown-menu-end bg-dark text-light shadow">
                 <a href="{% url 'profile' %}" class="dropdown-item text-light">
                     <i class="fas fa-user-circle me-2"></i> Profile
                 </a>
-                <div class="dropdown-divider bg-dark"></div>
-               
-                <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                <div class="dropdown-divider bg-secondary"></div>
+                <form action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="dropdown-item text-light w-100 text-start">
+                    <button type="submit"
+                            class="dropdown-item text-light w-100 text-start">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                     </button>
                 </form>
@@ -93,36 +119,26 @@
     </ul>
 </nav>
 
-<!-- JS to mark all notifications as read -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const bell = document.getElementById("notif-bell");
-    const countBadge = document.getElementById("notif-count");
+    const badge = document.getElementById("notif-count");
 
     if (bell) {
-        bell.addEventListener("click", function() {
+        bell.addEventListener("click", function () {
             fetch("{% url 'mark_all_notifications_read' %}", {
                 method: "POST",
                 headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                },
-            }).then(res => res.json()).then(data => {
-                if (data.success && countBadge) {
-                    countBadge.remove();
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && badge) {
+                    badge.remove();
                 }
             });
         });
     }
 });
-
-// Toggle white color on click
-  const searchBtn = document.getElementById("search-btn");
-  searchBtn.addEventListener("mousedown", () => {
-    searchBtn.classList.remove("btn-secondary");
-    searchBtn.classList.add("btn-light");
-  });
-  searchBtn.addEventListener("mouseup", () => {
-    searchBtn.classList.remove("btn-light");
-    searchBtn.classList.add("btn-secondary");
-  });
 </script>

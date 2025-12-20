@@ -82,5 +82,7 @@ urlpatterns = [
     path('delete-batch/<int:pk>/', user_views.DeleteBatch.as_view(), name='delete_batch'),
     path('list-user-batch/', user_views.ListUserBatch.as_view(), name='list_user_batch'),
 
+    #Search Urls
+    path("search-events/", views.EventSearchView.as_view(), name="event_search"),
         
 ]

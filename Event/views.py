@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.db.models import Case, When, Value, CharField
 from user.models import Notification
 from django.shortcuts import reverse
+from .utils import search_events
 
 # Event Views
 class CreateEvent(CreateView):
@@ -165,7 +166,6 @@ class EventUpdate(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
         return context
-
 
 class EventDelete(LoginRequiredMixin,DeleteView):
     model=Event
@@ -392,3 +392,19 @@ class ReportView(LoginRequiredMixin, View):
             return redirect("event_detail", pk=pk)
 
         return HttpResponse("Report reason is required.", status=400)
+
+#Search View
+class EventSearchView(LoginRequiredMixin,ListView):
+    template_name = 'Event/search_event.html'
+    context_object_name = "results"
+
+    def get_queryset(self):
+        query = self.request.GET.get("q", "")
+        if not query:
+            return []
+        return search_events(query, limit=20)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "")
+        return context
