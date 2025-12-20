@@ -15,6 +15,56 @@
 | 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
 
 ---
+## 🔍 Intelligent Search System (Core Feature)
+
+MyEventHub implements **database-level full-text search**, not ORM-based filtering.
+
+---
+
+### ⚙️ How Search Works
+
+- Uses **SQLite FTS5 virtual tables**
+- Automatically creates an **inverted index**
+- Search operates on:
+  - `title`
+  - `description`
+- Ranking is handled using the **BM25 relevance algorithm**
+
+---
+
+### 🧠 Why This Matters
+
+| Traditional ORM Search | MyEventHub Search |
+|-----------------------|------------------|
+| `LIKE '%text%'` | Inverted index lookup |
+| Full table scan | Indexed token lookup |
+| No ranking | BM25 relevance scoring |
+| Slow at scale | Optimized and scalable |
+
+---
+
+### 🧪 Example SQL Used
+
+```sql
+SELECT e.*,
+       bm25(Event_event_fts) AS rank
+FROM Event_event e
+JOIN Event_event_fts
+     ON e.id = Event_event_fts.rowid
+WHERE Event_event_fts MATCH ?
+ORDER BY rank
+LIMIT 20;
+```
+### 🔁 Automatic Sync Using Triggers
+
+The FTS index remains synchronized using **SQLite triggers**:
+
+- **INSERT** → index updated  
+- **UPDATE** → index refreshed  
+- **DELETE** → index cleaned  
+
+No manual re-indexing is required.
+
 ## ⚙️ Architecture
 
 <p align="center">
