@@ -368,18 +368,23 @@ class DeleteComment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         comment = self.get_object()
         return self.request.user == comment.user or self.request.user.is_staff
 
+
 class UpdateComment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
     fields = ['content']
-    def form_valid(self, form):
-        form.save()
-        return HttpResponseRedirect(reverse_lazy('comment_event', kwargs={'pk': self.object.event.pk}))
 
-    def get(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse_lazy('comment_event', kwargs={'pk': self.get_object().event.pk}))
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(
+            reverse_lazy(
+                'comment_event',
+                kwargs={'pk': self.object.event.pk}
+            )
+        )
 
     def test_func(self):
         return self.request.user == self.get_object().user
+
 
 #Report View 
 class ReportView(LoginRequiredMixin, View):

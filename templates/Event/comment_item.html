@@ -1,53 +1,98 @@
 <li class="list-group-item" id="comment-{{ comment.id }}">
-    <!-- Top row: username + buttons -->
+
+    <!-- Top row: username + actions -->
     <div class="d-flex justify-content-between align-items-start">
         <div class="d-flex align-items-center">
             <strong>{{ comment.user.username }}</strong>
-            <small class="text-muted ms-2">{{ comment.created_at|date:"d M Y, h:i A" }}</small>
+            <small class="text-muted ms-2">
+                {{ comment.created_at|date:"d M Y, h:i A" }}
+            </small>
         </div>
 
-        {% if request.user == comment.user or request.user.is_staff %}
-        <div class="d-flex align-items-center">
-            <!-- Edit button -->
-            <button class="btn btn-link text-primary p-0 ms-2" title="Edit"
-                    onclick="editComment({{ comment.id }})">
-                <i class="fas fa-edit"></i>
-            </button>
-            <!-- Delete button -->
-            <a href="{% url 'comment_delete' comment.pk %}"
-               class="btn btn-link text-danger p-1 ms-2"
-               title="Delete">
-                <i class="fas fa-trash"></i>
-            </a>
-        </div>
+        {% if request.user == comment.user %}
+            <div class="d-flex align-items-center">
+
+                <!-- Edit button -->
+                <button
+                    type="button"
+                    class="btn btn-link text-primary p-0 ms-2"
+                    title="Edit"
+                    onclick="editComment({{ comment.id }})"
+                >
+                    <i class="fas fa-edit"></i>
+                </button>
+
+                <!-- Delete button -->
+                <a
+                    href="{% url 'comment_delete' comment.pk %}"
+                    class="btn btn-link text-danger p-0 ms-2"
+                    title="Delete"
+                >
+                    <i class="fas fa-trash"></i>
+                </a>
+
+            </div>
         {% endif %}
     </div>
 
-    <!-- Comment content -->
-    <p class="mt-2 mb-1 comment-text" id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
+    <!-- Comment text -->
+    <p
+        class="mt-2 mb-1 comment-text"
+        id="comment-text-{{ comment.id }}"
+    >
+        {{ comment.content }}
+    </p>
 
-    <!-- Inline edit form (hidden by default) -->
-    <form method="post" action="{% url 'comment_update' comment.pk %}" 
-          class="edit-comment-form mt-2" id="edit-form-{{ comment.id }}">
+    <!-- Edit form (hidden by default) -->
+    <form
+        method="post"
+        action="{% url 'comment_update' comment.pk %}"
+        class="edit-comment-form mt-2"
+        id="edit-form-{{ comment.id }}"
+    >
         {% csrf_token %}
-        <input type="text" name="content" value="{{ comment.content }}" 
-               class="form-control form-control-sm rounded-pill me-2" style="flex:1;" required>
-        <button type="submit" class="btn btn-success btn-sm me-1">Update</button>
-        <button type="button" class="btn btn-secondary btn-sm" 
-                onclick="cancelEdit({{ comment.id }})">Cancel</button>
+
+        <div class="d-flex align-items-center gap-2">
+            <input
+                type="text"
+                name="content"
+                value="{{ comment.content }}"
+                class="form-control form-control-sm"
+                required
+            >
+
+            <button type="submit" class="btn btn-success btn-sm">
+                Update
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="cancelEdit({{ comment.id }})"
+            >
+                Cancel
+            </button>
+        </div>
     </form>
 
-    <!-- Reply toggle button -->
-    <a href="#replies{{ comment.id }}" class="text-primary text-decoration-none small" data-bs-toggle="collapse">
+    <!-- Reply toggle -->
+    <a
+        href="#replies{{ comment.id }}"
+        class="text-primary text-decoration-none small"
+        data-bs-toggle="collapse"
+    >
         Reply →
     </a>
 
-    <!-- Replies section -->
+    <!-- Replies -->
     <div class="collapse mt-2" id="replies{{ comment.id }}">
-        {% if comment.replies.all %}
+
+        {% if comment.replies.exists %}
             <small class="text-muted d-block mb-2">
-                {{ comment.replies.count }} {{ comment.replies.count|pluralize:"reply,replies" }}
+                {{ comment.replies.count }}
+                {{ comment.replies.count|pluralize:"reply,replies" }}
             </small>
+
             <ul class="list-group ms-4 mb-2">
                 {% for reply in comment.replies.all %}
                     {% include 'Event/comment_item.html' with comment=reply %}
@@ -55,42 +100,80 @@
             </ul>
         {% endif %}
 
-        <!-- Reply input -->
-        <form method="post" action="{% url 'comment_event' comment.event.id %}" class="ms-4 mt-2">
+        <!-- Reply form -->
+        <form
+            method="post"
+            action="{% url 'comment_event' comment.event.id %}"
+            class="ms-4 mt-2"
+        >
             {% csrf_token %}
             <input type="hidden" name="parent_id" value="{{ comment.id }}">
+
             <div class="input-group input-group-sm">
-                <input type="text" name="content" class="form-control" placeholder="Write a reply..." required>
-                <button class="btn btn-primary btn-sm" type="submit">Send</button>
+                <input
+                    type="text"
+                    name="content"
+                    class="form-control"
+                    placeholder="Write a reply..."
+                    required
+                >
+                <button class="btn btn-primary btn-sm" type="submit">
+                    Send
+                </button>
             </div>
         </form>
+
     </div>
 </li>
 
-<!-- CSS to hide edit form by default -->
+<!-- Styles -->
 <style>
 .edit-comment-form {
-    display: none;       /* hidden initially */
-    flex-wrap: nowrap;   /* keep input + buttons on one line */
-    gap: 0.5rem;         /* spacing between input and buttons */
+    display: none;
 }
+
 .highlighted-comment {
-    background-color: #fff3cd !important; 
+    background-color: #fff3cd !important;
     transition: background-color 1s ease;
 }
 </style>
 
-
+<!-- Scripts -->
 <script>
+function editComment(commentId) {
+    const textEl = document.getElementById(`comment-text-${commentId}`);
+    const formEl = document.getElementById(`edit-form-${commentId}`);
+
+    if (!textEl || !formEl) {
+        console.error("Edit elements not found:", commentId);
+        return;
+    }
+
+    textEl.style.display = "none";
+    formEl.style.display = "block";
+}
+
+function cancelEdit(commentId) {
+    const textEl = document.getElementById(`comment-text-${commentId}`);
+    const formEl = document.getElementById(`edit-form-${commentId}`);
+
+    textEl.style.display = "block";
+    formEl.style.display = "none";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const highlightId = params.get("highlight");
+
     if (highlightId) {
         const target = document.getElementById(`comment-${highlightId}`);
         if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "center" });
             target.classList.add("highlighted-comment");
-            setTimeout(() => target.classList.remove("highlighted-comment"), 3000);
+
+            setTimeout(() => {
+                target.classList.remove("highlighted-comment");
+            }, 3000);
         }
     }
 });

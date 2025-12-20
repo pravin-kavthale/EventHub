@@ -2,27 +2,34 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from Event.models import Event
-# Create your models here.
 
+# Create your models here.
 class Profile(models.Model):
-    user=models.OneToOneField(User,on_delete=models.CASCADE)
-    FullName=models.TextField(max_length=30,blank=True)
-    Bio=models.TextField(blank=True)
-    Age=models.PositiveIntegerField(null=True,blank=True)
-    Gender=models.CharField(max_length=10,choices=[('Male','Male'),('Female','Female'),('Other','Other')],blank=True)
-    image=models.ImageField(default='default.jpg',upload_to='profile_pics')
-    MobileNumber=models.PositiveIntegerField(null=True,blank=True)
-    is_private=models.BooleanField(default=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    FullName = models.TextField(max_length=30, blank=True)
+    Bio = models.TextField(blank=True)
+    Age = models.PositiveIntegerField(null=True, blank=True)
+    Gender = models.CharField(
+        max_length=10,
+        choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')],
+        blank=True
+    )
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    MobileNumber = models.PositiveIntegerField(null=True, blank=True)
+    is_private = models.BooleanField(default=False)
+
     def __str__(self):
         return f'{self.user.username} profile'
-    #Resizing image while Uploading
-    def save(self):
-        super().save()
-        img=Image.open(self.image.path)
-        if img.width>300 or img.height>300:
-            output_size=(300,300)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image.path)
+
+            if img.height > 300 or img.width > 300:
+                img.thumbnail((300, 300))
+                img.save(self.image.path)
    
 class Notification(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
