@@ -10,7 +10,10 @@
 |---------|-------------|-------|
 | 🔐 **User Authentication** | Quick and secure registration and login via Django's built-in system. | 🔑 |
 | 📝 **Event Management** | Create, edit, delete, and view events with ease. | ✍️ |
-| 🔍 **Event Search & Filters** | Find events based on category, date, and location. | 🗂️ |
+| 🔍 **Event Filters** | Find events based on category, date, and location. | 🗂️ |
+| 🔍 **Advanced Event Search (FTS + BM25)** | Full-text search on title & description with ranked results. | 📝 |
+| ⚡ **Real-time Search Sync** | SQLite triggers auto-update search index on insert/update/delete. | 🧑‍💻 |
+| 🧠 **Search Relevance Ranking** | BM25 algorithm prioritizes meaningful matches. | 📝 |
 | 💬 **Comments & Notifications** | Interact with other users and get notified about updates. | 🛎️ |
 | 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
 
