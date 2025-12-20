@@ -15,7 +15,7 @@
 | 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
 
 ---
-## 🔍 Intelligent Search System (Core Feature)
+## 🔍 Intelligent Search System
 
 MyEventHub implements **database-level full-text search**, not ORM-based filtering.
 
