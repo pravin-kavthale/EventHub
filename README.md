@@ -173,11 +173,29 @@ No manual re-indexing is required.
 ---
 ## 🖼 Screenshots
 
-### Home Page
-![Home Page](output/output1.png)
+### Login Page
+![Login Page](output/login_page.png)
+
+### Personalized Dashboard
+![Dashboard Page](output/Persnalized_dashboard.png)
 
 ### My Event Page
-![Event/Profile Page](output/output2.png)
+![My Events ](output/my_event_page.png)
+
+### Search Result Page
+![Search Result Page](output/search_result_page.png)
+
+### Profile Page
+![Profile Page](output/profile_page.png)
+
+### Profile Update Page
+![Profile update Page](output/profile_update_page.png)
+
+### Event Creation Page
+![Event Creation Page](output/event_create_page.png)
+
+### Category Create Page
+![Category Create Page](output/category_create_page.png)
 
 ---
 
