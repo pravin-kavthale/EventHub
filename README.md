@@ -177,10 +177,10 @@ No manual re-indexing is required.
 ![Login Page](output/login_page.png)
 
 ### Personalized Dashboard
-![Dashboard Page](output/Persnalized_dashboard.png)
+![Dashboard Page](output/persnalized_dashboard.png)
 
 ### My Event Page
-![My Events ](output/my_event_page.png)
+![My Events ](output/my%20_event_page.png)
 
 ### Search Result Page
 ![Search Result Page](output/search_result_page.png)
