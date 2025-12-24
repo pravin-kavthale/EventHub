@@ -452,6 +452,7 @@ class EventSearchView(LoginRequiredMixin,ListView):
         return context
     
 # Personalization View
+
 class PersonalizedEventListView(LoginRequiredMixin, ListView):
     model = Event
     template_name = "Event/event_list.html"
@@ -461,41 +462,53 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
 
+        # 1️⃣ Categories from joined events (USER INTEREST PROFILE)
+        preferred_categories = (
+            Event.objects
+            .filter(participants=user)
+            .values_list("category_id", flat=True)
+        )
+
+        # 2️⃣ Candidate events (exclude joined)
         qs = (
             Event.objects
-            .exclude(participants=user)   # 🔥 KEY LINE (FIX)
+            .exclude(participants=user)
             .select_related("category", "organizer")
-            .prefetch_related("participants")
             .annotate(
-                liked_score=Count(
+                category_match=Case(
+                    When(category_id__in=preferred_categories, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                liked_by_user=Count(
                     "like",
-                    filter=Case(
-                        When(like__user=user, then=Value(1)),
-                        default=Value(0),
-                        output_field=IntegerField(),
-                    )
+                    filter=Q(like__user=user),
                 ),
             )
         )
 
-        # optional category filter
+        # optional category filter from dropdown
         category = self.request.GET.get("category")
         if category:
             qs = qs.filter(category_id=category)
 
         events = list(qs)
 
+        # 3️⃣ Final personalization score
         for event in events:
             event.personalization_score = (
-                event.liked_score * 2
+                event.category_match * 3 +   # STRONG SIGNAL
+                event.liked_by_user * 1      # WEAK SIGNAL
             )
 
+        # 4️⃣ Sort
         events.sort(
             key=lambda e: (e.personalization_score, e.created_at),
             reverse=True
         )
 
         return events
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
