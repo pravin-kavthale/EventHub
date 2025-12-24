@@ -1,1 +1,22 @@
+# Python
+*.pyc
+__pycache__/
+
+# Django local files
+db.sqlite3
+*.log
+*.pot
+*.py[cod]
+
+# Django static and media (optional if using S3)
+staticfiles/
+media/
+
+# Virtual environment
+venv/
 .env
+
+# IDEs
+.vscode/
+.idea/
+
