@@ -13,6 +13,16 @@ from django.db.models import Case, When, Value, CharField
 from user.models import Notification
 from django.shortcuts import reverse
 from .utils import search_events
+import random
+from collections import defaultdict
+from django.db.models import (
+    Q,
+    Count,
+    Case,
+    When,
+    IntegerField 
+)
+
 
 # Event Views
 class CreateEvent(CreateView):
@@ -175,6 +185,7 @@ class EventDelete(LoginRequiredMixin,DeleteView):
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user)
 
+# Category Views
 class CreateCategory(CreateView):
     model = Category
     form_class = CategoryForm
@@ -213,22 +224,42 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         return self.request.user.is_superuser
 
 # Like view
-class LikeView(LoginRequiredMixin,View):
-    def post(self,request,pk):
-        event=get_object_or_404(Event,pk=pk)
-        like,created=Like.objects.get_or_create(user=request.user,event=event)
-        if not created:
+class LikeView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+
+        like = Like.objects.filter(
+            user=request.user,
+            event=event
+        ).first()
+
+        if like:
+            # 🔻 UNLIKE
             like.delete()
+            event.likes.remove(request.user)
+
         else:
+            # 🔺 LIKE
+            Like.objects.create(
+                user=request.user,
+                event=event
+            )
+            event.likes.add(request.user)
+
+            # notify only if not self-like
             if event.organizer != request.user:
                 Notification.objects.create(
                     sender=request.user,
                     receiver=event.organizer,
                     event=event,
                     message=f"{request.user.username} has liked your event {event.title}",
-                    action_url=reverse('event_detail', kwargs={'pk': event.pk}),
+                    action_url=reverse(
+                        'event_detail',
+                        kwargs={'pk': event.pk}
+                    ),
                     type='Like'
                 )
+
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 class EventAttendanceView(LoginRequiredMixin, View):
@@ -301,7 +332,7 @@ class ChatRoomView(LoginRequiredMixin, View):
             'can_access': True
         })
     
-
+#comment Views
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'
 
@@ -400,6 +431,7 @@ class ReportView(LoginRequiredMixin, View):
 
 #Search View
 class EventSearchView(LoginRequiredMixin,ListView):
+
     template_name = 'Event/search_event.html'
     context_object_name = "results"
 
@@ -413,3 +445,59 @@ class EventSearchView(LoginRequiredMixin,ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q", "")
         return context
+    
+# Personalization View
+class PersonalizedEventListView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = "Event/event_list.html"   # your given template
+    context_object_name = "events"
+    paginate_by = 9   # keep pagination (scrollable + pages)
+    
+
+    def get_queryset(self):
+        user = self.request.user
+
+        qs = (
+            Event.objects
+            .select_related("category", "organizer")
+            .prefetch_related("participants", "likes")
+            .annotate(
+                # user joined?
+                join_score=Count(
+                    "participants",
+                    filter=Case(
+                        When(participants=user, then=Value(1)),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    ),
+                ),
+                # user liked?
+                like_score=Count(
+                    "likes",
+                    filter=Case(
+                        When(likes=user, then=Value(1)),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    ),
+                ),
+            )
+        )
+
+        # category filter (from dropdown)
+        category = self.request.GET.get("category")
+        if category:
+            qs = qs.filter(category_id=category)
+
+        # compute final personalization score in Python
+        events = []
+        for event in qs:
+            score = (event.join_score * 3) + (event.like_score * 2)
+            event.personalization_score = score
+            events.append(event)
+
+        # sort by personalization score DESC
+        events.sort(key=lambda e: e.personalization_score, reverse=True)
+
+        return events
+
+

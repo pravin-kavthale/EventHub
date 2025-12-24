@@ -25,57 +25,60 @@ class Category(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="events")
+
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="events"
+    )
+
     date = models.DateTimeField()
     location = models.CharField(max_length=300)
     start_time = models.TimeField()
     end_time = models.TimeField()
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events_created')
-    participants = models.ManyToManyField(User, related_name='events_participated', blank=True)
-    image = models.ImageField(upload_to="event_images/", default="event_images/default.png")
-    
-    comments_enabled=models.BooleanField(default=True)
-    likes=models.ManyToManyField(User,related_name='liked_events',blank=True)
-    
-    def __str__(self):
-        return self.title
-    def total_likes(self):
-        return self.likes.count()
-    def is_likeby(self,user):
-        return self.like_set.filter(user=user).exists()
-    @property
-    def get_status(self):
-        now = timezone.now()
-        
-        event_start_datetime = self.date
-        if now.date()==event_start_datetime.date():
-            if self.start_time <= now.time() <= self.end_time:
-                return "Ongoing"
-            elif now.time() < self.start_time:
-                return "Upcoming"
-            else:
-                return "Completed" 
-        if now > event_start_datetime:
-            return "Completed"
-        if now < event_start_datetime:
-            return "Upcoming"
-       
-        return "Ongoing"
+
+    organizer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='events_created'
+    )
+
+    # 🔥 FIXED NAME (THIS CAUSED YOUR ERROR)
+    participants = models.ManyToManyField(
+        User,
+        related_name='joined_events',
+        blank=True
+    )
+
+    image = models.ImageField(
+        upload_to="event_images/",
+        default="event_images/default.png"
+    )
+
+    # keep it
+    likes = models.ManyToManyField(
+        User,
+        related_name='liked_events',
+        blank=True
+    )
 
     class Meta:
         ordering = ['-start_time']
+
+    def __str__(self):
+        return self.title
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
     class Meta:
-        unique_together = ('user', 'event')   # prevent duplicate likes
+        unique_together = ('user', 'event')
 
     def __str__(self):
         return f'{self.user.username} likes {self.event.title}'
