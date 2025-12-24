@@ -497,3 +497,11 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
 
         return events
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 🔴 THIS IS WHAT YOU WERE MISSING
+        context["categories"] = Category.objects.all()
+
+        context["selected_category"] = self.request.GET.get("category")
+        return context
