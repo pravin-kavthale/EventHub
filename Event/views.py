@@ -20,8 +20,13 @@ from django.db.models import (
     Count,
     Case,
     When,
+    Value,
+    OuterRef,
+    Exists,
+    F,
     IntegerField 
 )
+
 
 
 # Event Views
@@ -449,55 +454,46 @@ class EventSearchView(LoginRequiredMixin,ListView):
 # Personalization View
 class PersonalizedEventListView(LoginRequiredMixin, ListView):
     model = Event
-    template_name = "Event/event_list.html"   # your given template
+    template_name = "Event/event_list.html"
     context_object_name = "events"
-    paginate_by = 9   # keep pagination (scrollable + pages)
-    
+    paginate_by = 9
 
     def get_queryset(self):
         user = self.request.user
 
         qs = (
             Event.objects
+            .exclude(participants=user)   # 🔥 KEY LINE (FIX)
             .select_related("category", "organizer")
-            .prefetch_related("participants", "likes")
+            .prefetch_related("participants")
             .annotate(
-                # user joined?
-                join_score=Count(
-                    "participants",
+                liked_score=Count(
+                    "like",
                     filter=Case(
-                        When(participants=user, then=Value(1)),
+                        When(like__user=user, then=Value(1)),
                         default=Value(0),
                         output_field=IntegerField(),
-                    ),
-                ),
-                # user liked?
-                like_score=Count(
-                    "likes",
-                    filter=Case(
-                        When(likes=user, then=Value(1)),
-                        default=Value(0),
-                        output_field=IntegerField(),
-                    ),
+                    )
                 ),
             )
         )
 
-        # category filter (from dropdown)
+        # optional category filter
         category = self.request.GET.get("category")
         if category:
             qs = qs.filter(category_id=category)
 
-        # compute final personalization score in Python
-        events = []
-        for event in qs:
-            score = (event.join_score * 3) + (event.like_score * 2)
-            event.personalization_score = score
-            events.append(event)
+        events = list(qs)
 
-        # sort by personalization score DESC
-        events.sort(key=lambda e: e.personalization_score, reverse=True)
+        for event in events:
+            event.personalization_score = (
+                event.liked_score * 2
+            )
+
+        events.sort(
+            key=lambda e: (e.personalization_score, e.created_at),
+            reverse=True
+        )
 
         return events
-
 

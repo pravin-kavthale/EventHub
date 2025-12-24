@@ -25,6 +25,7 @@ class Category(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
+    comments_enabled = models.BooleanField(default=True)
 
     category = models.ForeignKey(
         Category,
@@ -44,13 +45,12 @@ class Event(models.Model):
     organizer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='events_created'
+        related_name="events_created"
     )
 
-    # 🔥 FIXED NAME (THIS CAUSED YOUR ERROR)
     participants = models.ManyToManyField(
         User,
-        related_name='joined_events',
+        related_name="joined_events",
         blank=True
     )
 
@@ -59,15 +59,8 @@ class Event(models.Model):
         default="event_images/default.png"
     )
 
-    # keep it
-    likes = models.ManyToManyField(
-        User,
-        related_name='liked_events',
-        blank=True
-    )
-
     class Meta:
-        ordering = ['-start_time']
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -78,10 +71,10 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'event')
+        unique_together = ("user", "event")
 
     def __str__(self):
-        return f'{self.user.username} likes {self.event.title}'
+        return f"{self.user.username} likes {self.event.title}"
 
 class ChatRoom(models.Model):
     event = models.OneToOneField(Event, on_delete=models.CASCADE)
