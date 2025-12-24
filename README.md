@@ -7,17 +7,16 @@
 ## ✨ Features
 
 | Feature | Description |
-|---------|-------------|-------|
-| 🔐 **User Authentication** | Secure registration and login using Django authentication.|
-| 📝 **Event Management** | Create, edit, delete, and view events.|
-| 🧠 **Personalized Event Feed** | Events are ordered uniquely for each user based on likes and participation history. |
-| ❤️ **Event Likes System** | Users can like events; likes influence personalization ranking.|
-| 👥 **Event Participation Tracking** | Joining events improves future recommendations.|
-| 🔍 **IR-Based Full-Text Search (FTS + BM25)** | Database-level full-text search with relevance ranking.|
-| ⚡ **Real-time FTS Synchronization** | SQLite triggers auto-sync search index on insert/update/delete.|
-| 🧠 **Relevance Ranking** | BM25 algorithm prioritizes meaningful search results.|
-| 💬 **Comments & Notifications** | User interaction with real-time notifications.|
-| 👤 **User Profiles** | Editable profiles with event activity history.|
+|--------|-------------|
+| User Authentication | Secure user registration and login using Django auth |
+| Event Management | Create, edit, delete, and view events |
+| Personalized Event Feed | Events are ordered uniquely per user based on interaction history |
+| Event Likes | Users can like events, influencing recommendations |
+| Event Participation | Joining events increases recommendation relevance |
+| Full-Text Search (FTS + BM25) | Database-level search with relevance ranking |
+| Real-Time FTS Sync | SQLite triggers keep search index synchronized |
+| Comments & Notifications | User interaction with notifications |
+| User Profiles | Editable profiles with event activity history |
 
 
 ---
