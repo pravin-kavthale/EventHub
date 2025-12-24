@@ -6,33 +6,71 @@
 
 ## ✨ Features
 
-| Feature | Description | Emoji |
+| Feature | Description |
 |---------|-------------|-------|
-| 🔐 **User Authentication** | Quick and secure registration and login via Django's built-in system. | 🔑 |
-| 📝 **Event Management** | Create, edit, delete, and view events with ease. | ✍️ |
-| 🔍 **Event Filters** | Find events based on category, date, and location. | 🗂️ |
-| 🔍 **Advanced Event Search (FTS + BM25)** | Full-text search on title & description with ranked results. | 📝 |
-| ⚡ **Real-time Search Sync** | SQLite triggers auto-update search index on insert/update/delete. | 🧑‍💻 |
-| 🧠 **Search Relevance Ranking** | BM25 algorithm prioritizes meaningful matches. | 📝 |
-| 💬 **Comments & Notifications** | Interact with other users and get notified about updates. | 🛎️ |
-| 👤 **User Profiles** | Personalized profiles with full details and editable information. | 🧑‍💻 |
+| 🔐 **User Authentication** | Secure registration and login using Django authentication.|
+| 📝 **Event Management** | Create, edit, delete, and view events.|
+| 🧠 **Personalized Event Feed** | Events are ordered uniquely for each user based on likes and participation history. |
+| ❤️ **Event Likes System** | Users can like events; likes influence personalization ranking.|
+| 👥 **Event Participation Tracking** | Joining events improves future recommendations.|
+| 🔍 **IR-Based Full-Text Search (FTS + BM25)** | Database-level full-text search with relevance ranking.|
+| ⚡ **Real-time FTS Synchronization** | SQLite triggers auto-sync search index on insert/update/delete.|
+| 🧠 **Relevance Ranking** | BM25 algorithm prioritizes meaningful search results.|
+| 💬 **Comments & Notifications** | User interaction with real-time notifications.|
+| 👤 **User Profiles** | Editable profiles with event activity history.|
+
 
 ---
-## 🔍 Intelligent Search System
+## 🧠 Personalized Event Recommendation System
 
-MyEventHub implements **database-level full-text search**, not ORM-based filtering.
+MyEventHub implements a **rule-based personalization engine** that ensures each user sees events in a **unique order** based on their previous interactions.
+
+---
+
+### 🎯 Personalization Signals Used
+
+- **Liked Events**  
+  Increases preference for similar events in future recommendations.
+
+- **Joined Events**  
+  Strongly boosts the recommendation score for related events.
+
+- **Category Affinity**  
+  Events from categories the user frequently interacts with are ranked higher.
+
+---
+
+### 📊 Personalization Scoring Logic
+
+Each event receives a **personalization score** per user using the formula: Score = (3 × Joined) + (2 × Liked)
+
+Events are dynamically sorted in **descending order of personalization score**, ensuring that the most relevant events appear first for each user.
+
+---
+
+### ✅ Key Characteristics
+
+- Different users see different event orders  
+- Personalization is computed dynamically per request  
+- Lightweight and fully explainable (no ML models)  
+- Suitable for college-scale datasets  
+
+
+## 🔍 Information Retrieval (IR) Based Search System
+
+
+Search is implemented using **SQLite FTS5**, not Django ORM filtering.
 
 ---
 
 ### ⚙️ How Search Works
 
-- Uses **SQLite FTS5 virtual tables**
-- Automatically creates an **inverted index**
-- Search operates on:
+- SQLite **FTS5 virtual table**
+- Automatic **inverted index** creation
+- Indexed fields:
   - `title`
   - `description`
-- Ranking is handled using the **BM25 relevance algorithm**
-
+- Ranking performed using **BM25 relevance scoring**
 ---
 
 ### 🧠 Why This Matters
@@ -58,6 +96,18 @@ WHERE Event_event_fts MATCH ?
 ORDER BY rank
 LIMIT 20;
 ```
+## 📈 Search vs Recommendation: Clear Separation of Concerns
+
+| Feature        | Search System            | Personalized Feed            |
+|---------------|--------------------------|------------------------------|
+| Purpose       | Explicit user query       | Event discovery              |
+| Technique     | FTS + BM25                | Rule-based scoring           |
+| Database Use  | Inverted index            | Relational joins             |
+| Ordering      | Relevance score           | Personalization score        |
+| Performance   | Extremely fast            | Acceptable for small datasets|
+
+---
+
 ### 🔁 Automatic Sync Using Triggers
 
 The FTS index remains synchronized using **SQLite triggers**:
@@ -93,6 +143,8 @@ No manual re-indexing is required.
 ---
 
 ### 🧠 Business Logic Layer (User App & Event App)
+- Personalized recommendation logic based on user interactions (likes and participation)
+- Separate pipelines for search (IR-based) and browsing (personalization-based)
 - Core layer where **application rules are enforced**
 - Structured into two Django apps:
   - **User App**: authentication, authorization, user profiles
