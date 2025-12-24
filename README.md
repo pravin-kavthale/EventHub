@@ -179,11 +179,11 @@ No manual re-indexing is required.
 ### Personalized Dashboard
 ![Dashboard Page](output/persnalized_dashboard.png)
 
-### My Event Page
-![My Events ](output/my%20_event_page.png)
-
 ### Search Result Page
 ![Search Result Page](output/search_result_page.png)
+
+### Event Creation Page
+![Event Creation Page](output/event_create_page.png)
 
 ### Profile Page
 ![Profile Page](output/profile_page.png)
@@ -191,10 +191,7 @@ No manual re-indexing is required.
 ### Profile Update Page
 ![Profile update Page](output/profile_update_page.png)
 
-### Event Creation Page
-![Event Creation Page](output/event_create_page.png)
-
-### Category Create Page
+### Category Create Page (Admin Level)
 ![Category Create Page](output/categor_%20create_page.png)
 
 ---
