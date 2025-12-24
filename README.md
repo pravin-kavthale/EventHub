@@ -195,7 +195,7 @@ No manual re-indexing is required.
 ![Event Creation Page](output/event_create_page.png)
 
 ### Category Create Page
-![Category Create Page](output/category_create_page.png)
+![Category Create Page](output/categor_%20create_page.png)
 
 ---
 
