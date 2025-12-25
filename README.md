@@ -4,19 +4,22 @@
 
 ---
 
-## ✨ Features
+## ✨ Features## 
 
 | Feature | Description |
 |--------|-------------|
-| User Authentication | Secure user registration and login using Django auth |
-| Event Management | Create, edit, delete, and view events |
-| Personalized Event Feed | Events are ordered uniquely per user based on interaction history |
-| Event Likes | Users can like events, influencing recommendations |
-| Event Participation | Joining events increases recommendation relevance |
-| Full-Text Search (FTS + BM25) | Database-level search with relevance ranking |
-| Real-Time FTS Sync | SQLite triggers keep search index synchronized |
-| Comments & Notifications | User interaction with notifications |
-| User Profiles | Editable profiles with event activity history |
+| 🔐 User Authentication | Secure user registration and login using Django’s built-in authentication system |
+| 📅 Event Management | Create, edit, delete, and view events with categories, images, and schedules |
+| 🧠 Personalized Event Feed | Events are ranked uniquely per user based on interaction history (likes and participation) |
+| ❤️ Event Likes | Users can like events, influencing personalized recommendations |
+| 🤝 Event Participation | Joining events increases relevance in the personalized feed |
+| 🔍 Full-Text Search (PostgreSQL FTS) | Database-level full-text search on event title and description using PostgreSQL |
+| 📊 Relevance Ranking | Search results ranked using PostgreSQL’s `ts_rank_cd` scoring |
+| ⚡ Search Index Optimization | High-performance GIN index on searchable text fields |
+| 🛠️ Automatic Index Maintenance | Search index stays updated automatically via PostgreSQL indexing (no manual triggers) |
+| 💬 Comments & Notifications | User interactions with real-time notification updates |
+| 👤 User Profiles | Editable profiles with activity history (events created, liked, and joined) |
+
 
 
 ---
@@ -57,28 +60,30 @@ Events are dynamically sorted in **descending order of personalization score**, 
 
 ## 🔍 Information Retrieval (IR) Based Search System
 
-
-Search is implemented using **SQLite FTS5**, not Django ORM filtering.
+Search is implemented using **PostgreSQL Full-Text Search (FTS)**, not Django ORM filtering.
 
 ---
 
 ### ⚙️ How Search Works
 
-- SQLite **FTS5 virtual table**
-- Automatic **inverted index** creation
+- PostgreSQL native **Full-Text Search**
+- Text is converted to `tsvector` using `to_tsvector`
 - Indexed fields:
   - `title`
   - `description`
-- Ranking performed using **BM25 relevance scoring**
+- Query parsing via `plainto_tsquery`
+- Ranking performed using **`ts_rank_cd` relevance scoring**
+- Optimized with a **GIN index**
+
 ---
 
 ### 🧠 Why This Matters
 
-| Traditional ORM Search | MyEventHub Search |
-|-----------------------|------------------|
-| `LIKE '%text%'` | Inverted index lookup |
-| Full table scan | Indexed token lookup |
-| No ranking | BM25 relevance scoring |
+| Traditional ORM Search | EventHub Search |
+|-----------------------|-----------------|
+| `LIKE '%text%'` | Full-text token search |
+| Full table scan | GIN-indexed lookup |
+| No ranking | Relevance-based ranking |
 | Slow at scale | Optimized and scalable |
 
 ---
@@ -86,36 +91,40 @@ Search is implemented using **SQLite FTS5**, not Django ORM filtering.
 ### 🧪 Example SQL Used
 
 ```sql
-SELECT e.*,
-       bm25(Event_event_fts) AS rank
-FROM Event_event e
-JOIN Event_event_fts
-     ON e.id = Event_event_fts.rowid
-WHERE Event_event_fts MATCH ?
-ORDER BY rank
+SELECT id,
+       ts_rank_cd(
+         to_tsvector('english', coalesce(title,'') || ' ' || coalesce(description,'')),
+         plainto_tsquery('english', %s)
+       ) AS rank
+FROM "Event_event"
+WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(description,'')) @@
+      plainto_tsquery('english', %s)
+ORDER BY rank DESC
 LIMIT 20;
+
 ```
 ## 📈 Search vs Recommendation: Clear Separation of Concerns
 
-| Feature        | Search System            | Personalized Feed            |
-|---------------|--------------------------|------------------------------|
-| Purpose       | Explicit user query       | Event discovery              |
-| Technique     | FTS + BM25                | Rule-based scoring           |
-| Database Use  | Inverted index            | Relational joins             |
-| Ordering      | Relevance score           | Personalization score        |
-| Performance   | Extremely fast            | Acceptable for small datasets|
+| Feature | 🔍 Search System (FTS) | 🧠 Personalized Feed |
+|--------|------------------------|----------------------|
+| 🎯 Purpose | Explicit user query | Event discovery |
+| 🛠️ Technique | PostgreSQL FTS + relevance ranking | Rule-based scoring |
+| 🗄️ Database Use | Inverted text index (GIN) | Relational joins |
+| 📊 Ordering | Relevance score | Personalization score |
+| ⚡ Performance | Very fast | Acceptable for current scale |
 
 ---
 
-### 🔁 Automatic Sync Using Triggers
+## 🔁 Index Consistency & Maintenance
 
-The FTS index remains synchronized using **SQLite triggers**:
+- Search index is maintained automatically by **PostgreSQL**
+- GIN index stays consistent on:
+  - **INSERT**
+  - **UPDATE**
+  - **DELETE**
+- No manual triggers or background re-indexing required
 
-- **INSERT** → index updated  
-- **UPDATE** → index refreshed  
-- **DELETE** → index cleaned  
-
-No manual re-indexing is required.
+This reduces application complexity and improves reliability.
 
 ## ⚙️ Architecture
 
