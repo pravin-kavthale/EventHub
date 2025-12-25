@@ -15,7 +15,7 @@ class Profile(models.Model):
         blank=True
     )
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-    MobileNumber = models.PositiveIntegerField(null=True, blank=True)
+    MobileNumber = models.BigIntegerField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
 
     def __str__(self):
