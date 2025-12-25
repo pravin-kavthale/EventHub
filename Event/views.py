@@ -435,8 +435,7 @@ class ReportView(LoginRequiredMixin, View):
         return HttpResponse("Report reason is required.", status=400)
 
 #Search View
-class EventSearchView(LoginRequiredMixin,ListView):
-
+class EventSearchView(LoginRequiredMixin, ListView):
     template_name = 'Event/search_event.html'
     context_object_name = "results"
 
@@ -450,9 +449,9 @@ class EventSearchView(LoginRequiredMixin,ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q", "")
         return context
-    
-# Personalization View
 
+
+# Personalization View
 class PersonalizedEventListView(LoginRequiredMixin, ListView):
     model = Event
     template_name = "Event/event_list.html"
