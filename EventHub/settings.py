@@ -1,32 +1,23 @@
-"""
-Django settings for EventHub project.
-"""
-
 from pathlib import Path
 from decouple import config
-import cloudinary   # ✅ IMPORTANT
+import cloudinary
 
 # --------------------
 # BASE
 # --------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config(
-    "SECRET_KEY",
-    default="django-insecure-change-this-in-production"
-)
-
-DEBUG = True
-
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-in-production")
+DEBUG = True  # Set False in production
 ALLOWED_HOSTS = ["*"]
 
 # --------------------
 # APPLICATIONS
 # --------------------
 INSTALLED_APPS = [
-    # Cloudinary (ORDER IS CRITICAL)
-    "cloudinary_storage",
-    "cloudinary",
+    # Cloudinary (order is critical)
+    'cloudinary',
+    'cloudinary_storage',
 
     # Django defaults
     "django.contrib.admin",
@@ -121,17 +112,22 @@ USE_TZ = True
 # --------------------
 # STATIC FILES
 # --------------------
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static_root'  # Local copy, optional with Cloudinary
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticStorage'
+
 
 # --------------------
 # MEDIA / CLOUDINARY
 # --------------------
 MEDIA_URL = "/media/"
-
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-# ✅ EXPLICIT CLOUDINARY CONFIG (THIS IS WHAT YOU WERE MISSING)
 cloudinary.config(
     cloud_name=config("CLOUDINARY_CLOUD_NAME"),
     api_key=config("CLOUDINARY_API_KEY"),
@@ -180,6 +176,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # --------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+# Optional: local media folder
 MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_URL = "/media/"
+
+DEBUG = False
