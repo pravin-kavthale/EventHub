@@ -8,7 +8,7 @@ import cloudinary
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-in-production")
-DEBUG = True  # Set False in production
+DEBUG = False # Set False in production
 ALLOWED_HOSTS = ["*"]
 
 # --------------------
