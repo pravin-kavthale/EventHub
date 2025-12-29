@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from Event.models import Event
-import cloudinary.uploader
+import cloudinary.uploaderz 
 import os
 
 class Command(BaseCommand):

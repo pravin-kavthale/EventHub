@@ -57,7 +57,7 @@ class Event(models.Model):
     )
 
     
-    image = models.ImageField(upload_to="event_images/", null=True, blank=True)
+    image = CloudinaryField('image',null=True, blank=True)
     
     class Meta:
         ordering = ["-created_at"]
