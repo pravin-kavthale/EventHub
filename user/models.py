@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from Event.models import Event
+from cloudinary.models import CloudinaryField
+
 
 # Create your models here.
 class Profile(models.Model):
@@ -14,7 +16,7 @@ class Profile(models.Model):
         choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')],
         blank=True
     )
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    image = CloudinaryField('user_avatar', blank=True, null=True)
     MobileNumber = models.BigIntegerField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
 
@@ -48,7 +50,7 @@ class Batch(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField(blank=True)
     required_events=models.PositiveIntegerField(unique=True,default=0)
-    image=models.ImageField(upload_to='batch_images/',null=True,blank=True)
+    image=CloudinaryField('batch_thumbnail', blank=True, null=True)
     
     def __str__(self):
         return f"{self.name} needs (≥{self.event_threshold} events)"
