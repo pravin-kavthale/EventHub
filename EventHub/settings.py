@@ -11,6 +11,10 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-in-produc
 DEBUG = False # Set False in production
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://eventhub-lt3v.onrender.com',
+]
+
 # --------------------
 # APPLICATIONS
 # --------------------
