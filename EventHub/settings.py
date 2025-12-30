@@ -89,7 +89,7 @@ WSGI_APPLICATION = "EventHub.wsgi.application"
 
 DATABASES = {
     'default': dj_database_url.parse(
-        os.environ.get("DATABASE_URL"),
+        config("DATABASE_URL"),
         conn_max_age=600,
         ssl_require=True
     )
@@ -117,13 +117,14 @@ USE_TZ = True
 # STATIC FILES
 # --------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static_root'  # Local copy, optional with Cloudinary
 
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
 ]
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticStorage'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # --------------------
