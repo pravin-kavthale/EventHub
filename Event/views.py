@@ -517,3 +517,7 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
 
         context["selected_category"] = self.request.GET.get("category")
         return context
+
+def sidebar_view(request):
+    return render(request'base/sidebar.html')
+

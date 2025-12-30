@@ -84,5 +84,6 @@ urlpatterns = [
 
     #Search Urls
     path("search-events/", views.EventSearchView.as_view(), name="event_search"),
+    path("sidebar/", views.sidebar_view, name="sidebar"),
         
 ]
