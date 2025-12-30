@@ -519,5 +519,5 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
         return context
 
 def sidebar_view(request):
-    return render(request'base/sidebar.html')
+    return render(request,'base/sidebar.html')
 
