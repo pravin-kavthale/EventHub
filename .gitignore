@@ -8,9 +8,7 @@ db.sqlite3
 *.pot
 *.py[cod]
 
-# Django static and media (optional if using S3)
-staticfiles/
-media/
+
 
 # Virtual environment
 venv/
