@@ -3,9 +3,12 @@ from decouple import config
 import cloudinary
 import dj_database_url
 import os
+
 # --------------------
 # BASE
 # --------------------
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-in-production")
@@ -19,6 +22,7 @@ CSRF_TRUSTED_ORIGINS = [
 # --------------------
 # APPLICATIONS
 # --------------------
+
 INSTALLED_APPS = [
     # Cloudinary (order is critical)
     'cloudinary',
@@ -96,9 +100,11 @@ DATABASES = {
     )
 }
 
+
 # --------------------
 # PASSWORD VALIDATION
 # --------------------
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -186,3 +192,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEBUG = False
+
