@@ -122,13 +122,14 @@
                 </div>
 
                 <!-- Footer Action Button -->
+                {%if reuqest.user.is_superuser%}
                 <div class="mt-5 pt-3 border-top border-secondary d-flex justify-content-center">
                     
                     <a href="{% url 'delete_batch' batch.pk %}" class="btn footer-btn" style="background-color: #dc3545 !important; color: white !important;">
                         <i class="fas fa-trash me-1"></i> Delete Batch
                     </a>
                 </div>
-                
+                {%endif%}
             </div>
         </div>
     </div>
