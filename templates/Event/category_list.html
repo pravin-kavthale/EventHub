@@ -57,6 +57,7 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ category.event_count }}</td>
+                                    {% if request.user.is_superuser %}
                                     <td>
                                         <a class="btn btn-info btn-sm" href="{% url 'category_update' category.pk %}">
                                             <i class="fa fa-edit"></i>
@@ -65,6 +66,9 @@
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </td>
+                                        
+                                    {% endif %}
+                                    
                                 </tr>
                             {% empty %}
                                 <tr>
