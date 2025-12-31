@@ -442,7 +442,7 @@ class EventSearchView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         query = self.request.GET.get("q", "")
         if not query:
-            return []
+            return Event.objects.none()
         return search_events(query, limit=20)
 
     def get_context_data(self, **kwargs):
