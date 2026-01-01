@@ -190,10 +190,10 @@
                             </div>
 
                             <div class="d-flex justify-content-end gap-3">
-                                <a href="{% url 'event_list' %}" class="btn-cancel-event">
+                                <a href="{% url 'event_list' %}" class="btn-cancel-event m-1">
                                     <i class="fas fa-times me-2"></i>Cancel
                                 </a>
-                                <button type="submit" class="btn-create-event">
+                                <button type="submit" class="btn-create-event m-1">
                                     <i class="fas fa-check-circle me-2"></i>{{ view.object.pk|yesno:"Update,Create" }}
                                 </button>
                             </div>

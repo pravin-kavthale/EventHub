@@ -146,6 +146,15 @@ class CreateBatch(LoginRequiredMixin,UserPassesTestMixin,CreateView):
     def test_func(self):
         return self.request.user.is_superuser
 
+class UpdateBatch(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    model=Batch
+    fields=['name','description','required_events','image']
+    template_name='user/batch_form.html'
+    success_url=reverse_lazy('list_batch')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
 class ListBatch(LoginRequiredMixin,ListView):
     model=Batch
     template_name='user/batch_list.html'

@@ -23,8 +23,7 @@
                                 </div>
                             </div>
                         </form>
-                        <a class="btn btn-outline-light btn-sm mr-2" onclick="listView()"><i class="fa fa-bars"></i> List</a> 
-                        <a class="btn btn-outline-light btn-sm mr-2 active" onclick="gridView()"><i class="fa fa-th-large"></i> Grid</a>
+                        
                         <a class="btn btn-success btn-sm" href="{% url 'create_category' %}"><i class="fa fa-plus"></i> Create</a>
                     </div>
                 </div>
@@ -120,13 +119,5 @@
 }
 </style>
 
-<script>
-    function listView() {
-        document.querySelectorAll('.ctg_image').forEach(img => img.style.display = 'none');
-    }
-    
-    function gridView() {
-        document.querySelectorAll('.ctg_image').forEach(img => img.style.display = 'block');
-    }
-</script>
+
 {% endblock extrascript %}

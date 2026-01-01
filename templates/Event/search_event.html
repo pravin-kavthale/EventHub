@@ -4,30 +4,43 @@
 {% load static %}
 
 {% block content %}
+<style>
+   
+
+</style>
 
 
 <div class="container mt-4">
 
+    <!-- Back to Events -->
+    <div class="mb-3">
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="window.history.back()"
+        >
+            <i class="fas fa-arrow-left me-2">  Back to Events</i>
+
+        </button>
+    </div>
+
+    
+
     {% if results %}
-    <div class="row g-4">
-        {% for event in results %}
-        {% include "Event/event_card.html" %}
-        {% empty %}
-        <div class="col-12 text-center">
+        <div class="row g-4">
+            {% for event in results %}
+                {% include "Event/event_card.html" %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center mt-5">
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-1"></i> No events found.
+
             </div>
         </div>
-        {% endfor %}
-    </div>
-
-    {% else %}
-    <div class="text-center mt-5">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-1"></i> No events found.
-        </div>
-    </div>
     {% endif %}
-
+    
 </div>
+
 {% endblock content %}

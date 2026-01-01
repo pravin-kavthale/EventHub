@@ -50,12 +50,14 @@
                   <p>Create Category</p>
                 </a>
               </li>
+              {%if request.user.is_superuser%}
               <li class="nav-item">
                   <a href="{% url 'category_list' %}" class="nav-link">
                       <i class="far fa fa-list nav-icon"></i>
                       <p>Category List</p>
                   </a>
               </li>
+              {% endif %}
             </ul>
           </li>
           <li class="nav-item has-treeview menu-open">
@@ -80,12 +82,6 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa fa-edit nav-icon"></i>
-                  <p>Add Event Member</p>
-                </a>
-              </li>
-              <li class="nav-item">
                 <a href="{%url 'joined_events'%}" class="nav-link">
                   <i class="far fa fa-list nav-icon"></i>
                   <p>Join Event List</p>
@@ -99,38 +95,8 @@
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="far fa fa-edit nav-icon"></i>
-                  <p>Add Event Wish User</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
                   <i class="far fa fa-list nav-icon"></i>
                   <p>Complete Event List</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa fa-list nav-icon"></i>
-                  <p>Absense User</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa fa-list nav-icon"></i>
-                  <p>Complete Event User</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa fa-edit nav-icon"></i>
-                  <p>Create User Mark</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa fa-list nav-icon"></i>
-                  <p>User Mark List</p>
                 </a>
               </li>
             </ul>

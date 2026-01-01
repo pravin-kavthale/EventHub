@@ -1,54 +1,178 @@
 {% extends 'base/base.html' %}
-{% block title %}Create Batch{% endblock title %}
-{% block breadcrumb %}Create Batch{% endblock breadcrumb %}
+{% block title %}{{ view.object.pk|yesno:"Update Batch,Create Batch" }}{% endblock title %}
+{% block breadcrumb %}{{ view.object.pk|yesno:"Update Batch,Create Batch" }}{% endblock breadcrumb %}
 
 {% block content %}
-<div class="container mt-4">
+
+<style>
+    body {
+        background: linear-gradient(140deg, #b088bb, #d3b5c6) !important;
+    }
+
+    .batch-wrapper {
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 0 35px rgba(0,0,0,0.35);
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .batch-left-panel {
+        background: linear-gradient(150deg, #7f5af0, #6246ea);
+        padding: 55px 25px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .batch-left-panel h4 {
+        font-weight: 600;
+    }
+
+    .batch-right-panel {
+        background: #ffffff;
+    }
+
+    .batch-header-box {
+        background: #fff;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 18px 25px;
+    }
+
+    .batch-header-box h5 {
+        font-weight: 600;
+        color: #1d1b27;
+    }
+
+    .batch-form-container input,
+    .batch-form-container textarea {
+        background: #f8f6fb !important;
+        border: 1px solid #d8cdec !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        color: #2c2335 !important;
+    }
+
+    textarea.batch-textarea {
+        height: auto !important;
+        padding: 12px 14px !important;
+    }
+
+    .btn-submit-batch {
+        background: #7f5af0;
+        color: white;
+        font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: none;
+    }
+
+    .btn-cancel-batch {
+        background: #ece8f6;
+        color: #3d2c50;
+        font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: none;
+    }
+</style>
+
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-10">
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Create New Batch</h4>
+            <div class="row g-0 batch-wrapper">
+
+                <!-- LEFT PANEL -->
+                <div class="col-md-4 batch-left-panel">
+                    <i class="fas fa-layer-group fa-4x mb-4"></i>
+                    <h4>{{ view.object.pk|yesno:"Update Batch,Create Batch" }}</h4>
+                    <p class="small">Define rules and requirements for this batch.</p>
                 </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" class="row g-3">
-                        {% csrf_token %}
 
-                        <!-- Name -->
-                        <div class="col-12">
-                            <label for="id_name" class="form-label">Batch Name</label>
-                            <input type="text" name="name" class="form-control" id="id_name" placeholder="Enter batch name" required>
-                        </div>
+                <!-- RIGHT PANEL -->
+                <div class="col-md-8 batch-right-panel">
 
-                        <!-- Description -->
-                        <div class="col-12">
-                            <label for="id_description" class="form-label">Description</label>
-                            <textarea name="description" class="form-control" id="id_description" rows="4" placeholder="Enter batch description"></textarea>
-                        </div>
+                    <div class="batch-header-box">
+                        <h5>
+                            <i class="fas fa-cogs text-primary me-2"></i>
+                            {{ view.object.pk|yesno:"Update Batch Details,Create New Batch" }}
+                        </h5>
+                    </div>
 
-                        <!-- Required Events -->
-                        <div class="col-12">
-                            <label for="id_required_events" class="form-label">Required Events</label>
-                            <input type="number" name="required_events" class="form-control" id="id_required_events" min="0" placeholder="Enter required events">
-                        </div>
+                    <div class="card-body batch-form-container">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
 
-                        <!-- Image -->
-                        <div class="col-12">
-                            <label for="id_image" class="form-label">Batch Image</label>
-                            <input type="file" name="image" class="form-control" id="id_image" accept="image/*">
-                        </div>
+                            <div class="row g-4 mb-4">
 
-                        <!-- Buttons -->
-                        <div class="col-12 text-end mt-3">
-                            <a href="{% url 'list_batch' %}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-success">Create Batch</button>
-                        </div>
-                    </form>
+                                <!-- Batch Name -->
+                                <div class="col-12">
+                                    <label class="form-label">Batch Name</label>
+                                    <input type="text"
+                                           name="name"
+                                           class="form-control"
+                                           value="{{ form.instance.name }}"
+                                           placeholder="Enter batch name"
+                                           required>
+                                </div>
+
+                                <!-- Required Events -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Required Events</label>
+                                    <input type="number"
+                                           name="required_events"
+                                           class="form-control"
+                                           value="{{ form.instance.required_events }}"
+                                           min="0"
+                                           placeholder="Number of events required"
+                                           required>
+                                </div>
+
+                                <!-- Image -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Batch Image</label>
+                                    <input type="file"
+                                           name="image"
+                                           class="form-control"
+                                           accept="image/*">
+
+                                    {% if form.instance.image %}
+                                        <img src="{{ form.instance.image.url }}" class="mt-2 rounded" width="100">
+                                    {% endif %}
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description"
+                                              rows="4"
+                                              class="form-control batch-textarea"
+                                              placeholder="Explain what this batch represents">{{ form.instance.description }}</textarea>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{% url 'list_batch' %}" class="btn-cancel-batch m-1">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn-submit-batch m-1">
+                                    <i class="fas fa-save me-2"></i>
+                                    {{ view.object.pk|yesno:"Update Batch,Create Batch" }}
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
                 </div>
             </div>
 
         </div>
     </div>
 </div>
+
 {% endblock content %}
