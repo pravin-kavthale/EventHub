@@ -28,6 +28,10 @@ from django.db.models import (
 )
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+
 
 # Event Views
 class CreateEvent(CreateView):
@@ -44,28 +48,30 @@ class CreateEvent(CreateView):
         context['categories'] = Category.objects.all()
         return context
 
-class JoinEvent(LoginRequiredMixin, UserPassesTestMixin, View):
+class JoinEvent(LoginRequiredMixin, View):
+
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
-        if request.user in event.participants.all():
-            event.participants.remove(request.user)
-            messages.success(request, "You have left the event.")
-            EventAttendance.objects.filter(user=request.user, event=event).delete()
-        else:
-            event.participants.add(request.user)
-            messages.success(request, "You have joined the event.")
-            EventAttendance.objects.get_or_create(user=request.user, event=event, defaults={'status': 'going'})
-            Notification.objects    .create(
-                sender=request.user,
-                receiver=event.organizer,
-                message=f"{request.user} has joined your event {event}",
-                type='Join',
-            )
-        return redirect('event_detail', pk=pk)
+        user = request.user
 
-    def test_func(self):
-        event = get_object_or_404(Event, pk=self.kwargs['pk'])
-        return self.request.user != event.organizer
+        # Organizer cannot join
+        if user == event.organizer:
+            return JsonResponse(
+                {"error": "Organizer cannot join"},
+                status=403
+            )
+
+        if user in event.participants.all():
+            event.participants.remove(user)
+            joined = False
+        else:
+            event.participants.add(user)
+            joined = True
+
+        return JsonResponse({
+            "joined": joined,
+            "participants_count": event.participants.count()
+        })
 
 class EventList(ListView):
     model=Event
@@ -163,6 +169,7 @@ class joinedEvents(LoginRequiredMixin,ListView):
 
         return context
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class EventDetails(DetailView):
     model=Event
     template_name='Event/event_detail.html'
@@ -295,48 +302,53 @@ class getEventAttendance(LoginRequiredMixin,UserPassesTestMixin,ListView):
         return self.request.user.is_superuser or self.request.user == self.event.organizer
 
 class ChatRoomView(LoginRequiredMixin, View):
+
+    def dispatch(self, request, *args, **kwargs):
+        self.event = get_object_or_404(Event, pk=kwargs["pk"])
+        self.chatroom, _ = ChatRoom.objects.get_or_create(event=self.event)
+        return super().dispatch(request, *args, **kwargs)
+
+    def has_access(self):
+        user = self.request.user
+        return (
+            user.is_superuser
+            or user == self.event.organizer
+            or user in self.event.participants.all()
+        )
+
     def get(self, request, pk):
-        event = get_object_or_404(Event, pk=pk)
-        chatroom, created = ChatRoom.objects.get_or_create(event=event)
+        can_access = self.has_access()
 
-        # Check access
-        can_access = request.user.is_superuser or request.user == event.organizer or request.user in event.participants.all()
-
-        messages = chatroom.messages.all() if can_access else None
-
-        return render(request, 'Event/chatroom.html', {
-            'chatroom': chatroom,
-            'messages': messages,
-            'event': event,
-            'can_access': can_access
+        return render(request, "Event/chatroom.html", {
+            "chatroom": self.chatroom,
+            "messages": self.chatroom.messages.all() if can_access else None,
+            "event": self.event,
+            "can_access": can_access,
         })
 
     def post(self, request, pk):
-        event = get_object_or_404(Event, pk=pk)
-        chatroom, created = ChatRoom.objects.get_or_create(event=event)
-        can_access = request.user.is_superuser or request.user == event.organizer or request.user in event.participants.all()
+        if not self.has_access():
+            return redirect("join_event", pk=self.event.pk)
 
-        if not can_access:
-            return render(request, 'Event/chatroom.html', {
-                'chatroom': chatroom,
-                'messages': None,
-                'event': event,
-                'can_access': False
-            })
-
-        content = request.POST.get('content')
+        content = request.POST.get("content")
         if content:
-            chatroom.messages.create(user=request.user, content=content)
-            return redirect('chat_room', pk=pk)
+            self.chatroom.messages.create(
+                user=request.user,
+                content=content
+            )
 
-        messages = chatroom.messages.all()
-        return render(request, 'Event/chatroom.html', {
-            'chatroom': chatroom,
-            'messages': messages,
-            'event': event,
-            'can_access': True
-        })
-    
+            if request.user != self.event.organizer:
+                Notification.objects.create(
+                    sender=request.user,
+                    receiver=self.event.organizer,
+                    event=self.event,
+                    message=f"{request.user.username} sent a message in {self.event.title}",
+                    action_url=reverse("chat_room", kwargs={"pk": pk}),
+                    type="Message",
+                )
+
+        return redirect("chat_room", pk=pk)
+
 #comment Views
 class CommentView(LoginRequiredMixin, View):
     template_name = 'Event/event_comments.html'

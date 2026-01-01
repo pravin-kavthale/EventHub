@@ -105,25 +105,13 @@ body {
     border-radius: 999px;
 }
 
-.btn-primary {
-    background: #4f46e5;
-    border: none;
-    color: #fff;
-}
+.btn-primary { background: #4f46e5; border: none; color: #fff; }
 .btn-primary:hover { background: #4338ca; }
 
-.btn-success {
-    background: #16a34a;
-    border: none;
-    color: #fff;
-}
+.btn-success { background: #16a34a; border: none; color: #fff; }
 .btn-success:hover { background: #15803d; }
 
-.btn-danger {
-    background: #dc2626;
-    border: none;
-    color: #fff;
-}
+.btn-danger { background: #dc2626; border: none; color: #fff; }
 .btn-danger:hover { background: #b91c1c; }
 
 .btn-outline-secondary {
@@ -153,17 +141,6 @@ body {
 .custom-dropdown .dropdown-item:hover {
     background: #eef2ff;
     color: #3730a3;
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 768px) {
-    .event-title {
-        left: 20px;
-        bottom: 20px;
-    }
-    .event-title h1 {
-        font-size: 1.8rem;
-    }
 }
 </style>
 
@@ -214,20 +191,22 @@ body {
                 <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">← Back</a>
 
                 <div class="d-flex align-items-center gap-2">
+
                     {% if request.user == event.organizer %}
                         <a href="{% url 'event_update' event.pk %}" class="btn btn-primary">Edit</a>
                         <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
                     {% else %}
-                        <form method="post" action="{% url 'join_event' event.id %}">
-                            {% csrf_token %}
-                            <button class="btn btn-success">
-                                {% if request.user in event.participants.all %}
-                                    Leave Event
-                                {% else %}
-                                    Join Event
-                                {% endif %}
-                            </button>
-                        </form>
+                        <!-- ✅ AJAX JOIN / LEAVE -->
+                        <button
+                            class="btn join-btn {% if request.user in event.participants.all %}btn-danger{% else %}btn-success{% endif %}"
+                            data-url="{% url 'join_event' event.pk %}"
+                        >
+                            {% if request.user in event.participants.all %}
+                                Leave Event
+                            {% else %}
+                                Join Event
+                            {% endif %}
+                        </button>
 
                         <div class="dropdown">
                             <button data-bs-toggle="dropdown">
@@ -244,10 +223,60 @@ body {
                             </ul>
                         </div>
                     {% endif %}
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ================= AJAX SCRIPT ================= -->
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".join-btn");
+    if (!btn) return;
+
+    const url = btn.dataset.url;
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+    })
+    .then(data => {
+        if (data.joined) {
+            btn.textContent = "Leave Event";
+            btn.classList.remove("btn-success");
+            btn.classList.add("btn-danger");
+        } else {
+            btn.textContent = "Join Event";
+            btn.classList.remove("btn-danger");
+            btn.classList.add("btn-success");
+        }
+    })
+    .catch(err => console.error(err));
+});
+</script>
+
 
 {% endblock %}

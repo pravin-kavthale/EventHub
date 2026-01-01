@@ -17,7 +17,6 @@
         gap: 14px;
     }
 
-    /* Header */
     .chat-header {
         background: rgba(255,255,255,0.65);
         backdrop-filter: blur(12px);
@@ -31,7 +30,6 @@
         justify-content: space-between;
     }
 
-    /* Chat Body */
     .chat-body {
         background: rgba(255,255,255,0.75);
         backdrop-filter: blur(14px);
@@ -42,7 +40,6 @@
         box-shadow: 0 18px 40px rgba(0,0,0,0.08);
     }
 
-    /* Message Group */
     .msg-row {
         display: flex;
         margin-bottom: 18px;
@@ -91,7 +88,6 @@
         text-align: right;
     }
 
-    /* Input */
     .chat-input {
         background: rgba(255,255,255,0.7);
         backdrop-filter: blur(12px);
@@ -111,10 +107,9 @@
     }
 
     .chat-input :hover{
-        
         border-color: #153bf8;
-
     }
+
     .chat-input input:focus {
         border-color: #6366f1;
         box-shadow: 0 0 0 2px rgba(99,102,241,0.18);
@@ -135,7 +130,6 @@
         box-shadow: 0 8px 22px rgba(79,70,229,0.4);
     }
 
-    /* Join Card */
     .join-card {
         background: rgba(255,255,255,0.75);
         backdrop-filter: blur(14px);
@@ -144,7 +138,6 @@
         text-align: center;
         box-shadow: 0 18px 40px rgba(0,0,0,0.08);
     }
-
 </style>
 
 <div class="container mt-5 chat-shell">
@@ -186,12 +179,58 @@
 
     {% else %}
         <div class="join-card">
-            <p class="mb-4" style="color:black">You must join this event to participate in chat.</p>
-            <form method="POST" action="{% url 'join_event' event.pk %}">
+            <p class="mb-4" style="color:black">
+                You must join this event to participate in chat.
+            </p>
+
+            <form method="POST"
+                  action="{% url 'join_event' event.pk %}"
+                  id="join-event-form">
                 {% csrf_token %}
-                <button class="send-btn">Join Event</button>
+                <button class="send-btn" data-event-id="{{ event.pk }}">
+                    Join Event
+                </button>
             </form>
         </div>
+
+        <script>
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    document.cookie.split(";").forEach(cookie => {
+                        cookie = cookie.trim();
+                        if (cookie.startsWith(name + "=")) {
+                            cookieValue = decodeURIComponent(
+                                cookie.substring(name.length + 1)
+                            );
+                        }
+                    });
+                }
+                return cookieValue;
+            }
+
+            const joinForm = document.getElementById("join-event-form");
+
+            if (joinForm) {
+                joinForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    fetch(joinForm.action, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.joined) {
+                            location.reload();
+                        }
+                    });
+                });
+            }
+        </script>
     {% endif %}
 
 </div>
