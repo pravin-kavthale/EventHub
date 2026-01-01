@@ -33,12 +33,7 @@
 
             <h5 class="fw-bold text-dark">{{ event.title }}</h5>
 
-            <!-- ✅ ORGANIZER -->
             <small class="text-muted">
-                Organized by <strong>{{ event.organizer.username }}</strong>
-            </small>
-
-            <small class="text-muted mt-1">
                 <i class="fas fa-map-marker-alt"></i> {{ event.location }} <br>
                 <i class="fas fa-clock"></i> {{ event.date|date:"d M Y, h:i A" }}
             </small>
@@ -46,6 +41,14 @@
             <p class="mt-2 text-dark">
                 {{ event.description|truncatewords:20 }}
             </p>
+
+            <!-- Organizer -->
+            <small class="text-muted mb-2">
+                Organized by
+                <a href="{% url 'user_profile' username=event.organizer.username %}">
+                    {{ event.organizer.username }}
+                </a>
+            </small>
 
             <div class="mt-auto d-flex align-items-center justify-content-between flex-wrap">
 
@@ -58,20 +61,14 @@
                         {% else %}
                             <i class="far fa-heart text-secondary fs-5"></i>
                         {% endif %}
-                        <!-- ✅ LIKE COUNT -->
-                        <small class="text-muted ms-1">
-                            {{ event.likes.count }}
-                        </small>
+                        <small>{{ event.likes.count }}</small>
                     </button>
                 </form>
 
                 <!-- COMMENT -->
                 <a href="{% url 'comment_event' event.pk %}">
                     <i class="far fa-comment text-secondary fs-5"></i>
-                    <!-- ✅ COMMENT COUNT -->
-                    <small class="text-muted ms-1">
-                        {{ event.comments.count }}
-                    </small>
+                    <small>{{ event.comments.count }}</small>
                 </a>
 
                 <!-- VIEW -->
@@ -84,10 +81,15 @@
                     Chat
                 </a>
 
-                <!-- JOIN / LEAVE AJAX -->
+                <!-- JOIN / LEAVE -->
                 {% if request.user != event.organizer %}
                 <button
-                    class="btn btn-sm join-btn {% if request.user in event.participants.all %}btn-danger{% else %}btn-success{% endif %}"
+                    class="btn btn-sm join-btn
+                    {% if request.user in event.participants.all %}
+                        btn-danger
+                    {% else %}
+                        btn-success
+                    {% endif %}"
                     data-url="{% url 'join_event' event.pk %}"
                 >
                     {% if request.user in event.participants.all %}
@@ -98,29 +100,64 @@
                 </button>
                 {% endif %}
 
-            </div>
+                <!-- ORGANIZER DROPDOWN -->
+                {% if request.user == event.organizer %}
+                <div class="dropdown">
+                    <button
+                        class="btn p-0 m-0 text-secondary"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        style="border:none;background:transparent;"
+                    >
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
 
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'event_update' event.pk %}">
+                                Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               href="{% url 'event_delete' event.pk %}"
+                               onclick="return confirm('Delete this event?');">
+                                Delete
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               href="{% url 'report_event' event.pk %}"
+                               onclick="return confirm('Report this event?');">
+                                Report
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+                {% endif %}
+
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        document.cookie.split(";").forEach(cookie => {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + "=")) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    let value = null;
+    if (document.cookie) {
+        document.cookie.split(";").forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + "=")) {
+                value = decodeURIComponent(c.substring(name.length + 1));
             }
         });
     }
-    return cookieValue;
+    return value;
 }
 
 document.querySelectorAll(".join-btn").forEach(btn => {
     btn.addEventListener("click", function () {
-
         if (btn.disabled) return;
         btn.disabled = true;
 
@@ -131,7 +168,7 @@ document.querySelectorAll(".join-btn").forEach(btn => {
                 "X-Requested-With": "XMLHttpRequest"
             }
         })
-        .then(res => res.json())
+        .then(r => r.json())
         .then(data => {
             if (data.joined) {
                 btn.textContent = "Leave";
@@ -143,9 +180,7 @@ document.querySelectorAll(".join-btn").forEach(btn => {
                 btn.classList.add("btn-success");
             }
         })
-        .finally(() => {
-            btn.disabled = false;
-        });
+        .finally(() => btn.disabled = false);
     });
 });
 </script>
