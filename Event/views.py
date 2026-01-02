@@ -106,12 +106,7 @@ class MyEvents(LoginRequiredMixin, ListView):
 
         qs = qs.annotate(
         status=Case(
-                    When(
-                                date__date=now.date(),
-                                start_time__lte=now.time(),
-                                end_time__gte=now.time(),
-                                then=Value('ongoing')
-                        ),
+                    When(date__date=now.date(),then=Value('ongoing')),
                     When(date__lt=now, then=Value('completed')),
                     When(date__gt=now, then=Value('upcoming')),
                     default=Value('ongoing'),
@@ -235,7 +230,7 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     def test_func(self):
         return self.request.user.is_superuser
 
-# Like view
+#Like view 
 class LikeView(LoginRequiredMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
@@ -246,19 +241,13 @@ class LikeView(LoginRequiredMixin, View):
         ).first()
 
         if like:
-            # 🔻 UNLIKE
             like.delete()
-            event.likes.remove(request.user)
-
         else:
-            # 🔺 LIKE
             Like.objects.create(
                 user=request.user,
                 event=event
             )
-            event.likes.add(request.user)
 
-            # notify only if not self-like
             if event.organizer != request.user:
                 Notification.objects.create(
                     sender=request.user,
