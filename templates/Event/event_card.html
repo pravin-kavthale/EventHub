@@ -32,7 +32,7 @@
         <div class="card-body d-flex flex-column">
 
             <h5 class="fw-bold text-dark">{{ event.title }}</h5>
-            <!-- Organizer -->
+
             <small class="text-muted mb-2">
                 Organized by
                 <a href="{% url 'user_profile' username=event.organizer.username %}">
@@ -40,13 +40,11 @@
                 </a>
             </small>
 
-
             <small class="text-muted">
                 <i class="fas fa-map-marker-alt"></i> {{ event.location }} <br>
                 <i class="fas fa-clock"></i> {{ event.date|date:"d M Y, h:i A" }}
             </small>
 
-            <!-- CATEGORY -->
             <div class="mb-2">
                 {% if event.category %}
                     <span class="badge bg-info">
@@ -61,19 +59,14 @@
                 {{ event.description|truncatewords:20 }}
             </p>
 
-            
             <div class="mt-auto d-flex align-items-center justify-content-between flex-wrap">
 
-                <!-- LIKE (POST ONLY – NO AJAX) -->
-                <form action="{% url 'like_event' event.pk %}" method="post">
+                <!-- ✅ LIKE (AJAX FIXED, RED WHEN LIKED) -->
+                <form action="{% url 'like_event' event.pk %}" method="post" class="like-form">
                     {% csrf_token %}
                     <button type="submit" style="border:none;background:none">
-                        {% if event.is_liked %}
-                            <i class="fas fa-heart text-danger fs-5"></i>
-                        {% else %}
-                            <i class="far fa-heart text-secondary fs-5"></i>
-                        {% endif %}
-                        <small>{{ event.likes.count }}</small>
+                        <i class="{% if event.is_liked %}fas text-danger{% else %}far text-secondary{% endif %} fa-heart fs-5"></i>
+                        <small class="like-count">{{ event.likes.count }}</small>
                     </button>
                 </form>
 
@@ -93,7 +86,7 @@
                     Chat
                 </a>
 
-                <!-- JOIN / LEAVE (AJAX) -->
+                <!-- JOIN / LEAVE -->
                 {% if request.user != event.organizer %}
                     <button
                         class="btn btn-sm join-btn {% if request.user in event.participants.all %}btn-danger{% else %}btn-success{% endif %}"
@@ -105,41 +98,6 @@
                         {% endif %}
                     </button>
                 {% endif %}
-
-                <!-- ORGANIZER DROPDOWN -->
-                {% if request.user == event.organizer %}
-                <div class="dropdown">
-                    <button class="btn p-0 m-0 text-secondary"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            style="border:none;background:transparent;">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{% url 'event_update' event.pk %}">
-                                Edit
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger"
-                               href="{% url 'event_delete' event.pk %}"
-                               onclick="return confirm('Delete this event?');">
-                                Delete
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger"
-                               href="{% url 'report_event' event.pk %}"
-                               onclick="return confirm('Report this event?');">
-                                Report
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                {% endif %}
-
             </div>
         </div>
     </div>
@@ -159,12 +117,19 @@ function getCookie(name) {
     return value;
 }
 
-document.querySelectorAll(".join-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-        if (btn.disabled) return;
-        btn.disabled = true;
+document.querySelectorAll(".like-form").forEach(form => {
 
-        fetch(btn.dataset.url, {
+    // 🚫 PREVENT MULTIPLE BINDINGS
+    if (form.dataset.bound === "true") return;
+    form.dataset.bound = "true";
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const icon = form.querySelector("i");
+        const count = form.querySelector(".like-count");
+
+        fetch(form.action, {
             method: "POST",
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -173,17 +138,15 @@ document.querySelectorAll(".join-btn").forEach(btn => {
         })
         .then(r => r.json())
         .then(data => {
-            if (data.joined) {
-                btn.textContent = "Leave";
-                btn.classList.remove("btn-success");
-                btn.classList.add("btn-danger");
+            if (data.liked) {
+                icon.classList.remove("far", "text-secondary");
+                icon.classList.add("fas", "text-danger");
             } else {
-                btn.textContent = "Join";
-                btn.classList.remove("btn-danger");
-                btn.classList.add("btn-success");
+                icon.classList.remove("fas", "text-danger");
+                icon.classList.add("far", "text-secondary");
             }
-        })
-        .finally(() => btn.disabled = false);
+            count.textContent = data.likes_count;
+        });
     });
 });
 </script>

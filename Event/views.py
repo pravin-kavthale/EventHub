@@ -33,6 +33,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 
 
+
 # Event Views
 class CreateEvent(CreateView):
     model=Event
@@ -231,37 +232,36 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         return self.request.user.is_superuser
 
 #Like view 
+
 class LikeView(LoginRequiredMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
 
-        like = Like.objects.filter(
+        like, created = Like.objects.get_or_create(
             user=request.user,
             event=event
-        ).first()
+        )
 
-        if like:
+        if not created:
             like.delete()
+            liked = False
         else:
-            Like.objects.create(
-                user=request.user,
-                event=event
-            )
-
+            liked = True
             if event.organizer != request.user:
                 Notification.objects.create(
                     sender=request.user,
                     receiver=event.organizer,
                     event=event,
-                    message=f"{request.user.username} has liked your event {event.title}",
-                    action_url=reverse(
-                        'event_detail',
-                        kwargs={'pk': event.pk}
-                    ),
-                    type='Like'
+                    message=f"{request.user.username} liked your event {event.title}",
+                    action_url=reverse("event_detail", kwargs={"pk": event.pk}),
+                    type="Like"
                 )
 
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return JsonResponse({
+            "liked": liked,
+            "likes_count": Like.objects.filter(event=event).count()
+        })
+
 
 class EventAttendanceView(LoginRequiredMixin, View):
     def post(self, request, pk):
