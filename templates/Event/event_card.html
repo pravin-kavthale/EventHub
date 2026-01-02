@@ -32,16 +32,6 @@
         <div class="card-body d-flex flex-column">
 
             <h5 class="fw-bold text-dark">{{ event.title }}</h5>
-
-            <small class="text-muted">
-                <i class="fas fa-map-marker-alt"></i> {{ event.location }} <br>
-                <i class="fas fa-clock"></i> {{ event.date|date:"d M Y, h:i A" }}
-            </small>
-
-            <p class="mt-2 text-dark">
-                {{ event.description|truncatewords:20 }}
-            </p>
-
             <!-- Organizer -->
             <small class="text-muted mb-2">
                 Organized by
@@ -50,9 +40,31 @@
                 </a>
             </small>
 
+
+            <small class="text-muted">
+                <i class="fas fa-map-marker-alt"></i> {{ event.location }} <br>
+                <i class="fas fa-clock"></i> {{ event.date|date:"d M Y, h:i A" }}
+            </small>
+
+            <!-- CATEGORY -->
+            <div class="mb-2">
+                {% if event.category %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-tags me-1"></i>
+                        {{ event.category.name }}
+                    </span>
+                {% endif %}
+                <span class="badge bg-success">{{ event.get_status }}</span>
+            </div>
+
+            <p class="mt-2 text-dark">
+                {{ event.description|truncatewords:20 }}
+            </p>
+
+            
             <div class="mt-auto d-flex align-items-center justify-content-between flex-wrap">
 
-                <!-- LIKE -->
+                <!-- LIKE (POST ONLY – NO AJAX) -->
                 <form action="{% url 'like_event' event.pk %}" method="post">
                     {% csrf_token %}
                     <button type="submit" style="border:none;background:none">
@@ -81,34 +93,26 @@
                     Chat
                 </a>
 
-                <!-- JOIN / LEAVE -->
+                <!-- JOIN / LEAVE (AJAX) -->
                 {% if request.user != event.organizer %}
-                <button
-                    class="btn btn-sm join-btn
-                    {% if request.user in event.participants.all %}
-                        btn-danger
-                    {% else %}
-                        btn-success
-                    {% endif %}"
-                    data-url="{% url 'join_event' event.pk %}"
-                >
-                    {% if request.user in event.participants.all %}
-                        Leave
-                    {% else %}
-                        Join
-                    {% endif %}
-                </button>
+                    <button
+                        class="btn btn-sm join-btn {% if request.user in event.participants.all %}btn-danger{% else %}btn-success{% endif %}"
+                        data-url="{% url 'join_event' event.pk %}">
+                        {% if request.user in event.participants.all %}
+                            Leave
+                        {% else %}
+                            Join
+                        {% endif %}
+                    </button>
                 {% endif %}
 
                 <!-- ORGANIZER DROPDOWN -->
                 {% if request.user == event.organizer %}
                 <div class="dropdown">
-                    <button
-                        class="btn p-0 m-0 text-secondary"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        style="border:none;background:transparent;"
-                    >
+                    <button class="btn p-0 m-0 text-secondary"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            style="border:none;background:transparent;">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
 
@@ -132,7 +136,6 @@
                                 Report
                             </a>
                         </li>
-                        
                     </ul>
                 </div>
                 {% endif %}
