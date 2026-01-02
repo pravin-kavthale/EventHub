@@ -95,6 +95,37 @@ class EventList(ListView):
         context['selected_category'] = self.request.GET.get('category', '')
         return context
 
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class EventDetails(DetailView):
+    model=Event
+    template_name='Event/event_detail.html'
+    context_object_name='event'
+
+class EventUpdate(LoginRequiredMixin, UpdateView):
+    model = Event
+    fields = ['title','description','category','date','location','start_time','end_time','image']
+    template_name='Event/event_form.html'
+    success_url = reverse_lazy('event_list')
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
+
+class EventDelete(LoginRequiredMixin,DeleteView):
+    model=Event
+    template_name='Event/event_delete.html'
+    success_url=reverse_lazy('event_list')
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user)
+
+
+# Event Filter Views
 class MyEvents(LoginRequiredMixin, ListView):
     model = Event
     template_name = 'Event/MyEvents.html'
@@ -165,33 +196,19 @@ class joinedEvents(LoginRequiredMixin,ListView):
 
         return context
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
-class EventDetails(DetailView):
+class LikedEvents(LoginRequiredMixin,ListView):
     model=Event
-    template_name='Event/event_detail.html'
-    context_object_name='event'
-
-class EventUpdate(LoginRequiredMixin, UpdateView):
-    model = Event
-    fields = ['title','description','category','date','location','start_time','end_time','image']
-    template_name='Event/event_form.html'
-    success_url = reverse_lazy('event_list')
+    template_name='Event/liked_events.html'
+    context_object_name='events'
 
     def get_queryset(self):
-        return Event.objects.filter(organizer=self.request.user)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
-        return context
+        return (
+            Event.objects
+            .filter(like__user=self.request.user)
+            .order_by('-like__created_at')
+            .distinct()
+        )
 
-class EventDelete(LoginRequiredMixin,DeleteView):
-    model=Event
-    template_name='Event/event_delete.html'
-    success_url=reverse_lazy('event_list')
-
-    def get_queryset(self):
-        return Event.objects.filter(organizer=self.request.user)
 
 # Category Views
 class CreateCategory(CreateView):
@@ -263,33 +280,7 @@ class LikeView(LoginRequiredMixin, View):
         })
 
 
-class EventAttendanceView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        event = get_object_or_404(Event, pk=pk)
-        status = request.POST.get('status', 'going')  # default to 'going'
-
-        attendance, created = EventAttendance.objects.get_or_create(
-            user=request.user,
-            event=event,
-            defaults={'status': status}  # only used if created
-        )
-        if not created:
-            # If already exists, delete it (toggle off)
-            attendance.delete()
-
-        return redirect('event_detail', pk=pk)
-
-class getEventAttendance(LoginRequiredMixin,UserPassesTestMixin,ListView):
-    model=EventAttendance
-    template_name='Event/event_attendance.html'
-    context_object_name='attendances'
-
-    def get_queryset(self):
-        self.event = get_object_or_404(Event, pk=self.kwargs['pk'])
-        return EventAttendance.objects.filter(event=self.event)
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user == self.event.organizer
-
+#Chatroom
 class ChatRoomView(LoginRequiredMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
