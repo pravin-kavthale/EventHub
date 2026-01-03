@@ -4,12 +4,11 @@ from django.views.generic import CreateView,DetailView,ListView,UpdateView,Delet
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment,Report
 from django.urls import reverse_lazy 
-from django.db.models import Count
 from django.views import View
 from django.contrib import messages
 from .forms import CategoryForm 
 from django.utils import timezone
-from django.db.models import Case, When, Value, CharField
+
 from user.models import Notification
 from django.shortcuts import reverse
 from .utils import search_events
@@ -24,13 +23,18 @@ from django.db.models import (
     OuterRef,
     Exists,
     F,
-    IntegerField 
+    IntegerField ,
+    CharField,
+    
 )
 
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+
+from .utils import with_likes
+
 
 
 
@@ -80,14 +84,14 @@ class EventList(ListView):
     context_object_name='events'
 
     def get_queryset(self):
-        qs=Event.objects.all().order_by('-start_time')
-        category_filter = self.request.GET.get('category')  
+        qs = Event.objects.all().order_by('-start_time')
+
+        category_filter = self.request.GET.get('category')
         if category_filter:
             qs = qs.filter(category__id=category_filter)
-        user = self.request.user
-        for event in qs:
-            event.is_liked = event.is_likeby(user)
-        return qs
+
+        return with_likes(qs, self.request.user)
+
 
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
@@ -98,9 +102,14 @@ class EventList(ListView):
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class EventDetails(DetailView):
-    model=Event
-    template_name='Event/event_detail.html'
-    context_object_name='event'
+    model = Event
+    template_name = 'Event/event_detail.html'
+    context_object_name = 'event'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return with_likes(qs, self.request.user)
+
 
 class EventUpdate(LoginRequiredMixin, UpdateView):
     model = Event
@@ -137,19 +146,21 @@ class MyEvents(LoginRequiredMixin, ListView):
         qs = Event.objects.filter(organizer=self.request.user)
 
         qs = qs.annotate(
-        status=Case(
-                    When(date__date=now.date(),then=Value('ongoing')),
-                    When(date__lt=now, then=Value('completed')),
-                    When(date__gt=now, then=Value('upcoming')),
-                    default=Value('ongoing'),
-                    output_field=CharField()
-                )
+            status=Case(
+                When(date__date=now.date(), then=Value('ongoing')),
+                When(date__lt=now, then=Value('completed')),
+                When(date__gt=now, then=Value('upcoming')),
+                default=Value('ongoing'),
+                output_field=CharField()
+            )
         )
+
         status_filter = self.request.GET.get('status', 'all').lower()
         if status_filter in ['completed', 'ongoing', 'upcoming']:
             qs = qs.filter(status__iexact=status_filter)
 
-        return qs
+        # 🔴 REQUIRED FOR HEART STATE CONSISTENCY
+        return with_likes(qs, self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,7 +172,7 @@ class MyEvents(LoginRequiredMixin, ListView):
         context['completed_events_count'] = user_events.filter(date__lt=now).count()
         context['ongoing_events_count'] = user_events.filter(date=now.date()).count()
         context['upcoming_events_count'] = user_events.filter(date__gt=now).count()
-        
+
         return context
 
 class joinedEvents(LoginRequiredMixin,ListView):
@@ -182,7 +193,10 @@ class joinedEvents(LoginRequiredMixin,ListView):
 
         if status_filter in ['completed','ongoing','upcoming']:
             qs=qs.filter(status=status_filter)
-        return qs.order_by('-start_time')
+
+        qs = qs.order_by('-start_time')
+        return with_likes(qs, self.request.user)
+
     
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
@@ -196,18 +210,19 @@ class joinedEvents(LoginRequiredMixin,ListView):
 
         return context
 
-class LikedEvents(LoginRequiredMixin,ListView):
-    model=Event
-    template_name='Event/liked_events.html'
-    context_object_name='events'
+class LikedEvents(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = 'Event/liked_events.html'
+    context_object_name = 'events'
 
     def get_queryset(self):
-        return (
+        qs = (
             Event.objects
             .filter(like__user=self.request.user)
             .order_by('-like__created_at')
             .distinct()
         )
+        return with_likes(qs, self.request.user)
 
 
 # Category Views
@@ -249,7 +264,6 @@ class CategoryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         return self.request.user.is_superuser
 
 #Like view 
-
 class LikeView(LoginRequiredMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
@@ -274,11 +288,17 @@ class LikeView(LoginRequiredMixin, View):
                     type="Like"
                 )
 
-        return JsonResponse({
-            "liked": liked,
-            "likes_count": Like.objects.filter(event=event).count()
-        })
+        likes_count = Like.objects.filter(event=event).count()
 
+        # ✅ RETURN JSON ONLY FOR AJAX
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "liked": liked,
+                "likes_count": likes_count
+            })
+
+        # ✅ NORMAL POST → REDIRECT BACK
+        return redirect(request.META.get("HTTP_REFERER", "events"))
 
 #Chatroom
 class ChatRoomView(LoginRequiredMixin, View):
@@ -435,7 +455,9 @@ class EventSearchView(LoginRequiredMixin, ListView):
         query = self.request.GET.get("q", "")
         if not query:
             return Event.objects.none()
-        return search_events(query, limit=20)
+        qs = search_events(query, limit=20)
+        return with_likes(qs, self.request.user)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -453,14 +475,12 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
 
-        # 1️⃣ Categories from joined events (USER INTEREST PROFILE)
         preferred_categories = (
             Event.objects
             .filter(participants=user)
             .values_list("category_id", flat=True)
         )
 
-        # 2️⃣ Candidate events (exclude joined)
         qs = (
             Event.objects
             .exclude(participants=user)
@@ -478,35 +498,41 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
             )
         )
 
-        # optional category filter from dropdown
         category = self.request.GET.get("category")
         if category:
             qs = qs.filter(category_id=category)
 
+        # 🔴 convert to list ONLY for scoring
         events = list(qs)
 
-        # 3️⃣ Final personalization score
         for event in events:
             event.personalization_score = (
-                event.category_match * 3 +   # STRONG SIGNAL
-                event.liked_by_user * 1      # WEAK SIGNAL
+                event.category_match * 3 +
+                event.liked_by_user * 1
             )
 
-        # 4️⃣ Sort
         events.sort(
             key=lambda e: (e.personalization_score, e.created_at),
             reverse=True
         )
 
-        return events
+        # 🔴 CRITICAL: go back to QuerySet + apply with_likes
+        qs = Event.objects.filter(pk__in=[e.pk for e in events])
+        qs = qs.annotate(
+            personalization_order=Case(
+                *[
+                    When(pk=e.pk, then=Value(i))
+                    for i, e in enumerate(events)
+                ],
+                output_field=IntegerField()
+            )
+        ).order_by("personalization_order")
 
+        return with_likes(qs, user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # 🔴 THIS IS WHAT YOU WERE MISSING
         context["categories"] = Category.objects.all()
-
         context["selected_category"] = self.request.GET.get("category")
         return context
 

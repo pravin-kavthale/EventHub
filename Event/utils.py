@@ -1,7 +1,31 @@
 from django.db import connection
-from Event.models import Event
+from Event.models import Event,Like
+from django.db.models import Exists, OuterRef, Count, Q, IntegerField, Value
 
-from django.db.models import Case, When
+def with_likes(qs, user):
+    """
+    Annotates queryset with:
+    - is_liked (bool for current user)
+    - likes_count (total likes)
+    """
+    qs = qs.annotate(
+        likes_count=Count("like", distinct=True)
+    )
+
+    if user.is_authenticated:
+        return qs.annotate(
+            is_liked=Exists(
+                Like.objects.filter(
+                    user=user,
+                    event=OuterRef("pk")
+                )
+            )
+        )
+
+    return qs.annotate(
+        is_liked=Value(False, output_field=IntegerField())
+    )
+
 
 def search_events(query, limit=20):
     sql = """
