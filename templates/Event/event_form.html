@@ -1,6 +1,7 @@
+{% extends 'base/base.html' %}
 {% load static %}
 
-{% extends 'base/base.html' %}
+
 {% block title %}{{ view.object.pk|yesno:"Update Event,Create Event" }}{% endblock title %}
 {% block breadcrumb %}{{ view.object.pk|yesno:"Update Event,Create Event" }}{% endblock breadcrumb %}
 
