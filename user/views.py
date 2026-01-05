@@ -16,6 +16,10 @@ from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from django.urls import reverse
 
+
+from django.http import JsonResponse
+from django.db import transaction
+
 User = get_user_model() 
 
 def register(request):
@@ -253,19 +257,18 @@ class ListFollowing(LoginRequiredMixin,ListView):
         context['users'] = [conn.following for conn in context['connections']]
         return context
 
-class ProfilePrivacy(LoginRequiredMixin, UserPassesTestMixin, View):
-    model = Profile
-    def test_func(self):
-        profile = get_object_or_404(Profile, user=self.request.user)
-        return self.request.user == profile.user
 
+class ProfilePrivacy(LoginRequiredMixin, View):
+
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        profile = get_object_or_404(Profile, user=self.request.user)
-        profile.is_private=not profile.is_private
+        profile = get_object_or_404(Profile, user=request.user)
+
+        profile.is_private = not profile.is_private
         profile.save()
-        if profile.is_private:
-            messages.success(request, "Your profile is now Private.")
-        else:
-            messages.success(request, "Your profile is now Public.")
-        return redirect(request.META.get('HTTP_REFERER', 'profile'))
+
+        return JsonResponse({
+            "success": True,
+            "is_private": profile.is_private
+        })
 

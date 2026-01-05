@@ -285,76 +285,79 @@
                       </div>
                     </div>
 
+
+                    <!-- Privacy Setting Card -->
                     <div class="card card-outline card-warning">
                       <div class="card-header">
                         <h3 class="card-title">Privacy Settings</h3>
                       </div>
                       <div class="card-body text-center">
-                        <form action="{% url 'Profile_Privacy' target_user.id %}" method="post" id="privacyForm">
+                        <form id="privacyForm">
                           {% csrf_token %}
                           <div class="custom-control custom-switch">
                             <input type="checkbox"
-                                          class="custom-control-input"
-                                          id="privacySwitch"
-                                          name="is_private"
-                                          {% if target_user.profile.is_private %}checked{% endif %}
-                                          onchange="document.getElementById('privacyForm').submit();">
+                                  class="custom-control-input"
+                                  id="privacySwitch"
+                                  {% if target_user.profile.is_private %}checked{% endif %}>
                             <label class="custom-control-label" for="privacySwitch">
-                              {% if target_user.profile.is_private %}
-                                Profile is Private
-                              {% else %}
-                                Profile is Public
-                              {% endif %}
+                              <span id="privacyLabel">
+                                {% if target_user.profile.is_private %}
+                                  Profile is Private
+                                {% else %}
+                                  Profile is Public
+                                {% endif %}
+                              </span>
                             </label>
+                          </div>
+                        </form>
+
+                      </div>
+                    </div>
+                    <div class="card card-outline card-danger mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h3 class="card-title m-0">Change Password</h3>
+                      <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#changePasswordForm" aria-expanded="false" aria-controls="changePasswordForm">
+                        <i class="fas fa-chevron-down"></i>
+                      </button>
+                    </div>
+
+                    <div id="changePasswordForm" class="collapse">
+                      <div class="card-body">
+                        <form method="post" action="{% url 'password_change' %}">
+                          {% csrf_token %}
+                          {{ password_form.non_field_errors }}
+
+                          <div class="form-group">
+                            {{ password_form.old_password.label_tag }}
+                            {{ password_form.old_password }}
+                            {% for error in password_form.old_password.errors %}
+                              <p class="text-danger small">{{ error }}</p>
+                            {% endfor %}
+                          </div>
+
+                          <div class="form-group">
+                            {{ password_form.new_password1.label_tag }}
+                            {{ password_form.new_password1 }}
+                            {% for error in password_form.new_password1.errors %}
+                              <p class="text-danger small">{{ error }}</p>
+                            {% endfor %}
+                          </div>
+
+                          <div class="form-group">
+                            {{ password_form.new_password2.label_tag }}
+                            {{ password_form.new_password2 }}
+                            {% for error in password_form.new_password2.errors %}
+                              <p class="text-danger small">{{ error }}</p>
+                            {% endfor %}
+                          </div>
+
+                          <div class="form-group">
+                            <button type="submit" class="btn btn-danger">Update Password</button>
                           </div>
                         </form>
                       </div>
                     </div>
-<div class="card card-outline card-danger mb-4">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h3 class="card-title m-0">Change Password</h3>
-    <button class="btn btn-tool" type="button" data-toggle="collapse" data-target="#changePasswordForm" aria-expanded="false" aria-controls="changePasswordForm">
-      <i class="fas fa-chevron-down"></i>
-    </button>
-  </div>
-
-  <div id="changePasswordForm" class="collapse">
-    <div class="card-body">
-      <form method="post" action="{% url 'password_change' %}">
-        {% csrf_token %}
-        {{ password_form.non_field_errors }}
-
-        <div class="form-group">
-          {{ password_form.old_password.label_tag }}
-          {{ password_form.old_password }}
-          {% for error in password_form.old_password.errors %}
-            <p class="text-danger small">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="form-group">
-          {{ password_form.new_password1.label_tag }}
-          {{ password_form.new_password1 }}
-          {% for error in password_form.new_password1.errors %}
-            <p class="text-danger small">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="form-group">
-          {{ password_form.new_password2.label_tag }}
-          {{ password_form.new_password2 }}
-          {% for error in password_form.new_password2.errors %}
-            <p class="text-danger small">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="form-group">
-          <button type="submit" class="btn btn-danger">Update Password</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+                    </div>
 
 
                     </div>
@@ -426,56 +429,78 @@
 
 {% include 'base/js.html' %}
 
+
 <script>
-$(document).ready(function() {
+$(function () {
+
     const targetUserId = "{{ target_user.id }}";
 
-    // Only set up URLs if targetUserId is available (i.e., not an empty string or 0 if that's possible)
+    /* ------------------ Followers / Following ------------------ */
     if (targetUserId) {
-        // Replace '0' placeholder with the actual user ID
         const followersUrl = "{% url 'list_followers' user_id=0 %}".replace('0', targetUserId);
         const followingsUrl = "{% url 'list_followings' user_id=0 %}".replace('0', targetUserId);
 
         function loadModalContent(url, bodyId) {
-            const $modalBody = $(`#${bodyId}`);
-            $modalBody.html('<p class="text-center text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Loading list...</p>');
+            const $modalBody = $('#' + bodyId);
+            $modalBody.html(
+                '<p class="text-center text-muted">' +
+                '<i class="fas fa-spinner fa-spin mr-2"></i> Loading list...</p>'
+            );
 
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function(data) {
-                    $modalBody.html(data);
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX Error loading connection list:", error);
-                    $modalBody.html('<p class="text-center text-danger">Error loading list. Check your URL configuration and templates.</p>');
-                }
-            });
+            $.get(url)
+                .done(data => $modalBody.html(data))
+                .fail(() => {
+                    $modalBody.html(
+                        '<p class="text-center text-danger">Failed to load list.</p>'
+                    );
+                });
         }
-        $('#followersModal').on('show.bs.modal', function (e) {
-            loadModalContent(followersUrl, 'followers-modal-body');
-        });
-        $('#followingModal').on('show.bs.modal', function (e) {
-            loadModalContent(followingsUrl, 'following-modal-body');
-        });
+
+        $('#followersModal').on('show.bs.modal', () =>
+            loadModalContent(followersUrl, 'followers-modal-body')
+        );
+
+        $('#followingModal').on('show.bs.modal', () =>
+            loadModalContent(followingsUrl, 'following-modal-body')
+        );
     }
 
+    /* ------------------ Profile Privacy Toggle ------------------ */
+    $(document).on('change', '#privacySwitch', function () {
+        const $switch = $(this);
+        const isChecked = $switch.is(':checked');
+        const csrfToken = $('[name=csrfmiddlewaretoken]').first().val();
 
-    // Zoom effect for profile image
-    let zoomed = false;
-    $('#zoomImage').on('click', function() {
-        if (!zoomed) {
-            $(this).css('transform', 'scale(1.5)');
-            $(this).css('cursor', 'zoom-out');
-            zoomed = true;
-        } else {
-            $(this).css('transform', 'scale(1)');
-            $(this).css('cursor', 'zoom-in');
-            zoomed = false;
-        }
+        $.ajax({
+            url: "{% url 'Profile_Privacy' target_user.id %}",
+            method: "POST",
+            headers: { 'X-CSRFToken': csrfToken },
+            dataType: "json",
+            success: function (response) {
+                $('#privacyLabel').text(
+                    response.is_private ? 'Profile is Private' : 'Profile is Public'
+                );
+            },
+            error: function () {
+                // rollback UI state
+                $switch.prop('checked', !isChecked);
+                alert('Privacy update failed');
+            }
+        });
     });
-});
 
+    /* ------------------ Image Zoom ------------------ */
+    let zoomed = false;
+    $(document).on('click', '#zoomImage', function () {
+        $(this).css({
+            transform: zoomed ? 'scale(1)' : 'scale(1.5)',
+            cursor: zoomed ? 'zoom-in' : 'zoom-out'
+        });
+        zoomed = !zoomed;
+    });
+
+});
 </script>
+
 </body>
 </html>
