@@ -472,7 +472,7 @@ $(function () {
         const csrfToken = $('[name=csrfmiddlewaretoken]').first().val();
 
         $.ajax({
-            url: "{% url 'Profile_Privacy' target_user.id %}",
+            url: "{% url 'Profile_Privacy' %}",
             method: "POST",
             headers: { 'X-CSRFToken': csrfToken },
             dataType: "json",
@@ -482,12 +482,12 @@ $(function () {
                 );
             },
             error: function () {
-                // rollback UI state
                 $switch.prop('checked', !isChecked);
                 alert('Privacy update failed');
             }
         });
     });
+
 
     /* ------------------ Image Zoom ------------------ */
     let zoomed = false;

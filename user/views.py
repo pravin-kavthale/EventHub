@@ -18,7 +18,11 @@ from django.urls import reverse
 
 
 from django.http import JsonResponse
+
 from django.db import transaction
+
+from django.views import View
+
 
 User = get_user_model() 
 
@@ -257,18 +261,16 @@ class ListFollowing(LoginRequiredMixin,ListView):
         context['users'] = [conn.following for conn in context['connections']]
         return context
 
-
 class ProfilePrivacy(LoginRequiredMixin, View):
 
     @transaction.atomic
-    def post(self, request, *args, **kwargs):
-        profile = get_object_or_404(Profile, user=request.user)
+    def post(self, request):
+        profile, _ = Profile.objects.get_or_create(user=request.user)
 
         profile.is_private = not profile.is_private
-        profile.save()
+        profile.save(update_fields=['is_private'])
 
         return JsonResponse({
             "success": True,
             "is_private": profile.is_private
         })
-

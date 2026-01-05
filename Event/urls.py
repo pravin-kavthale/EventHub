@@ -2,13 +2,14 @@ from django.urls import path
 from . import views
 from user import views as user_views
 from django.contrib.auth import views as auth_views
+from django.db import transaction
 
 urlpatterns = [
     # User Authentication URLs
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
     path('profile/<str:username>/', user_views.profile, name='user_profile'),
-    path('ProfilePrivacy/<int:pk>/', user_views.ProfilePrivacy.as_view(), name='Profile_Privacy'),
+    path('ProfilePrivacy/',user_views.ProfilePrivacy.as_view(),name='Profile_Privacy'),
     path('password-change/', user_views.password_change, name='password_change'),
     path(
         'password-reset/',
