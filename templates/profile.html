@@ -38,7 +38,7 @@
 
               <div class="card-header bg-light border-0 p-4">
                   <div class="d-flex align-items-center">
-                      {% if target_user.profile.image.url%}
+                      {% if target_user.profile.image %}
                       <img class="profile-user-img img-fluid img-circle"
                            style="height: 90px; width: 90px; border: 3px solid #ced4da; cursor: pointer;"
                            src="{{ target_user.profile.image.url }}"
@@ -52,7 +52,7 @@
                            alt="{{ target_user.username }} profile picture"
                            data-toggle="modal"
                            data-target="#imageModal">
-                      {%end%}
+                      {% endif %}
 
                       <div class="user-details flex-grow-1 ml-3 ml-md-4">
                           <h2 class="profile-username m-0">{{ target_user.username }}</h2>
