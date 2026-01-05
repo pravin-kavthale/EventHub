@@ -38,7 +38,7 @@
 
               <div class="card-header bg-light border-0 p-4">
                   <div class="d-flex align-items-center">
-                      {% if target_user.profile.image %}
+                      {% if target_user.profile and target_user.profile.image %}
                         <img class="profile-user-img img-fluid img-circle"
                             style="height: 90px; width: 90px; border: 3px solid #ced4da; cursor: pointer;"
                             src="{{ target_user.profile.image.url }}"
@@ -48,7 +48,7 @@
                       {% else %}
                         <img class="profile-user-img img-fluid img-circle"
                             style="height: 90px; width: 90px; border: 3px solid #ced4da; cursor: pointer;"
-                            src="{% static 'img/default_profile.png' %}"
+                            src="{% static 'img/default.jpg' %}"
                             alt="{{ target_user.username }} profile picture"
                             data-toggle="modal"
                             data-target="#imageModal">
@@ -137,42 +137,42 @@
               <div class="card-body">
                 <div class="tab-content">
                   <div class="active tab-pane" id="details">
-    <div class="row">
-      <div class="col-md-6">
-        <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
-        <p class="text-muted">{{ target_user.profile.FullName|default:target_user.username }}</p>
-        <hr>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <strong><i class="fas fa-user mr-1"></i> Full Name</strong>
+                        <p class="text-muted">{{ target_user.profile.FullName|default:target_user.username }}</p>
+                        <hr>
 
-        <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
-        {% if target_user == request.user or target_user.is_superuser %}
-          <p class="text-muted">{{ target_user.email }}</p>
-        {% else %}
-          <p class="text-muted">Private</p>
-        {% endif %}
-        <hr>
+                        <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+                        {% if target_user == request.user or target_user.is_superuser %}
+                          <p class="text-muted">{{ target_user.email }}</p>
+                        {% else %}
+                          <p class="text-muted">Private</p>
+                        {% endif %}
+                        <hr>
 
-        <strong><i class="fas fa-quote-left mr-1"></i> Bio</strong>
-        <p class="text-muted">{{ target_user.profile.Bio|default:"No bio set yet." }}</p>
-        <hr>
+                        <strong><i class="fas fa-quote-left mr-1"></i> Bio</strong>
+                        <p class="text-muted">{{ target_user.profile.Bio|default:"No bio set yet." }}</p>
+                        <hr>
 
-        <strong><i class="fas fa-calendar mr-1"></i> Date Joined</strong>
-        <p class="text-muted">{{ target_user.date_joined|date:"M. d, Y, h:i a." }}</p>
-      </div>
+                        <strong><i class="fas fa-calendar mr-1"></i> Date Joined</strong>
+                        <p class="text-muted">{{ target_user.date_joined|date:"M. d, Y, h:i a." }}</p>
+                      </div>
 
-      <div class="col-md-6">
-        <strong><i class="fas fa-birthday-cake mr-1"></i> Age</strong>
-        <p class="text-muted">{{ target_user.profile.Age|default:"-" }}</p>
-        <hr>
+                      <div class="col-md-6">
+                        <strong><i class="fas fa-birthday-cake mr-1"></i> Age</strong>
+                        <p class="text-muted">{{ target_user.profile.Age|default:"-" }}</p>
+                        <hr>
 
-        <strong><i class="fas fa-venus-mars mr-1"></i> Gender</strong>
-        <p class="text-muted">{{ target_user.profile.Gender|default:"-" }}</p>
-        <hr>
+                        <strong><i class="fas fa-venus-mars mr-1"></i> Gender</strong>
+                        <p class="text-muted">{{ target_user.profile.Gender|default:"-" }}</p>
+                        <hr>
 
-        <strong><i class="fas fa-phone mr-1"></i> Mobile Number</strong>
-        <p class="text-muted">{{ target_user.profile.MobileNumber|default:"-" }}</p>
-      </div>
-    </div>
-  </div>
+                        <strong><i class="fas fa-phone mr-1"></i> Mobile Number</strong>
+                        <p class="text-muted">{{ target_user.profile.MobileNumber|default:"-" }}</p>
+                      </div>
+                    </div>
+                  </div>
 
 
                   {% if target_user == request.user %}
