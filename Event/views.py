@@ -1,8 +1,8 @@
-from django.shortcuts import render,redirect, get_object_or_404,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import CreateView,DetailView,ListView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
-from .models import Event,Category,Like,ChatRoom,EventAttendance,Comment,Report
+from .models import Event,Category,Like,ChatRoom,Comment,Report,EventRegistration
 from django.urls import reverse_lazy 
 from django.views import View
 from django.contrib import messages
@@ -10,8 +10,8 @@ from .forms import CategoryForm
 from django.utils import timezone
 
 from user.models import Notification
-from django.shortcuts import reverse
-from .utils import search_events
+from django.urls import reverse
+
 import random
 from collections import defaultdict
 from django.db.models import (
@@ -33,9 +33,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 
-from .utils import with_likes
-
-
+from .utils import with_likes, generate_qr_code, search_events
 
 
 # Event Views
@@ -54,29 +52,35 @@ class CreateEvent(CreateView):
         return context
 
 class JoinEvent(LoginRequiredMixin, View):
-
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         user = request.user
 
-        # Organizer cannot join
         if user == event.organizer:
-            return JsonResponse(
-                {"error": "Organizer cannot join"},
-                status=403
-            )
+            return JsonResponse({"error": "Organizer cannot join"}, status=403)
 
-        if user in event.participants.all():
-            event.participants.remove(user)
+        registration = EventRegistration.objects.filter(
+            event=event,
+            user=user
+        ).first()
+
+        if registration:
+            registration.delete()
             joined = False
         else:
-            event.participants.add(user)
+            EventRegistration.objects.create(
+                event=event,
+                user=user
+            )
             joined = True
+
+        participants_count = EventRegistration.objects.filter(event=event).count()
 
         return JsonResponse({
             "joined": joined,
-            "participants_count": event.participants.count()
+            "participants_count": participants_count
         })
+
 
 class EventList(ListView):
     model=Event
@@ -175,40 +179,47 @@ class MyEvents(LoginRequiredMixin, ListView):
 
         return context
 
-class joinedEvents(LoginRequiredMixin,ListView):
-    model=Event
-    template_name='Event/joined_events.html'
-    context_object_name='events'
+
+class joinedEvents(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = 'Event/joined_events.html'
+    context_object_name = 'events'
 
     def get_queryset(self):
-        status_filter=self.request.GET.get('status','all').lower()
-        qs=Event.objects.filter(participants=self.request.user)
+        user = self.request.user
+        now = timezone.now()
 
-        qs=qs.annotate(status=Case(
-            When(date__lt=timezone.now(),then=Value('completed')),
-            When(date__gt=timezone.now(),then=Value('upcoming')),
-            default=Value('ongoing'),
-            output_field=CharField()            
-        ))
+        qs = Event.objects.filter(registrations__user=user).annotate(
+            status=Case(
+                When(date__lt=now, then=Value('completed')),
+                When(date__gt=now, then=Value('upcoming')),
+                default=Value('ongoing'),
+                output_field=CharField()
+            ),
+            is_registered=Exists(
+                EventRegistration.objects.filter(event=OuterRef('pk'), user=user)
+            )
+        )
 
-        if status_filter in ['completed','ongoing','upcoming']:
-            qs=qs.filter(status=status_filter)
+        status_filter = self.request.GET.get('status', 'all').lower()
+        if status_filter in ['completed', 'ongoing', 'upcoming']:
+            qs = qs.filter(status=status_filter)
 
-        qs = qs.order_by('-start_time')
-        return with_likes(qs, self.request.user)
+        return with_likes(qs.order_by('-start_time'), user)
 
-    
-    def get_context_data(self,**kwargs):
-        context=super().get_context_data(**kwargs)
-        now=timezone.now()
-        Joined_events=Event.objects.filter(participants=self.request.user)
-        context['current_status']=self.request.GET.get('status','all')
-        context['total_events']=Joined_events.count()
-        context['completed_events_count']=Joined_events.filter(date__lt=now).count()
-        context['ongoing_events_count']=Joined_events.filter(date=now.date()).count()
-        context['upcoming_events_count']=Joined_events.filter(date__gt=now).count()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        joined_events = Event.objects.filter(registrations__user=self.request.user)
+
+        context['current_status'] = self.request.GET.get('status', 'all')
+        context['total_events'] = joined_events.count()
+        context['completed_events_count'] = joined_events.filter(date__lt=now).count()
+        context['ongoing_events_count'] = joined_events.filter(date__date=now.date()).count()
+        context['upcoming_events_count'] = joined_events.filter(date__gt=now).count()
 
         return context
+
 
 class LikedEvents(LoginRequiredMixin, ListView):
     model = Event
@@ -313,7 +324,7 @@ class ChatRoomView(LoginRequiredMixin, View):
         return (
             user.is_superuser
             or user == self.event.organizer
-            or user in self.event.participants.all()
+            or EventRegistration.objects.filter(event=self.event,user=user).exists()
         )
 
     def get(self, request, pk):
@@ -476,14 +487,13 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
         user = self.request.user
 
         preferred_categories = (
-            Event.objects
-            .filter(participants=user)
+            Event.objects.filter(registrations__user=user)
             .values_list("category_id", flat=True)
         )
 
         qs = (
             Event.objects
-            .exclude(participants=user)
+            .exclude(registrations__user=user)
             .select_related("category", "organizer")
             .annotate(
                 category_match=Case(
@@ -539,3 +549,12 @@ class PersonalizedEventListView(LoginRequiredMixin, ListView):
 def sidebar_view(request):
     return render(request,'base/sidebar.html')
 
+class RegistrationQRView(LoginRequiredMixin, View):
+    def get(self, request, event_id):
+        registration = get_object_or_404(
+            EventRegistration,
+            event_id=event_id,
+            user=request.user
+        )
+        qr_image = generate_qr_code(registration.qr_token)
+        return HttpResponse(qr_image, content_type="image/png")

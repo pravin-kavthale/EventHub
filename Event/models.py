@@ -5,6 +5,7 @@ import uuid
 from django.utils import timezone
 
 from cloudinary.models import CloudinaryField
+import uuid 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -28,35 +29,16 @@ class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     comments_enabled = models.BooleanField(default=True)
-
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="events"
-    )
-
+    category = models.ForeignKey(Category,on_delete=models.SET_NULL,null=True,related_name="events")
     date = models.DateTimeField()
     location = models.CharField(max_length=300)
     start_time = models.TimeField()
     end_time = models.TimeField()
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    organizer = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="events_created"
-    )
-
-    participants = models.ManyToManyField(
-        User,
-        related_name="joined_events",
-        blank=True
-    )
-
-    
+ 
+    organizer = models.ForeignKey(User,on_delete=models.CASCADE,related_name="events_created")
     image = CloudinaryField('image',null=True, blank=True)
     
     class Meta:
@@ -69,6 +51,7 @@ class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     class Meta:
         unique_together = ("user", "event")
@@ -85,31 +68,14 @@ class ChatRoom(models.Model):
         if not self.name:
             self.name = f'chatroom_{self.event.id}'
         super().save(*args, **kwargs)
-        self.users.add(*self.event.participants.all())
+        self.users.add(
+            *User.objects.filter(event_registrations__event=self.event)
+        )
+
 
     def __str__(self):
         return self.name
 
-class EventAttendance(models.Model):
-    STATUS_CHOICES = [
-        ('going', 'Going'),
-        ('interested', 'Interested'),
-        ('maybe', 'Maybe'),
-        ('not_going', 'Not Going'),
-    ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="participations")
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="attendances")
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='maybe')
-
-    qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    attended = models.BooleanField(default=False)
-    check_in_time = models.DateTimeField(null=True, blank=True)
-    
-    class Meta:
-        unique_together = ('user', 'event')   # prevent duplicate likes
-
-    def __str__(self):
-        return f"{self.user.username} - {self.event.title} ({self.status})"
 
 class Message(models.Model):
     chatroom=models.ForeignKey(ChatRoom,on_delete=models.CASCADE,related_name="messages")
@@ -136,7 +102,6 @@ class Comment(models.Model):
     def is_reply(self):
         return self.parent is not None
     
-
 class Report(models.Model):
     REPORT_REASON_CHOICES=[
         ('spam','spam or misleading'),
@@ -153,3 +118,16 @@ class Report(models.Model):
         return f"{self.user.username} reported {self.event.title} for {self.reason}"
     class Meta:
         ordering=["-created_at"]
+
+class EventRegistration(models.Model):
+    event=models.ForeignKey(Event,on_delete=models.CASCADE,related_name="registrations")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="event_registrations")
+    qr_token=models.UUIDField(default=uuid.uuid4,unique=True,editable=False)
+    is_used=models.BooleanField(default=False)
+
+    created_at=models.DateTimeField(auto_now_add=True)
+    used_at=models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        unique_together=('event','user')
+    

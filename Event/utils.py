@@ -1,6 +1,19 @@
 from django.db import connection
-from Event.models import Event,Like
-from django.db.models import Exists, OuterRef, Count, Q, IntegerField, Value
+from .models import Event, Like
+
+from django.db.models import (
+    Exists,
+    OuterRef,
+    Count,
+    Q,
+    IntegerField,
+    Value,
+    Case,
+    When,
+)
+
+import qrcode
+from io import BytesIO
 
 def with_likes(qs, user):
     """
@@ -52,3 +65,18 @@ def search_events(query, limit=20):
         .select_related('organizer', 'category')
         .order_by(preserved_order)
     )
+
+def generate_qr_code(uuid_value):
+    qr=qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(str(uuid_value))
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer= BytesIO()
+    img.save(buffer, format="PNG")
+    return buffer.getvalue()

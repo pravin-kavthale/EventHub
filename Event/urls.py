@@ -95,5 +95,8 @@ urlpatterns = [
     #Search Urls
     path("search-events/", views.EventSearchView.as_view(), name="event_search"),
     path("sidebar/", views.sidebar_view, name="sidebar"),
-        
+    
+    # Qr Code Url
+    path("events/<int:event_id>/my-qr/",views.RegistrationQRView.as_view(),name="my_event_qr")
+
 ]
