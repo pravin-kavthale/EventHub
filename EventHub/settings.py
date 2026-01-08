@@ -191,4 +191,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Optional: local media folder
 MEDIA_ROOT = BASE_DIR / "media"
 
-DEBUG = True
+DEBUG = False
