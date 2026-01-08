@@ -130,7 +130,7 @@ This reduces application complexity and improves reliability.
 ## ⚙️ Architecture
 
 <p align="center">
-  <img src="output/Architecture.png" alt="Architecture Diagram" width="700">
+  <img src="output/Eventhub_Architecture.png" alt="Architecture Diagram" width="700">
 </p>
 
 ### 🌐 Presentation Layer (HTML, CSS, JavaScript)
