@@ -92,11 +92,47 @@
         {% for event in events %}
             {% include "Event/event_card.html" %}
         {% empty %}
-        <div class="col-12 text-center">
-            <div class="alert alert-info">No joined events found.</div>
-        </div>
+            <div class="col-12 text-center">
+                <div class="alert alert-info">No joined events found.</div>
+            </div>
         {% endfor %}
-    </div>
-</div>
 
+    </div>
+
+    <!-- QR MODAL (ONCE) -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-3">
+                <h5 class="mb-3">Your Event QR Code</h5>
+                <img id="qrImage" src="" class="img-fluid" alt="QR Code">
+                <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock content %}
+
+
+{% block extrascript %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modalEl = document.getElementById("qrModal");
+    if (!modalEl || typeof bootstrap === "undefined") return;
+
+    const modal = new bootstrap.Modal(modalEl);
+    const qrImage = document.getElementById("qrImage");
+
+    document.querySelectorAll(".qr-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            qrImage.src = this.dataset.qrUrl;
+            modal.show();
+        });
+    });
+
+});
+</script>
+{% endblock extrascript %}

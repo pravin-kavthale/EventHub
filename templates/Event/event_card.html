@@ -138,6 +138,15 @@
 
             </div>
         </div>
+        {% if event.is_registered and request.resolver_match.url_name == 'joined_events' %}
+            <button
+                class="btn btn-outline-dark btn-sm qr-btn"
+                data-qr-url="{% url 'my_event_qr' event.id %}">
+                <i class="fas fa-qrcode"> Show QR</i>
+            </button>
+        {% endif %}
+
+
     </div>
 </div>
 

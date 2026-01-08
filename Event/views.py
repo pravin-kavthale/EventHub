@@ -81,29 +81,6 @@ class JoinEvent(LoginRequiredMixin, View):
             "participants_count": participants_count
         })
 
-
-class EventList(ListView):
-    model=Event
-    template_name='Event/event_list.html'
-    context_object_name='events'
-
-    def get_queryset(self):
-        qs = Event.objects.all().order_by('-start_time')
-
-        category_filter = self.request.GET.get('category')
-        if category_filter:
-            qs = qs.filter(category__id=category_filter)
-
-        return with_likes(qs, self.request.user)
-
-
-    def get_context_data(self,**kwargs):
-        context=super().get_context_data(**kwargs)
-        context['categories']=Category.objects.all()
-        context['selected_category'] = self.request.GET.get('category', '')
-        return context
-
-
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class EventDetails(DetailView):
     model = Event
@@ -139,6 +116,30 @@ class EventDelete(LoginRequiredMixin,DeleteView):
 
 
 # Event Filter Views
+
+
+class EventList(ListView):
+    model=Event
+    template_name='Event/event_list.html'
+    context_object_name='events'
+
+    def get_queryset(self):
+        qs = Event.objects.all().order_by('-start_time')
+
+        category_filter = self.request.GET.get('category')
+        if category_filter:
+            qs = qs.filter(category__id=category_filter)
+
+        return with_likes(qs, self.request.user)
+
+
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        context['categories']=Category.objects.all()
+        context['selected_category'] = self.request.GET.get('category', '')
+        return context
+
+
 class MyEvents(LoginRequiredMixin, ListView):
     model = Event
     template_name = 'Event/MyEvents.html'
