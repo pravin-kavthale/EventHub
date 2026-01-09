@@ -153,6 +153,7 @@
     <div class="row g-4">
         {% for event in events %}
             {% include "Event/event_card.html" %}
+            {% include "Event/report_modal.html" with event=event %}
         {% empty %}
             <div class="col-12 text-center">
                 <div class="alert alert-info">

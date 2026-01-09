@@ -1,0 +1,42 @@
+<!-- REPORT MODAL -->
+<div class="modal fade" id="reportEventModal-{{ event.pk }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{% url 'event_report' event.pk %}">
+        {% csrf_token %}
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Report Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="text-muted">Select a reason:</p>
+
+                <button type="submit" name="reason" value="spam"
+                    class="btn btn-outline-danger w-100 mb-2">
+                Spam or misleading
+                </button>
+
+                <button type="submit" name="reason" value="inappropriate"
+                    class="btn btn-outline-danger w-100 mb-2">
+                    Inappropriate content
+                </button>
+
+                <button type="submit" name="reason" value="harassment"
+                    class="btn btn-outline-danger w-100 mb-2">
+                    Harassment / Hate speech
+                </button>
+
+                <button type="submit" name="reason" value="other"
+                    class="btn btn-outline-danger w-100">
+                    Other
+                </button>
+            </div>
+        </div>
+
+        </form>
+    </div>
+</div>
+
+          

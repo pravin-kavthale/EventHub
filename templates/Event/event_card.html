@@ -103,7 +103,7 @@
                 {% endif %}
 
                 <!-- ORGANIZER DROPDOWN -->
-                {% if request.user == event.organizer %}
+                
                 <div class="dropdown">
                     <button class="btn p-0 m-0 text-secondary"
                             type="button"
@@ -113,6 +113,7 @@
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-end">
+                        {% if request.user == event.organizer %}
                         <li>
                             <a class="dropdown-item" href="{% url 'event_update' event.pk %}">
                                 Edit
@@ -125,17 +126,17 @@
                                 Delete
                             </a>
                         </li>
+                        {% else %}
                         <li>
                             <a class="dropdown-item text-danger"
-                               href="{% url 'event_report' event.pk %}"
-                               onclick="return confirm('Report this event?');">
+                            data-bs-toggle="modal"
+                            data-bs-target="#reportEventModal-{{ event.pk }}">
                                 Report
                             </a>
                         </li>
+                        {% endif %}
                     </ul>
                 </div>
-                {% endif %}
-
             </div>
         </div>
         {% if event.is_registered and request.resolver_match.url_name == 'joined_events' %}

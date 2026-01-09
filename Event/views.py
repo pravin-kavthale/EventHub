@@ -33,7 +33,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 
-from .utils import with_likes, generate_qr_code, search_events
+from .utils import with_likes, generate_qr_code, search_events,check_and_block_event_owner
+
+
 
 
 # Event Views
@@ -451,6 +453,11 @@ class ReportView(LoginRequiredMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         reason = request.POST.get("reason")
+
+        if event.organizer == request.user:
+            messages.error(request, "You cannot report your own event.")
+            return redirect("event_detail", pk=pk)
+
 
         if reason:
             Report.objects.create(user=request.user, event=event, reason=reason)
