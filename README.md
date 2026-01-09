@@ -1,10 +1,10 @@
-# 🚀 MyEventHub: Connect, Create, Conquer Events!
+# 🚀 EventHub: Connect, Create, Conquer Events!
 
 **MyEventHub** is a dynamic web application built with Django that revolutionizes how users explore, manage, and participate in events. Whether you're an organizer planning the next big gathering or an attendee looking for exciting activities, our platform offers a seamless, interactive experience.
 
 ---
 
-## ✨ Features## 
+## ✨ Features
 
 | Feature | Description |
 |--------|-------------|
@@ -54,8 +54,9 @@ Events are dynamically sorted in **descending order of personalization score**, 
 
 - Different users see different event orders  
 - Personalization is computed dynamically per request  
-- Lightweight and fully explainable (no ML models)  
-- Suitable for college-scale datasets  
+- Lightweight and fully explainable (no ML models)
+- Designed to perform efficiently for small-to-medium scale datasets
+  
 
 
 ## 🔍 Information Retrieval (IR) Based Search System
@@ -129,7 +130,7 @@ This reduces application complexity and improves reliability.
 ## ⚙️ Architecture
 
 <p align="center">
-  <img src="output/Architecture.png" alt="Architecture Diagram" width="700">
+  <img src="output/Eventhub_Architecture.png" alt="Architecture Diagram" width="700">
 </p>
 
 ### 🌐 Presentation Layer (HTML, CSS, JavaScript)
@@ -173,13 +174,113 @@ This reduces application complexity and improves reliability.
 
 ---
 
-### 🗄️ Data Layer (MySQL via Django ORM)
+### 🗄️ Data Layer (PostgreSQL via Django ORM)
+
 - Manages **data persistence and retrieval**
-- MySQL stores users, events, comments, and chat messages
-- Django ORM abstracts raw SQL queries
-- Ensures **data consistency, integrity, and portability**
+- Uses **PostgreSQL** as the primary database
+- Required for:
+  - Full-Text Search (FTS)
+  - GIN indexing
+  - Relevance ranking using `ts_rank_cd`
+- Stores:
+  - Users
+  - Events
+  - Categories
+  - Comments
+  - Likes and participation records
+  - Notifications and chat messages
+- Hosted as a **managed cloud database on Render**
+- Django ORM is used for:
+  - Relational queries
+  - Model validation
+  - Database portability
+- Raw SQL is selectively used for **FTS and ranking queries** where ORM is insufficient
+
+This layer ensures **data integrity, performance optimization, and scalable search capabilities**.
+
 
 ---
+---
+
+## 🌍 Deployment & Production Configuration
+
+MyEventHub is **fully deployed and production-ready**, not just a local development project.
+
+---
+
+## ☁️ Hosting & Infrastructure
+
+- **Backend Hosting**: Render  
+- **Database**: PostgreSQL (Render Managed Database)  
+- **Media Storage**: Cloudinary  
+- **Static Files**: Whitenoise  
+- **Environment**: Production settings with `DEBUG = False`
+
+This setup ensures scalability, reliability, and proper separation of concerns between application logic, media storage, and static assets.
+
+---
+
+## 🗄️ Database (Production)
+
+- **PostgreSQL** used as the production database
+- Hosted as a **managed Render PostgreSQL service**
+- Supports **Full-Text Search, GIN indexing, and relevance ranking**
+
+
+---
+
+## 🖼️ Media & Static File Handling
+
+| Asset Type | Technology Used | Purpose |
+|-----------|-----------------|---------|
+| Media Files (event images, profile images) | Cloudinary | Cloud-based storage and optimized delivery |
+| Static Files (CSS, JS) | Whitenoise | Efficient static file serving in production |
+
+- Media files are **not stored on the server**
+- Static assets are compressed and cached via Whitenoise
+- No dependency on external web servers like Nginx for static file handling
+
+---
+
+## ⚡ AJAX-Based Interactive Features
+
+To improve user experience and responsiveness, MyEventHub uses **AJAX** for key interactions.
+
+### 🔁 Instant Actions (No Page Reload)
+
+- ❤️ Like / Unlike Event  
+- 🤝 Join / Leave Event  
+- 🔔 Notification updates  
+
+These actions:
+- Send asynchronous requests to Django views  
+- Update the UI instantly  
+- Reduce server load and unnecessary page reloads  
+
+---
+
+## 📱 QR-Based Event Authorization System
+
+To ensure secure verification of event participants, MyEventHub includes a **QR code–based authorization mechanism**.
+
+### 🔐 How It Works
+
+- When a user joins an event, a **unique QR code** is generated  
+- The QR code is:
+  - Linked to the user–event relationship
+  - Non-transferable
+- Event organizers can **scan the QR code at the venue**
+- Only **verified joined users** are authorized for access
+
+### 🎯 Purpose & Benefits
+
+- Prevents unauthorized entry  
+- Eliminates fake or duplicate participation  
+- Adds a real-world security layer to a digital system  
+- Bridges online event management with offline validation  
+
+---
+
 ## 🖼 Screenshots
 
 ### Login Page
