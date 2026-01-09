@@ -19,6 +19,7 @@ class Profile(models.Model):
     image = CloudinaryField('user_avatar', blank=True, null=True)
     MobileNumber = models.BigIntegerField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
+    is_blocked=models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} profile'

@@ -454,6 +454,10 @@ class ReportView(LoginRequiredMixin, View):
 
         if reason:
             Report.objects.create(user=request.user, event=event, reason=reason)
+            messages.success(request, "Event reported successfully.")
+            check_and_block_event_owner(event.organizer)
+                
+
             return redirect("event_detail", pk=pk)
 
         return HttpResponse("Report reason is required.", status=400)

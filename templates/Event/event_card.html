@@ -164,6 +164,37 @@ function getCookie(name) {
     return value;
 }
 
+
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".join-btn");
+    if (!btn) return;
+
+    const url = btn.dataset.url;
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+    })
+    .then(data => {
+        if (data.joined) {
+            btn.textContent = "Leave Event";
+            btn.classList.remove("btn-success");
+            btn.classList.add("btn-danger");
+        } else {
+            btn.textContent = "Join Event";
+            btn.classList.remove("btn-danger");
+            btn.classList.add("btn-success");
+        }
+    })
+    .catch(err => console.error(err));
+});
+
 document.querySelectorAll(".like-form").forEach(form => {
 
     // 🚫 PREVENT MULTIPLE BINDINGS

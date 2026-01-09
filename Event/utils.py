@@ -1,5 +1,6 @@
 from django.db import connection
-from .models import Event, Like
+from .models import Event, Like,Report
+from user.models import Profile
 
 from django.db.models import (
     Exists,
@@ -80,3 +81,16 @@ def generate_qr_code(uuid_value):
     buffer= BytesIO()
     img.save(buffer, format="PNG")
     return buffer.getvalue()
+
+def check_and_block_event_owner(user):
+    flagged_event_count=(
+        Event.objects.filter(organizer=user).
+        annotate(unique_count=Count('reports', distinct=True))
+        .filter(unique_count__gte=5)
+        .count()
+    )
+    if flagged_event_count>=3:
+        profile=user.profile
+        profile.is_blocked=True
+        profile.save(update_fields=["is_blocked"])
+        
