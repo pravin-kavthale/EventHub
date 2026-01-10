@@ -3,34 +3,86 @@
     <div class="modal-dialog modal-dialog-centered">
         <form class="report-form" data-event-id="{{ event.pk }}">
             {% csrf_token %}
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">Report Event</h5>
+            <div class="modal-content" style="background: #2e2e33; border-radius: 12px; border: 1px solid #444;">
+                
+                <!-- Header -->
+                <div class="modal-header" style="border-bottom: 1px solid #444;">
+                    <h5 class="modal-title" style="color: #fff;">Report Event</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted">Select a reason:</p>
 
-                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn" value="spam">
+                <!-- Body -->
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <p class="text-white mb-3" style="font-size: 1.1rem; font-weight: 600;">
+                        Select a reason:
+                    </p>
+
+                    <!-- Buttons -->
+                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn"
+                        value="spam" style="border-radius: 8px; background: #505059; border-color: #555; color: #fff; font-weight: 600; transition: all 0.2s;">
                         Spam or misleading
                     </button>
 
-                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn" value="inappropriate">
+                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn"
+                        value="inappropriate" style="border-radius: 8px; background: #505059; border-color: #555; color: #fff; font-weight: 600; transition: all 0.2s;">
                         Inappropriate content
                     </button>
 
-                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn" value="harassment">
+                    <button type="button" class="btn btn-outline-danger w-100 mb-2 report-btn"
+                        value="harassment" style="border-radius: 8px; background: #505059; border-color: #555; color: #fff; font-weight: 600; transition: all 0.2s;">
                         Harassment / Hate speech
                     </button>
 
-                    <button type="button" class="btn btn-outline-danger w-100 report-btn" value="other">
+                    <button type="button" class="btn btn-outline-danger w-100 report-btn"
+                        value="other" style="border-radius: 8px; background: #505059; border-color: #555; color: #fff; font-weight: 600; transition: all 0.2s;">
                         Other
                     </button>
 
-                    <!-- Place for showing messages -->
-                    <div class="mt-2" id="report-message-{{ event.pk }}"></div>
+                    <!-- Message Area -->
+                    <div class="mt-3" id="report-message-{{ event.pk }}"></div>
                 </div>
+
             </div>
         </form>
     </div>
 </div>
+
+<!-- Extra Styling for hover effect and error messages -->
+<style>
+    /* Swap default and hover styles for buttons */
+    .report-btn:hover {
+        background: #3b3b40 !important;
+        color: #e71616 !important;
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    .report-btn {
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+
+    /* Modal fade effect */
+    .modal-content {
+        transition: all 0.25s ease;
+    }
+
+    /* Error message style */
+    .report-error {
+        background-color: #bb0a1e;
+        color: #fff;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Success message style */
+    .report-success {
+        background-color: #28a745;
+        color: #fff;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+</style>
