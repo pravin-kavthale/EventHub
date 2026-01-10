@@ -453,21 +453,33 @@ class ReportView(LoginRequiredMixin, View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
         reason = request.POST.get("reason")
+        
+        if Report.objects.filter(user=request.user,event=event).exists():
+            return JsonResponse({
+                "status": "error",
+                "message": "You have already reported this event."
+            })
 
         if event.organizer == request.user:
-            messages.error(request, "You cannot report your own event.")
-            return redirect("event_detail", pk=pk)
+            return JsonResponse({
+                "status": "error",
+                "message": "You cannot report your own event."
+            })
 
 
         if reason:
             Report.objects.create(user=request.user, event=event, reason=reason)
-            messages.success(request, "Event reported successfully.")
             check_and_block_event_owner(event.organizer)
-                
 
-            return redirect("event_detail", pk=pk)
+            return JsonResponse({
+                "status": "success",
+                "message": "Event reported successfully."
+            })
 
-        return HttpResponse("Report reason is required.", status=400)
+        return JsonResponse({
+            "status": "error",
+            "message": "Report reason is required."
+        }, status=400)
 
 #Search View
 class EventSearchView(LoginRequiredMixin, ListView):
