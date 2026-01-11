@@ -90,6 +90,7 @@
     <div class="row g-4">
         {% for event in events %}
             {% include "Event/event_card.html" %}
+            
         {% empty %}
         <div class="col-12 text-center">
             <div class="alert alert-info">
@@ -101,5 +102,4 @@
 
 
 </div>
-<script src="{% static 'js/event_report.js' %}"></script>
 {% endblock content %}

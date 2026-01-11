@@ -30,6 +30,7 @@
         <div class="row g-4">
             {% for event in results %}
                 {% include "Event/event_card.html" %}
+                {% include "Event/report_modal.html" with event=event %}
             {% endfor %}
         </div>
     {% else %}
