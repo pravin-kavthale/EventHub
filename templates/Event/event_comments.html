@@ -93,7 +93,7 @@
 
     {% if event.comments_enabled %}
     <div class="comment-form">
-        <h5 class="mb-3">Add a Comment</h5>
+        <h5 class="mb-3" style="color: black">Add a Comment</h5>
         <form method="post" action="{% url 'comment_event' event.id %}">
             {% csrf_token %}
             <div class="d-flex gap-2">
