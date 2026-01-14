@@ -42,7 +42,7 @@ MyEventHub implements a **rule-based personalization engine** that ensures each 
 
 ---
 
-### 📊 Personalization Scoring Logic
+### Personalization Scoring Logic
 
 Each event receives a **personalization score** per user using the formula: Score = (3 × Joined) + (2 × Liked)
 
@@ -50,7 +50,7 @@ Events are dynamically sorted in **descending order of personalization score**, 
 
 ---
 
-### ✅ Key Characteristics
+### Key Characteristics
 
 - Different users see different event orders  
 - Personalization is computed dynamically per request  
@@ -59,13 +59,13 @@ Events are dynamically sorted in **descending order of personalization score**, 
   
 
 
-## 🔍 Information Retrieval (IR) Based Search System
+## Information Retrieval (IR) Based Search System
 
 Search is implemented using **PostgreSQL Full-Text Search (FTS)**, not Django ORM filtering.
 
 ---
 
-### ⚙️ How Search Works
+### How Search Works
 
 - PostgreSQL native **Full-Text Search**
 - Text is converted to `tsvector` using `to_tsvector`
@@ -78,7 +78,7 @@ Search is implemented using **PostgreSQL Full-Text Search (FTS)**, not Django OR
 
 ---
 
-### 🧠 Why This Matters
+### Why This Matters
 
 | Traditional ORM Search | EventHub Search |
 |-----------------------|-----------------|
@@ -89,7 +89,7 @@ Search is implemented using **PostgreSQL Full-Text Search (FTS)**, not Django OR
 
 ---
 
-### 🧪 Example SQL Used
+### Example SQL Used
 
 ```sql
 SELECT id,
@@ -104,7 +104,7 @@ ORDER BY rank DESC
 LIMIT 20;
 
 ```
-## 📈 Search vs Recommendation: Clear Separation of Concerns
+## Search vs Recommendation: Clear Separation of Concerns
 
 | Feature | 🔍 Search System (FTS) | 🧠 Personalized Feed |
 |--------|------------------------|----------------------|
@@ -116,7 +116,7 @@ LIMIT 20;
 
 ---
 
-## 🔁 Index Consistency & Maintenance
+## Index Consistency & Maintenance
 
 - Search index is maintained automatically by **PostgreSQL**
 - GIN index stays consistent on:
@@ -133,7 +133,7 @@ This reduces application complexity and improves reliability.
   <img src="output/Eventhub_Architecture.png" alt="Architecture Diagram" width="700">
 </p>
 
-### 🌐 Presentation Layer (HTML, CSS, JavaScript)
+### Presentation Layer (HTML, CSS, JavaScript)
 - Responsible for **user interaction and UI rendering**
 - Built using **Django templates**
 - Displays events, comments, and chat messages
@@ -142,7 +142,7 @@ This reduces application complexity and improves reliability.
 
 ---
 
-### ⚙️ Application Layer (Django Views, URLs)
+### Application Layer (Django Views, URLs)
 - Acts as the **request–response controller**
 - Django views receive HTTP requests from the frontend
 - URL routing maps requests to appropriate views
@@ -151,7 +151,7 @@ This reduces application complexity and improves reliability.
 
 ---
 
-### 🧠 Business Logic Layer (User App & Event App)
+### Business Logic Layer (User App & Event App)
 - Personalized recommendation logic based on user interactions (likes and participation)
 - Separate pipelines for search (IR-based) and browsing (personalization-based)
 - Core layer where **application rules are enforced**
@@ -165,7 +165,7 @@ This reduces application complexity and improves reliability.
 
 ---
 
-### 🛡️ Security Layer (Authentication, Middleware, CSRF)
+### Security Layer (Authentication, Middleware, CSRF)
 - Ensures **system safety and access control**
 - Uses Django’s authentication system for session management
 - CSRF protection for all form submissions
@@ -174,7 +174,7 @@ This reduces application complexity and improves reliability.
 
 ---
 
-### 🗄️ Data Layer (PostgreSQL via Django ORM)
+### Data Layer (PostgreSQL via Django ORM)
 
 - Manages **data persistence and retrieval**
 - Uses **PostgreSQL** as the primary database
@@ -202,13 +202,13 @@ This layer ensures **data integrity, performance optimization, and scalable sear
 ---
 ---
 
-## 🌍 Deployment & Production Configuration
+## Deployment & Production Configuration
 
 MyEventHub is **fully deployed and production-ready**, not just a local development project.
 
 ---
 
-## ☁️ Hosting & Infrastructure
+## Hosting & Infrastructure
 
 - **Backend Hosting**: Render  
 - **Database**: PostgreSQL (Render Managed Database)  
@@ -220,7 +220,7 @@ This setup ensures scalability, reliability, and proper separation of concerns b
 
 ---
 
-## 🗄️ Database (Production)
+## Database (Production)
 
 - **PostgreSQL** used as the production database
 - Hosted as a **managed Render PostgreSQL service**
@@ -229,7 +229,7 @@ This setup ensures scalability, reliability, and proper separation of concerns b
 
 ---
 
-## 🖼️ Media & Static File Handling
+## Media & Static File Handling
 
 | Asset Type | Technology Used | Purpose |
 |-----------|-----------------|---------|
@@ -259,11 +259,11 @@ These actions:
 
 ---
 
-## 📱 QR-Based Event Authorization System
+## QR-Based Event Authorization System
 
 To ensure secure verification of event participants, MyEventHub includes a **QR code–based authorization mechanism**.
 
-### 🔐 How It Works
+### How It Works
 
 - When a user joins an event, a **unique QR code** is generated  
 - The QR code is:
@@ -272,7 +272,7 @@ To ensure secure verification of event participants, MyEventHub includes a **QR 
 - Event organizers can **scan the QR code at the venue**
 - Only **verified joined users** are authorized for access
 
-### 🎯 Purpose & Benefits
+### Purpose & Benefits
 
 - Prevents unauthorized entry  
 - Eliminates fake or duplicate participation  
@@ -348,7 +348,7 @@ To ensure secure verification of event participants, MyEventHub includes a **QR 
 Visit `http://127.0.0.1:8000/` in your browser.
 
 ---
-## 💡 Usage
+## Usage
 
 - **📝 Register/Login**: Users must register or log in to access event features.  
 - **🎉 Create Events**: Logged-in users can create events with details such as title, description, date, and category.  
