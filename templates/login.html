@@ -29,6 +29,14 @@
 
       <form action="{% url 'login' %}" method="post">
           {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+
           <div class="input-group mb-3">
             {{ form.username }}
             <div class="input-group-append">
