@@ -23,7 +23,7 @@ function loadParticipants(url) {
             data.forEach(user => {
                 body.innerHTML += `
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <a href="/profile/${user.username}/" class="fw-bold" style="color:black">
+                        <a href="/Events/profile/${user.username}/" class="fw-bold" style="color:black">
                             ${user.username}
                         </a>
                         <span class="text-muted">${user.email}</span>
