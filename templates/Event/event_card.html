@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load event_tags %}
 <style>
     body {
         background: #0f0f16;
@@ -83,14 +83,17 @@
                 </a>
 
                 {% if request.user != event.organizer %}
+                    {% is_event_registered request.user event as is_registered%}
                     <button
-                        class="btn btn-sm join-btn {% if request.user in event.participants.all %}btn-danger{% else %}btn-success{% endif %}"
+                        class="btn btn-sm join-btn {% if is_registered %}btn-danger{% else %}btn-success{% endif %}"
                         data-url="{% url 'join_event' event.pk %}">
-                        {% if request.user in event.participants.all %}
+                        
+                        {% if is_registered%}
                             Leave
                         {% else %}
                             Join
-                        {% endif %}
+                        {% endif %} 
+                        
                     </button>
                 {% endif %}
 

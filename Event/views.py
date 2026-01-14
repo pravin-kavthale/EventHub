@@ -220,7 +220,6 @@ class joinedEvents(LoginRequiredMixin, ListView):
         context['completed_events_count'] = joined_events.filter(date__lt=now).count()
         context['ongoing_events_count'] = joined_events.filter(date__date=now.date()).count()
         context['upcoming_events_count'] = joined_events.filter(date__gt=now).count()
-
         return context
 
 
