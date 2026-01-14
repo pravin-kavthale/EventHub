@@ -1,5 +1,7 @@
 {% load static %}
 {% load event_tags %}
+
+<script src="{% static '/js/participants.js' %}"></script>
 <style>
     body {
         background: #0f0f16;
@@ -114,6 +116,15 @@
                                    href="{% url 'event_delete' event.pk %}"
                                    onclick="return confirm('Delete this event?');">
                                     Delete
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                href="#"
+                                onclick="loadParticipants('{% url 'event_participants' event.pk %}')"
+                                data-bs-toggle="modal"
+                                data-bs-target="#participantsModal">
+                                    View Participants
                                 </a>
                             </li>
                         {% else %}

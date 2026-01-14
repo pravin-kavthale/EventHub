@@ -34,9 +34,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 
 from .utils import with_likes, generate_qr_code, search_events,check_and_block_event_owner
-
-
-
+from .selectors import get_event_participants
 
 # Event Views
 class CreateEvent(CreateView):
@@ -581,3 +579,14 @@ class RegistrationQRView(LoginRequiredMixin, View):
         )
         qr_image = generate_qr_code(registration.qr_token)
         return HttpResponse(qr_image, content_type="image/png")
+
+class Participants(LoginRequiredMixin, View):
+
+    def get(self, request, pk):
+        event = get_object_or_404(Event, pk=pk, organizer=request.user)
+
+        participants = get_event_participants(event).values(
+            "id", "username", "email"
+        )
+
+        return JsonResponse(list(participants), safe=False)
