@@ -8,17 +8,17 @@
 
 | Feature | Description |
 |--------|-------------|
-| 🔐 User Authentication | Secure user registration and login using Django’s built-in authentication system |
-| 📅 Event Management | Create, edit, delete, and view events with categories, images, and schedules |
-| 🧠 Personalized Event Feed | Events are ranked uniquely per user based on interaction history (likes and participation) |
-| ❤️ Event Likes | Users can like events, influencing personalized recommendations |
-| 🤝 Event Participation | Joining events increases relevance in the personalized feed |
-| 🔍 Full-Text Search (PostgreSQL FTS) | Database-level full-text search on event title and description using PostgreSQL |
-| 📊 Relevance Ranking | Search results ranked using PostgreSQL’s `ts_rank_cd` scoring |
-| ⚡ Search Index Optimization | High-performance GIN index on searchable text fields |
-| 🛠️ Automatic Index Maintenance | Search index stays updated automatically via PostgreSQL indexing (no manual triggers) |
-| 💬 Comments & Notifications | User interactions with real-time notification updates |
-| 👤 User Profiles | Editable profiles with activity history (events created, liked, and joined) |
+| User Authentication | Secure user registration and login using Django’s built-in authentication system |
+| Event Management | Create, edit, delete, and view events with categories, images, and schedules |
+| Personalized Event Feed | Events are ranked uniquely per user based on interaction history (likes and participation) |
+| Event Likes | Users can like events, influencing personalized recommendations |
+| Event Participation | Joining events increases relevance in the personalized feed |
+| Full-Text Search (PostgreSQL FTS) | Database-level full-text search on event title and description using PostgreSQL |
+| Relevance Ranking | Search results ranked using PostgreSQL’s `ts_rank_cd` scoring |
+| Search Index Optimization | High-performance GIN index on searchable text fields |
+| Automatic Index Maintenance | Search index stays updated automatically via PostgreSQL indexing (no manual triggers) |
+| Comments & Notifications | User interactions with real-time notification updates |
+| User Profiles | Editable profiles with activity history (events created, liked, and joined) |
 
 
 
