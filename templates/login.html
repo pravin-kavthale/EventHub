@@ -31,7 +31,7 @@
           {% csrf_token %}
 
           {% if form.errors %}
-            <div class="alert alert-danger">
+            <div style="color:rgb(218, 232, 232); background-color:rgb(157, 158, 158)">
               {{ form.non_field_errors }}
             </div>
           {% endif %}
