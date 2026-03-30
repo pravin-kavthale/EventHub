@@ -4,6 +4,7 @@ import cloudinary
 import dj_database_url
 import os
 
+
 # --------------------
 # BASE
 # --------------------
@@ -93,11 +94,12 @@ WSGI_APPLICATION = "EventHub.wsgi.application"
 # DATABASE
 # --------------------
 
+
+
 DATABASES = {
-    'default': dj_database_url.parse(
-        config("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
+    'default': dj_database_url.config(
+        default='postgresql://neondb_owner:npg_0bspvzrP4mhY@ep-proud-boat-anupnw38-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require',
+        conn_max_age=600
     )
 }
 
