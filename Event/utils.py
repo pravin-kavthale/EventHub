@@ -42,11 +42,25 @@ def with_likes(qs, user):
 
 
 def search_events(query, limit=20):
+    """
+    Optimized PostgreSQL full-text search using GIN index.
+    1. Filter using search_vector @@ plainto_tsquery.
+    2. Limit candidate rows before ranking.
+    3. Rank only the filtered candidates.
+    """
     sql = """
+        WITH filtered AS (
+            SELECT id, search_vector
+            FROM "Event_event"
+            WHERE search_vector @@ plainto_tsquery('english', %s)
+            LIMIT 200  -- top candidates to reduce ranking overhead
+        )
         SELECT id
-        FROM "Event_event"
-        WHERE search_vector @@ plainto_tsquery('english', %s)
-        ORDER BY ts_rank(search_vector, plainto_tsquery('english', %s)) DESC
+        FROM (
+            SELECT id, ts_rank_cd(search_vector, plainto_tsquery('english', %s)) AS rank
+            FROM filtered
+        ) AS sub
+        ORDER BY rank DESC
         LIMIT %s;
     """
     with connection.cursor() as cursor:
