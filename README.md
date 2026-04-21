@@ -1,4 +1,4 @@
-# 🚀 EventHub: Connect, Create, Conquer Events!
+# EventHub: Connect, Create, Conquer Events!
 
 **MyEventHub** is a dynamic web application built with Django that revolutionizes how users explore, manage, and participate in events. Whether you're an organizer planning the next big gathering or an attendee looking for exciting activities, our platform offers a seamless, interactive experience.
 
